@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox,
     QGroupBox,
     QHBoxLayout,
     QPushButton,
     QScrollArea,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
@@ -24,6 +25,10 @@ class RegionSelector(QWidget):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self.setSizePolicy(
+            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Expanding,
+        )
         self._targets = load_overrides(TARGETS_CACHE_PATH)
         self._boxes: dict[str, QCheckBox] = {}
         self._build_ui()
@@ -42,6 +47,7 @@ class RegionSelector(QWidget):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         container = QWidget()
         layout = QVBoxLayout(container)
 
@@ -74,7 +80,7 @@ class RegionSelector(QWidget):
 
         layout.addStretch()
         scroll.setWidget(container)
-        outer.addWidget(scroll)
+        outer.addWidget(scroll, stretch=1)
 
     def _select_region(self, region: Region, checked: bool) -> None:
         for target in self._targets:

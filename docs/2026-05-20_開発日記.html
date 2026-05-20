@@ -380,6 +380,7 @@ body.diary > footer {
       <tr><td>16:39</td><td>DL・常駐動線のバグ修正とテスト拡充</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1639">#entry-1639</a></td></tr>
       <tr><td>16:41</td><td>モックテストスイート実行・記録</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1641">#entry-1641</a></td></tr>
       <tr><td>16:45</td><td>SQLite スレッドエラー修正・GUI 再起動</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1645">#entry-1645</a></td></tr>
+      <tr><td>16:48</td><td>設定タブ 2 列レイアウト</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1648">#entry-1648</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -506,6 +507,20 @@ body.diary > footer {
   <p><code>AsyncTaskWorker</code>（QThread）内の <code>StartupScheduler</code> が、メインスレッドで開いた <code>self._repo</code> を参照していた。</p>
   <h3>対応</h3>
   <p>DL / 再 DL はワーカー内で <code>Repository(DB_PATH)</code> を別接続。PRAGMA WAL + <code>check_same_thread=False</code> は保険。<code>test_repository_threading.py</code> 追加。Commit: <code>d150b2d</code>。GUI 再起動済み。</p>
+</section>
+
+  <section class="entry" id="entry-1648">
+  <h2>設定タブ 2 列レイアウト</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>設定タブを <strong>左右 2 列</strong> に変更。左半分は <strong>ダウンロード対象地域</strong> のみ（地域リストを縦いっぱいに表示）、右半分は基本・起動時チェック・DL・通知・ログ・トレイ・Git および保存ボタンを <code>QScrollArea</code> で縦積み。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-mod">M</span> ui/tabs/settings_tab.py</li>
+    <li><span class="op op-mod">M</span> ui/widgets/region_selector.py</li>
+  </ul>
+  <h3>検証</h3>
+  <p><code>uv run pytest -q</code> 99 passed / <code>ruff</code> / <code>mypy</code>。Commit: <code>pending</code></p>
 </section>
 </main>
 

@@ -49,10 +49,30 @@ class SettingsTab(QWidget):
         self.load_from_config()
 
     def _build_ui(self) -> None:
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        body = QWidget()
-        layout = QVBoxLayout(body)
+        root = QHBoxLayout(self)
+        root.setSpacing(12)
+
+        # 左列: ダウンロード対象地域 -- タブ高さいっぱい
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+
+        regions = QGroupBox("ダウンロード対象地域")
+        regions_layout = QVBoxLayout(regions)
+        self._region_selector = RegionSelector()
+        regions_layout.addWidget(self._region_selector, stretch=1)
+        self._region_summary = QLabel()
+        regions_layout.addWidget(self._region_summary)
+        self._region_selector.selection_changed.connect(self._update_region_summary)
+        left_layout.addWidget(regions, stretch=1)
+
+        root.addWidget(left_panel, stretch=1)
+
+        # 右列: その他の設定 -- 縦スクロール
+        right_scroll = QScrollArea()
+        right_scroll.setWidgetResizable(True)
+        right_body = QWidget()
+        right_layout = QVBoxLayout(right_body)
 
         basic = QGroupBox("基本")
         basic_form = QFormLayout(basic)
@@ -66,16 +86,7 @@ class SettingsTab(QWidget):
         self._theme = QComboBox()
         self._theme.addItems(["light", "dark"])
         basic_form.addRow("テーマ", self._theme)
-        layout.addWidget(basic)
-
-        regions = QGroupBox("ダウンロード対象地域")
-        regions_layout = QVBoxLayout(regions)
-        self._region_selector = RegionSelector()
-        regions_layout.addWidget(self._region_selector)
-        self._region_summary = QLabel()
-        regions_layout.addWidget(self._region_summary)
-        self._region_selector.selection_changed.connect(self._update_region_summary)
-        layout.addWidget(regions)
+        right_layout.addWidget(basic)
 
         schedule = QGroupBox("起動時チェック")
         schedule_form = QFormLayout(schedule)
@@ -86,7 +97,7 @@ class SettingsTab(QWidget):
         schedule_form.addRow("再チェック間隔（時間）", self._interval_hours)
         self._last_check_label = QLabel("—")
         schedule_form.addRow("最終チェック", self._last_check_label)
-        layout.addWidget(schedule)
+        right_layout.addWidget(schedule)
 
         download = QGroupBox("ダウンロード")
         download_form = QFormLayout(download)
@@ -100,7 +111,7 @@ class SettingsTab(QWidget):
         self._timeout.setRange(10, 600)
         self._timeout.setSuffix(" 秒")
         download_form.addRow("タイムアウト", self._timeout)
-        layout.addWidget(download)
+        right_layout.addWidget(download)
 
         notify = QGroupBox("通知")
         notify_layout = QVBoxLayout(notify)
@@ -110,7 +121,7 @@ class SettingsTab(QWidget):
         notify_layout.addWidget(self._notify_new)
         notify_layout.addWidget(self._notify_complete)
         notify_layout.addWidget(self._notify_error)
-        layout.addWidget(notify)
+        right_layout.addWidget(notify)
 
         log_group = QGroupBox("ログ")
         log_form = QFormLayout(log_group)
@@ -120,7 +131,7 @@ class SettingsTab(QWidget):
         self._log_retention = QComboBox()
         self._log_retention.addItems(["30d", "90d", "infinite"])
         log_form.addRow("ログ保持", self._log_retention)
-        layout.addWidget(log_group)
+        right_layout.addWidget(log_group)
 
         tray_group = QGroupBox("トレイ・スタートアップ")
         tray_layout = QVBoxLayout(tray_group)
@@ -130,7 +141,7 @@ class SettingsTab(QWidget):
         tray_layout.addWidget(self._enable_tray)
         tray_layout.addWidget(self._minimize_tray)
         tray_layout.addWidget(self._start_with_windows)
-        layout.addWidget(tray_group)
+        right_layout.addWidget(tray_group)
 
         github_group = QGroupBox("Git 連携（任意）")
         github_form = QFormLayout(github_group)
@@ -140,7 +151,7 @@ class SettingsTab(QWidget):
         github_form.addRow("リポジトリパス", self._github_repo)
         self._github_auto_commit = QCheckBox("ダウンロード後に自動 commit")
         github_form.addRow(self._github_auto_commit)
-        layout.addWidget(github_group)
+        right_layout.addWidget(github_group)
 
         actions = QHBoxLayout()
         save_btn = QPushButton("設定を保存")
@@ -153,12 +164,11 @@ class SettingsTab(QWidget):
         actions.addWidget(check_btn)
         actions.addWidget(scrape_btn)
         actions.addStretch()
-        layout.addLayout(actions)
-        layout.addStretch()
+        right_layout.addLayout(actions)
+        right_layout.addStretch()
 
-        scroll.setWidget(body)
-        outer = QVBoxLayout(self)
-        outer.addWidget(scroll)
+        right_scroll.setWidget(right_body)
+        root.addWidget(right_scroll, stretch=1)
 
     def _browse_save_root(self) -> None:
         path = QFileDialog.getExistingDirectory(self, "保存先フォルダを選択")
