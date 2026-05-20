@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "scraped_at": null,
+  "targets": [
+    {
+      "code": "hokkaido_sapporo",
+      "filename_key": "hokkaido_sapporo"
+    },
+    {
+      "code": "hokkaido_hakodate",
+      "filename_key": "hokkaido_hakodate"
+    },
+    {
+      "code": "hokkaido_asahikawa",
+      "filename_key": "hokkaido_asahikawa"
+    },
+    {
+      "code": "hokkaido_kushiro",
+      "filename_key": "hokkaido_kushiro"
+    },
+    {
+      "code": "hokkaido_kitami",
+      "filename_key": "hokkaido_kitami"
+    },
+    {
+      "code": "aomori",
+      "filename_key": "aomori"
+    },
+    {
+      "code": "iwate",
+      "filename_key": "iwate"
+    },
+    {
+      "code": "miyagi",
+      "filename_key": "miyagi"
+    },
+    {
+      "code": "akita",
+      "filename_key": "akita"
+    },
+    {
+      "code": "yamagata",
+      "filename_key": "yamagata"
+    },
+    {
+      "code": "fukushima",
+      "filename_key": "fukushima"
+    },
+    {
+      "code": "ibaraki",
+      "filename_key": "ibaraki"
+    },
+    {
+      "code": "tochigi",
+      "filename_key": "tochigi"
+    },
+    {
+      "code": "gunma",
+      "filename_key": "gunma"
+    },
+    {
+      "code": "saitama",
+      "filename_key": "saitama"
+    },
+    {
+      "code": "chiba",
+      "filename_key": "chiba"
+    },
+    {
+      "code": "tokyo",
+      "filename_key": "tokyo"
+    },
+    {
+      "code": "kanagawa",
+      "filename_key": "kanagawa"
+    },
+    {
+      "code": "yamanashi",
+      "filename_key": "yamanashi"
+    },
+    {
+      "code": "nagano",
+      "filename_key": "nagano"
+    },
+    {
+      "code": "niigata",
+      "filename_key": "niigata"
+    },
+    {
+      "code": "toyama",
+      "filename_key": "toyama"
+    },
+    {
+      "code": "ishikawa",
+      "filename_key": "ishikawa"
+    },
+    {
+      "code": "fukui",
+      "filename_key": "fukui"
+    },
+    {
+      "code": "gifu",
+      "filename_key": "gifu"
+    },
+    {
+      "code": "shizuoka",
+      "filename_key": "shizuoka"
+    },
+    {
+      "code": "aichi",
+      "filename_key": "aichi"
+    },
+    {
+      "code": "mie",
+      "filename_key": "mie"
+    },
+    {
+      "code": "shiga",
+      "filename_key": "shiga"
+    },
+    {
+      "code": "kyoto",
+      "filename_key": "kyoto"
+    },
+    {
+      "code": "osaka",
+      "filename_key": "osaka"
+    },
+    {
+      "code": "hyogo",
+      "filename_key": "hyogo"
+    },
+    {
+      "code": "nara",
+      "filename_key": "nara"
+    },
+    {
+      "code": "wakayama",
+      "filename_key": "wakayama"
+    },
+    {
+      "code": "tottori",
+      "filename_key": "tottori"
+    },
+    {
+      "code": "shimane",
+      "filename_key": "shimane"
+    },
+    {
+      "code": "okayama",
+      "filename_key": "okayama"
+    },
+    {
+      "code": "hiroshima",
+      "filename_key": "hiroshima"
+    },
+    {
+      "code": "yamaguchi",
+      "filename_key": "yamaguchi"
+    },
+    {
+      "code": "tokushima",
+      "filename_key": "tokushima"
+    },
+    {
+      "code": "kagawa",
+      "filename_key": "kagawa"
+    },
+    {
+      "code": "ehime",
+      "filename_key": "ehime"
+    },
+    {
+      "code": "kochi",
+      "filename_key": "kochi"
+    },
+    {
+      "code": "fukuoka",
+      "filename_key": "fukuoka"
+    },
+    {
+      "code": "saga",
+      "filename_key": "saga"
+    },
+    {
+      "code": "nagasaki",
+      "filename_key": "nagasaki"
+    },
+    {
+      "code": "kumamoto",
+      "filename_key": "kumamoto"
+    },
+    {
+      "code": "oita",
+      "filename_key": "oita"
+    },
+    {
+      "code": "miyazaki",
+      "filename_key": "miyazaki"
+    },
+    {
+      "code": "kagoshima",
+      "filename_key": "kagoshima"
+    },
+    {
+      "code": "okinawa",
+      "filename_key": "okinawa"
+    }
+  ]
+}
