@@ -2,13 +2,12 @@
 
 import pytest
 
-from jatic_library.cli import main
+from jatic_library.cli import build_parser, main
 
 
-def test_main_no_command_prints_hello(capsys) -> None:
-    assert main([]) == 0
-    captured = capsys.readouterr()
-    assert "Hello from JATIC-Library" in captured.out
+def test_build_parser_has_subcommands() -> None:
+    parser = build_parser()
+    assert parser.parse_args(["check"]).command == "check"
 
 
 def test_main_version(capsys) -> None:
