@@ -105,7 +105,12 @@ class Repository:
 
     def connect(self) -> None:
         """Open connection and apply schema migrations."""
-        self._conn = sqlite3.connect(str(self.db_path), isolation_level=None)
+        # GUI の QThread ワーカーは別スレッドで接続を開く。共有接続時の保険として無効化。
+        self._conn = sqlite3.connect(
+            str(self.db_path),
+            isolation_level=None,
+            check_same_thread=False,
+        )
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA foreign_keys = ON")
         self._conn.execute("PRAGMA journal_mode = WAL")

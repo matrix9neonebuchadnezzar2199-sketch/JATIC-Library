@@ -379,6 +379,7 @@ body.diary > footer {
       <tr><td>13:26</td><td>残作業一覧の整理（配布フェーズ）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1326">#entry-1326</a></td></tr>
       <tr><td>16:39</td><td>DL・常駐動線のバグ修正とテスト拡充</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1639">#entry-1639</a></td></tr>
       <tr><td>16:41</td><td>モックテストスイート実行・記録</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1641">#entry-1641</a></td></tr>
+      <tr><td>16:45</td><td>SQLite スレッドエラー修正・GUI 再起動</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1645">#entry-1645</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -494,6 +495,17 @@ body.diary > footer {
   <p>DL・常駐・スクレイプ動線のモック中心 9 ファイル（22 テスト）を <code>-v</code> で実行し全 pass を確認。<code>DEV_SETUP.md</code> に再現コマンドを追記。</p>
   <h3>検証</h3>
   <p>全件 <code>pytest -q</code> 98 passed。モック subset 22 passed in 1.95s（<code>test_downloader</code> / <code>test_scheduler_flow</code> / <code>test_tray</code> 等）。Commit: <code>0ea7faf</code></p>
+</section>
+
+  <section class="entry" id="entry-1645">
+  <h2>SQLite スレッドエラー修正（GUI 起動時 DL）</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">incident</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>背景</h3>
+  <p>GUI 起動後の「今すぐ更新確認」で <code>SQLite objects created in a thread can only be used in that same thread</code> が発生。</p>
+  <h3>原因</h3>
+  <p><code>AsyncTaskWorker</code>（QThread）内の <code>StartupScheduler</code> が、メインスレッドで開いた <code>self._repo</code> を参照していた。</p>
+  <h3>対応</h3>
+  <p>DL / 再 DL はワーカー内で <code>Repository(DB_PATH)</code> を別接続。PRAGMA WAL + <code>check_same_thread=False</code> は保険。<code>test_repository_threading.py</code> 追加。</p>
 </section>
 </main>
 

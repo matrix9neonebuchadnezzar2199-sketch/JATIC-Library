@@ -18,7 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from jatic_library import __app_name__, __version__
-from jatic_library.constants import REPO_URL, TARGETS_CACHE_PATH
+from jatic_library.constants import DB_PATH, REPO_URL, TARGETS_CACHE_PATH
 from jatic_library.core.downloader import Downloader
 from jatic_library.core.exporter import (
     ExportError,
@@ -248,15 +248,16 @@ class MainWindow(QMainWindow):
         progress_dialog.show()
 
         async def _task() -> CheckOutcome:
-            scheduler = StartupScheduler(self._config, self._repo)
-
             def _progress_cb(progress: object) -> None:
                 from jatic_library.core.downloader import DownloadProgress
 
                 if isinstance(progress, DownloadProgress):
                     progress_dialog.report(progress)
 
-            return await scheduler.run_check(force=force, progress_cb=_progress_cb)
+            # UI 用 self._repo はメインスレッド専用。DL はワーカー内で別接続を開く。
+            with Repository(DB_PATH) as worker_repo:
+                scheduler = StartupScheduler(self._config, worker_repo)
+                return await scheduler.run_check(force=force, progress_cb=_progress_cb)
 
         def _on_success(result: object) -> None:
             progress_dialog.accept()
@@ -337,8 +338,9 @@ class MainWindow(QMainWindow):
             return
 
         async def _task() -> object:
-            downloader = Downloader(self._config.download, self._repo)
-            return await downloader.download_publication(info, [target])
+            with Repository(DB_PATH) as worker_repo:
+                downloader = Downloader(self._config.download, worker_repo)
+                return await downloader.download_publication(info, [target])
 
         def _on_success(_result: object) -> None:
             self._refresh_data_tabs()
