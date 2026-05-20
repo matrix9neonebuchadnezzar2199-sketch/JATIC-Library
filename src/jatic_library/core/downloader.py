@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
+import httpx
 from loguru import logger
 
 from jatic_library.constants import APP_VERSION, TARGETS_CACHE_PATH
@@ -85,6 +86,7 @@ class Downloader:
 
         semaphore = asyncio.Semaphore(self._settings.concurrency)
         result = DownloadResult(publish_ym=info.folder_name)
+        rescrape_state = {"done": False}
 
         async with JarticHttpClient(timeout_sec=float(self._settings.timeout_sec)) as http:
 
@@ -98,6 +100,7 @@ class Downloader:
                             folder,
                             manifest,
                             progress_cb,
+                            rescrape_state,
                         )
                         if status == "skipped":
                             result.skipped.append(target.code)
@@ -125,6 +128,7 @@ class Downloader:
         folder: Path,
         manifest: Manifest,
         progress_cb: ProgressCallback | None,
+        rescrape_state: dict[str, bool],
     ) -> str:
         """Download a single target. Returns 'skipped' or 'done'."""
         url = build_zip_url(info, target.filename_key)
@@ -180,10 +184,36 @@ class Downloader:
                 last_error = exc
                 if dest.exists():
                     dest.unlink(missing_ok=True)
+                if await self._maybe_rescrape_on_404(exc, rescrape_state):
+                    target = self._refresh_target(target)
+                    url = build_zip_url(info, target.filename_key)
+                    continue
                 if attempt < self._settings.retry:
                     await asyncio.sleep(2**attempt)
         assert last_error is not None
         raise last_error
+
+    async def _maybe_rescrape_on_404(self, exc: Exception, rescrape_state: dict[str, bool]) -> bool:
+        if rescrape_state.get("done"):
+            return False
+        status_code = None
+        if isinstance(exc, httpx.HTTPStatusError):
+            status_code = exc.response.status_code
+        if status_code != httpx.codes.NOT_FOUND:
+            return False
+        logger.warning("404 for ZIP URL, running one-time Playwright rescrape")
+        from jatic_library.core.playwright_scraper import scrape_and_save_targets
+
+        await scrape_and_save_targets()
+        rescrape_state["done"] = True
+        return True
+
+    def _refresh_target(self, target: Target) -> Target:
+        master = load_overrides(TARGETS_CACHE_PATH)
+        for item in master:
+            if item.code == target.code:
+                return item
+        return target
 
     async def _stream_to_file(
         self,

@@ -35,6 +35,7 @@ class FileDetailPanel(QWidget):
             "ダウンロード日時",
             "元 URL",
             "DB ステータス",
+            "タグ",
         ):
             value = QLabel("—")
             value.setWordWrap(True)
@@ -49,7 +50,7 @@ class FileDetailPanel(QWidget):
         for label in self._labels.values():
             label.setText("—")
 
-    def show_file(self, item: LibraryFileItem) -> None:
+    def show_file(self, item: LibraryFileItem, *, tags: list[str] | None = None) -> None:
         """Populate fields from *item*."""
         self._labels["表示名"].setText(item.display_name)
         self._labels["公開月"].setText(item.publish_ym)
@@ -60,3 +61,5 @@ class FileDetailPanel(QWidget):
         self._labels["ダウンロード日時"].setText(item.downloaded_at or "—")
         self._labels["元 URL"].setText(item.source_url or "—")
         self._labels["DB ステータス"].setText(item.status or "—")
+        tag_text = ", ".join(tags) if tags else "—"
+        self._labels["タグ"].setText(tag_text)

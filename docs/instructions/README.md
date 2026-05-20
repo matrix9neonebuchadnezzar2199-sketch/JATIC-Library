@@ -2,7 +2,7 @@
 
 Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `mypy` → コミット。
 
-**進捗の正本:** [../DEV_STATUS.md](../DEV_STATUS.md)（#12 以降の番号は、次フェーズ設計後に割り当て）
+**進捗の正本:** [../DEV_STATUS.md](../DEV_STATUS.md)
 
 | # | ファイル | タイトル | 状態 |
 |---|----------|----------|------|
@@ -17,10 +17,16 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 09 | [INST_09_main_window.md](INST_09_main_window.md) | メインウィンドウ・起動 | **完了** |
 | 10 | [INST_10_settings_tab.md](INST_10_settings_tab.md) | 設定タブ | **完了** |
 | 11 | [INST_11_library_tab.md](INST_11_library_tab.md) | 保管庫タブ | **完了** |
-
-### 次フェーズ（指示書未作成）
-
-#12 以降は **指示書をまだ書かない**。スコープと優先度は [DEV_STATUS.md §5](../DEV_STATUS.md#5-次フェーズバックログ12-番号未割当) のバックログで管理し、着手時に `INST_12_*.md` を追加する。
+| 12 | [INST_12_download_progress.md](INST_12_download_progress.md) | DL 進捗ダイアログ | **完了** |
+| 13 | [INST_13_dl_404_rescrape.md](INST_13_dl_404_rescrape.md) | 404 自動再スクレイプ | **完了** |
+| 14 | [INST_14_library_actions.md](INST_14_library_actions.md) | 保管庫拡張 | **完了** |
+| 15 | [INST_15_tags.md](INST_15_tags.md) | タグ UI | **完了** |
+| 16 | [INST_16_calendar_missing.md](INST_16_calendar_missing.md) | カレンダー・欠損月 | **完了** |
+| 17 | [INST_17_compare_tab.md](INST_17_compare_tab.md) | 比較タブ | **完了** |
+| 18 | [INST_18_export_chart.md](INST_18_export_chart.md) | エクスポート・グラフ | **完了** |
+| 19 | [INST_19_git_sync.md](INST_19_git_sync.md) | Git 連携 | **完了** |
+| 20 | [INST_20_system_tray.md](INST_20_system_tray.md) | トレイ・スタートアップ | **完了** |
+| 21 | [INST_21_pyinstaller.md](INST_21_pyinstaller.md) | PyInstaller | **完了** |
 
 - 差分メモ: [ALIGNMENT.md](ALIGNMENT.md)
 - 正本設計: [../DESIGN.md](../DESIGN.md)
@@ -28,5 +34,5 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 ## 依存関係
 
 ```
-01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → (12 … 設計後)
+01 → 02 → … → 21
 ```

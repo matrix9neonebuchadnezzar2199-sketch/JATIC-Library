@@ -375,6 +375,7 @@ body.diary > footer {
       <tr><td>12:16</td><td>INST #09-#10 GUI・設定タブ</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1216">#entry-1216</a></td></tr>
       <tr><td>13:01</td><td>INST #11 保管庫タブ</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1301">#entry-1301</a></td></tr>
       <tr><td>13:06</td><td>README 刷新・DEV_STATUS 設計</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1306">#entry-1306</a></td></tr>
+      <tr><td>13:19</td><td>INST #13-#21 全機能実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1319">#entry-1319</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -452,6 +453,17 @@ body.diary > footer {
   <p>README を GitHub 向けに再構成（バッジ・目次・利用可/予定の分離・Mermaid）。進捗の正本を <code>docs/DEV_STATUS.md</code> に移し、<strong>#12 は指示書未作成</strong>・バックログ管理と明記。</p>
   <h3>設計判断</h3>
   <p>README の「#12〜 未着手」行は廃止。次フェーズは DEV_STATUS §5 で優先度を決めてから INST 番号を割り当てる運用に統一。</p>
+</section>
+
+  <section class="entry" id="entry-1319">
+  <h2>INST #13〜#21 バックログ一括実装</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p><code>DEV_STATUS</code> 未着手分を指示書 #13〜#21 として作成し、設計→実装を連続で完了。404 時の出版単位再スクレイプ、保管庫ソート・再 DL・削除・タグ、カレンダー欠損表示、比較タブ＋簡易グラフ、ZIP/CSV エクスポート、Git 自動 commit、トレイ・スタートアップ、PyInstaller <code>build.bat</code>。</p>
+  <h3>変更ファイル</h3>
+  <p><code>downloader.py</code> / <code>library_tab.py</code> / <code>calendar_tab.py</code> / <code>compare_tab.py</code> / <code>main_window.py</code> / <code>exporter.py</code> / <code>git_sync.py</code> / <code>tray.py</code> / <code>startup.py</code> / <code>build.bat</code> / <code>docs/DEV_STATUS.md</code> ほか指示書・テスト。</p>
+  <h3>検証</h3>
+  <p><code>uv run pytest -q</code> 80 passed / <code>ruff</code> / <code>mypy</code> 通過。</p>
 </section>
 </main>
 

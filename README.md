@@ -115,10 +115,10 @@ uv run mypy
 | 文書 | 説明 |
 |------|------|
 | [docs/DESIGN.md](docs/DESIGN.md) | 全体設計・要件定義 |
-| [docs/DEV_STATUS.md](docs/DEV_STATUS.md) | **実装進捗の正本**（指示書 #01〜#11、Phase、機能マトリクス） |
+| [docs/DEV_STATUS.md](docs/DEV_STATUS.md) | **実装進捗の正本**（指示書 #01〜#21、Phase、機能マトリクス） |
 | [docs/DEV_SETUP.md](docs/DEV_SETUP.md) | 開発環境・検証手順 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phase ロードマップ |
-| [docs/instructions/](docs/instructions/) | Cursor 向け実装指示書（#01〜#11 完了） |
+| [docs/instructions/](docs/instructions/) | Cursor 向け実装指示書（#01〜#21 完了） |
 | [docs/USER_MANUAL.md](docs/USER_MANUAL.md) | ユーザーマニュアル（整備中） |
 
 ---
@@ -162,7 +162,7 @@ flowchart LR
 | HTTP | httpx（HTTP/2 → 1.1 フォールバック） |
 | 動的取得 | Playwright（Chromium） |
 | データ | SQLite、JSON manifest、polars（CSV プレビュー） |
-| 配布（予定） | PyInstaller `--onedir` |
+| 配布 | PyInstaller `--onedir`（`build.bat`） |
 
 ---
 

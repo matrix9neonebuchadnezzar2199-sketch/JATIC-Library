@@ -15,6 +15,7 @@ from jatic_library.core.downloader import (
     ProgressCallback,
     resolve_targets,
 )
+from jatic_library.core.git_sync import sync_publication_folder
 from jatic_library.core.logger import setup_logging
 from jatic_library.core.models import CheckResult
 from jatic_library.core.notifier import DownloadSummary, Notifier
@@ -129,6 +130,15 @@ class StartupScheduler:
         )
         if result.failed:
             notifier.notify_error(f"{len(result.failed)} region(s) failed")
+
+        if self._config.download.save_root is not None and (
+            result.succeeded or result.skipped
+        ):
+            sync_publication_folder(
+                self._config.github,
+                self._config.download.save_root,
+                result.publish_ym,
+            )
 
         result_label: CheckResult = "new_found" if result.succeeded else "no_update"
         if result.failed:

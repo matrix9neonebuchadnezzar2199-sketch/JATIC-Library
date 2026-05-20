@@ -127,6 +127,8 @@ def _scan_month_folder(
 def scan_library(
     save_root: Path | None,
     repo: Repository | None = None,
+    *,
+    sort: str = "date_desc",
 ) -> list[LibraryYearItem]:
     """Build year → month → file tree from *save_root*."""
     if save_root is None or not save_root.is_dir():
@@ -143,7 +145,11 @@ def scan_library(
         except (OSError, ValueError):
             continue
 
-    months.sort(key=lambda m: (m.year, m.month), reverse=True)
+    reverse = sort != "date_asc"
+    months.sort(key=lambda m: (m.year, m.month), reverse=reverse)
+    if sort == "name":
+        for month in months:
+            month.files.sort(key=lambda f: f.display_name)
     years_map: dict[int, LibraryYearItem] = {}
     for month in months:
         if month.year not in years_map:

@@ -122,6 +122,26 @@ class SettingsTab(QWidget):
         log_form.addRow("ログ保持", self._log_retention)
         layout.addWidget(log_group)
 
+        tray_group = QGroupBox("トレイ・スタートアップ")
+        tray_layout = QVBoxLayout(tray_group)
+        self._enable_tray = QCheckBox("システムトレイを有効にする")
+        self._minimize_tray = QCheckBox("閉じるときトレイに格納する")
+        self._start_with_windows = QCheckBox("Windows 起動時に自動起動")
+        tray_layout.addWidget(self._enable_tray)
+        tray_layout.addWidget(self._minimize_tray)
+        tray_layout.addWidget(self._start_with_windows)
+        layout.addWidget(tray_group)
+
+        github_group = QGroupBox("Git 連携（任意）")
+        github_form = QFormLayout(github_group)
+        self._github_enabled = QCheckBox("Git 同期を有効にする")
+        github_form.addRow(self._github_enabled)
+        self._github_repo = QLineEdit()
+        github_form.addRow("リポジトリパス", self._github_repo)
+        self._github_auto_commit = QCheckBox("ダウンロード後に自動 commit")
+        github_form.addRow(self._github_auto_commit)
+        layout.addWidget(github_group)
+
         actions = QHBoxLayout()
         save_btn = QPushButton("設定を保存")
         save_btn.clicked.connect(self.save_to_store)
@@ -166,6 +186,12 @@ class SettingsTab(QWidget):
         self._notify_error.setChecked(cfg.notification.on_error)
         self._log_level.setCurrentText(cfg.log.level)
         self._log_retention.setCurrentText(cfg.log.retention)
+        self._enable_tray.setChecked(cfg.tray.enable_tray)
+        self._minimize_tray.setChecked(cfg.tray.minimize_to_tray)
+        self._start_with_windows.setChecked(cfg.tray.start_with_windows)
+        self._github_enabled.setChecked(cfg.github.enabled)
+        self._github_repo.setText(str(cfg.github.repo_path) if cfg.github.repo_path else "")
+        self._github_auto_commit.setChecked(cfg.github.auto_commit)
 
     def apply_to_config(self) -> AppConfig:
         """Copy widget state into ``self._config``."""
@@ -191,6 +217,13 @@ class SettingsTab(QWidget):
             Literal["30d", "90d", "infinite"],
             self._log_retention.currentText(),
         )
+        self._config.tray.enable_tray = self._enable_tray.isChecked()
+        self._config.tray.minimize_to_tray = self._minimize_tray.isChecked()
+        self._config.tray.start_with_windows = self._start_with_windows.isChecked()
+        self._config.github.enabled = self._github_enabled.isChecked()
+        repo_text = self._github_repo.text().strip()
+        self._config.github.repo_path = Path(repo_text) if repo_text else None
+        self._config.github.auto_commit = self._github_auto_commit.isChecked()
         return self._config
 
     def save_to_store(self) -> None:

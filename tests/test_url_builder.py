@@ -8,6 +8,7 @@ from jatic_library.core.url_builder import (
     build_zip_url,
     compute_publish_info,
     parse_folder_name,
+    publish_info_from_folder,
 )
 
 _PUBLISH_CASES = [
@@ -60,3 +61,12 @@ def test_parse_folder_name_ok(folder: str, expected: tuple[int, int]) -> None:
 def test_parse_folder_name_invalid(folder: str) -> None:
     with pytest.raises(ValueError):
         parse_folder_name(folder)
+
+
+def test_publish_info_from_folder() -> None:
+    info = publish_info_from_folder("2026_3")
+    assert info.folder_name == "2026_3"
+    assert info.data_year == 2026
+    assert info.data_month == 3
+    assert info.publish_year == 2026
+    assert info.publish_month == 5

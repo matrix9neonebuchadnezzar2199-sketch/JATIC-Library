@@ -78,3 +78,7 @@ class Manifest:
                 self.files[index] = entry
                 return
         self.files.append(entry)
+
+    def remove_file(self, target_code: str) -> None:
+        """Remove a file entry by target code."""
+        self.files = [entry for entry in self.files if entry.target_code != target_code]

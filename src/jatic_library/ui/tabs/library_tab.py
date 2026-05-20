@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import os
 
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtCore import QPoint, Qt, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
+    QComboBox,
     QHBoxLayout,
+    QInputDialog,
     QLineEdit,
     QMenu,
     QMessageBox,
@@ -42,6 +44,11 @@ KIND_FILE = "file"
 class LibraryTab(QWidget):
     """Browse downloaded publications in a three-level tree."""
 
+    redownload_requested = Signal(object)
+    delete_requested = Signal(object)
+    export_month_requested = Signal(str)
+    sort_changed = Signal(str)
+
     def __init__(
         self,
         config: AppConfig,
@@ -65,9 +72,18 @@ class LibraryTab(QWidget):
         self._search = QLineEdit()
         self._search.setPlaceholderText("地域名で検索…")
         self._search.textChanged.connect(self._apply_search_filter)
+        self._sort = QComboBox()
+        for label, key in (
+            ("日付（新しい順）", "date_desc"),
+            ("日付（古い順）", "date_asc"),
+            ("地域名", "name"),
+        ):
+            self._sort.addItem(label, key)
+        self._sort.currentIndexChanged.connect(self._on_sort_changed)
         refresh_btn = QPushButton("再読込")
         refresh_btn.clicked.connect(self.refresh)
         toolbar.addWidget(self._search)
+        toolbar.addWidget(self._sort)
         toolbar.addWidget(refresh_btn)
         left_layout.addLayout(toolbar)
 
@@ -100,9 +116,27 @@ class LibraryTab(QWidget):
     def refresh(self) -> None:
         """Rescan save_root and rebuild the tree."""
         save_root = self._config.download.save_root
-        self._tree_data = scan_library(save_root, self._repo)
+        sort_key = self._config.ui.library_default_sort
+        self._tree_data = scan_library(save_root, self._repo, sort=sort_key)
+        self._sync_sort_combo(sort_key)
         self._rebuild_tree()
         self._apply_search_filter(self._search.text())
+
+    def _sync_sort_combo(self, sort_key: str) -> None:
+        for index in range(self._sort.count()):
+            if self._sort.itemData(index) == sort_key:
+                self._sort.blockSignals(True)
+                self._sort.setCurrentIndex(index)
+                self._sort.blockSignals(False)
+                break
+
+    def _on_sort_changed(self) -> None:
+        sort_key = self._sort.currentData()
+        if not isinstance(sort_key, str):
+            return
+        self._config.ui.library_default_sort = sort_key
+        self.sort_changed.emit(sort_key)
+        self.refresh()
 
     def _rebuild_tree(self) -> None:
         self._tree.clear()
@@ -187,12 +221,23 @@ class LibraryTab(QWidget):
         file_item = current.data(0, ROLE_FILE_ITEM)
         if not isinstance(file_item, LibraryFileItem):
             return
-        self._detail.show_file(file_item)
+        scope_key = self._file_scope_key(file_item)
+        tag_names = [row.name for row in self._repo.list_tags_for("file", scope_key)]
+        self._detail.show_file(file_item, tags=tag_names)
         self._preview.load_zip(file_item.file_path)
+
+    @staticmethod
+    def _file_scope_key(file_item: LibraryFileItem) -> str:
+        code = file_item.target_code or file_item.file_name
+        return f"{file_item.publish_ym}/{code}"
 
     def _open_context_menu(self, position: QPoint) -> None:
         item = self._tree.itemAt(position)
         if item is None:
+            return
+        kind = item.data(0, ROLE_NODE_KIND)
+        if kind == KIND_MONTH:
+            self._month_context_menu(item, position)
             return
         file_item = item.data(0, ROLE_FILE_ITEM)
         if not isinstance(file_item, LibraryFileItem):
@@ -201,6 +246,9 @@ class LibraryTab(QWidget):
         menu = QMenu(self)
         open_action = QAction("エクスプローラーで開く", self)
         copy_action = QAction("パスをコピー", self)
+        redownload_action = QAction("再ダウンロード", self)
+        delete_action = QAction("削除", self)
+        tag_action = QAction("タグを管理…", self)
 
         def open_in_explorer() -> None:
             folder = file_item.file_path.parent
@@ -216,6 +264,74 @@ class LibraryTab(QWidget):
 
         open_action.triggered.connect(open_in_explorer)
         copy_action.triggered.connect(copy_path)
+        redownload_action.triggered.connect(lambda: self.redownload_requested.emit(file_item))
+        delete_action.triggered.connect(lambda: self._confirm_delete(file_item))
+        tag_action.triggered.connect(lambda: self._manage_tags(file_item))
         menu.addAction(open_action)
         menu.addAction(copy_action)
+        menu.addSeparator()
+        menu.addAction(redownload_action)
+        menu.addAction(delete_action)
+        menu.addAction(tag_action)
         menu.exec(self._tree.viewport().mapToGlobal(position))
+
+    def _month_context_menu(self, item: QTreeWidgetItem, position: QPoint) -> None:
+        month_item = self._month_from_node(item)
+        if month_item is None:
+            return
+        menu = QMenu(self)
+        export_zip = QAction("月次 ZIP バンドルをエクスポート…", self)
+        export_csv = QAction("統合 CSV をエクスポート…", self)
+
+        def export_bundle() -> None:
+            self.export_month_requested.emit(month_item.folder_name)
+
+        export_zip.triggered.connect(export_bundle)
+        export_csv.triggered.connect(export_bundle)
+        menu.addAction(export_zip)
+        menu.addAction(export_csv)
+        menu.exec(self._tree.viewport().mapToGlobal(position))
+
+    def _confirm_delete(self, file_item: LibraryFileItem) -> None:
+        answer = QMessageBox.question(
+            self,
+            "削除確認",
+            f"{file_item.display_name} を削除しますか？\n{file_item.file_path}",
+        )
+        if answer == QMessageBox.StandardButton.Yes:
+            self.delete_requested.emit(file_item)
+
+    def _manage_tags(self, file_item: LibraryFileItem) -> None:
+        scope_key = self._file_scope_key(file_item)
+        existing = {row.id: row.name for row in self._repo.list_tags_for("file", scope_key)}
+        all_tags = self._repo.list_tags()
+        choices = [f"{row.name} ({row.id})" for row in all_tags]
+        if not choices:
+            name, ok = QInputDialog.getText(self, "タグ", "新しいタグ名:")
+            if ok and name.strip():
+                tag_id = self._repo.create_tag(name.strip())
+                self._repo.assign_tag(tag_id, "file", scope_key)
+                self._on_selection_changed(self._tree.currentItem(), None)
+            return
+
+        selected, ok = QInputDialog.getItem(
+            self,
+            "タグ",
+            "付与するタグを選択（キャンセルで新規作成）:",
+            choices,
+            editable=False,
+        )
+        if ok and selected:
+            tag_id = int(selected.rsplit("(", 1)[1].rstrip(")"))
+            if tag_id in existing:
+                self._repo.unassign_tag(tag_id, "file", scope_key)
+            else:
+                self._repo.assign_tag(tag_id, "file", scope_key)
+            self._on_selection_changed(self._tree.currentItem(), None)
+            return
+
+        name, ok_new = QInputDialog.getText(self, "タグ", "新しいタグ名:")
+        if ok_new and name.strip():
+            tag_id = self._repo.create_tag(name.strip())
+            self._repo.assign_tag(tag_id, "file", scope_key)
+            self._on_selection_changed(self._tree.currentItem(), None)

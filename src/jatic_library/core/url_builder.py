@@ -62,6 +62,24 @@ def build_doc_url(info: PublishInfo) -> str:
     return info.dir_url + "typeB_danmen.pdf"
 
 
+def publish_info_from_folder(folder_name: str) -> PublishInfo:
+    """Build ``PublishInfo`` for an on-disk ``YYYY_M`` data folder."""
+    data_year, data_month = parse_folder_name(folder_name)
+    publish_year, publish_month = _shift_month(data_year, data_month, PUBLISH_LAG_MONTHS)
+    folder = folder_name
+    publish_ym_compact = f"{publish_year}{publish_month:02d}010000"
+    dir_url = JARTIC_DATA_DIR_TPL.format(publish_ym_compact=publish_ym_compact)
+    return PublishInfo(
+        publish_year=publish_year,
+        publish_month=publish_month,
+        data_year=data_year,
+        data_month=data_month,
+        folder_name=folder,
+        publish_ym_compact=publish_ym_compact,
+        dir_url=dir_url,
+    )
+
+
 def parse_folder_name(folder_name: str) -> tuple[int, int]:
     """Parse ``YYYY_M`` folder name into year and month."""
     match = _FOLDER_RE.match(folder_name)
