@@ -11,8 +11,8 @@ from loguru import logger
 from jatic_library.constants import DB_PATH, LOG_DIR, TZ_JST
 from jatic_library.core.downloader import Downloader, DownloadResult, resolve_targets
 from jatic_library.core.logger import setup_logging
-from jatic_library.core.notifier import DownloadSummary, Notifier
 from jatic_library.core.models import CheckResult
+from jatic_library.core.notifier import DownloadSummary, Notifier
 from jatic_library.core.repository import Repository
 from jatic_library.core.url_builder import compute_publish_info
 from jatic_library.settings.config import AppConfig
