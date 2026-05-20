@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         self.resize(1024, 720)
 
         self._tabs = QTabWidget()
-        self._library_tab = LibraryTab()
+        self._library_tab = LibraryTab(config, repo)
         self._settings_tab = SettingsTab(config, store)
         self._calendar_tab = CalendarTab()
         self._compare_tab = CompareTab()
@@ -113,6 +113,7 @@ class MainWindow(QMainWindow):
 
     def _on_config_saved(self, config: AppConfig) -> None:
         self._config = config
+        self._library_tab.update_config(config)
         app = QApplication.instance()
         if isinstance(app, QApplication):
             apply_theme(app, config.ui.theme)
@@ -176,6 +177,7 @@ class MainWindow(QMainWindow):
             outcome = result
             assert isinstance(outcome, CheckOutcome)
             self._settings_tab.load_from_config()
+            self._library_tab.refresh()
             self.statusBar().showMessage(
                 f"チェック完了: 新規 {outcome.new_downloads} / "
                 f"スキップ {outcome.skipped} / エラー {outcome.errors}",
