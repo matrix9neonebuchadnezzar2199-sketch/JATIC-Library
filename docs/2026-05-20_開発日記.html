@@ -378,6 +378,7 @@ body.diary > footer {
       <tr><td>13:19</td><td>INST #13-#21 全機能実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1319">#entry-1319</a></td></tr>
       <tr><td>13:26</td><td>残作業一覧の整理（配布フェーズ）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1326">#entry-1326</a></td></tr>
       <tr><td>16:39</td><td>DL・常駐動線のバグ修正とテスト拡充</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1639">#entry-1639</a></td></tr>
+      <tr><td>16:41</td><td>モックテストスイート実行・記録</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1641">#entry-1641</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -484,6 +485,15 @@ body.diary > footer {
   <p>ダウンロード完了判定（部分地域で <code>complete</code> になる不具合）、Git 同期のパス外 add、トレイ未初期化時の close、進捗ダイアログ残留を修正。<code>test_publication_status</code> / <code>test_scheduler_flow</code> / <code>test_tray</code> 等を追加。</p>
   <h3>検証</h3>
   <p><code>uv run pytest -q</code> 98 passed / <code>ruff</code> / <code>mypy</code>。Commit: <code>5e6a16f</code></p>
+</section>
+
+  <section class="entry" id="entry-1641">
+  <h2>モックテストスイート実行・記録</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">docs</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>DL・常駐・スクレイプ動線のモック中心 9 ファイル（22 テスト）を <code>-v</code> で実行し全 pass を確認。<code>DEV_SETUP.md</code> に再現コマンドを追記。</p>
+  <h3>検証</h3>
+  <p>全件 <code>pytest -q</code> 98 passed。モック subset 22 passed in 1.95s（<code>test_downloader</code> / <code>test_scheduler_flow</code> / <code>test_tray</code> 等）。</p>
 </section>
 </main>
 

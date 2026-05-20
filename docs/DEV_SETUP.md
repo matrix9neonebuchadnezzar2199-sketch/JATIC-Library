@@ -32,6 +32,19 @@ uv run mypy
 uv run pytest
 ```
 
+### モック中心テスト（DL・常駐・スクレイプ動線）
+
+ネットワーク・実サイト・トレイ実機に依存しないサブセット（2026-05-20 時点 **22 件**）:
+
+```powershell
+uv run pytest tests/test_downloader.py tests/test_downloader_rescrape.py `
+  tests/test_scheduler_flow.py tests/test_playwright_scraper.py `
+  tests/test_http_client.py tests/test_git_sync.py `
+  tests/test_tray.py tests/test_workers.py tests/test_startup.py -v
+```
+
+全件: `uv run pytest -q`（**98 passed**、GUI/Qt 含む）。
+
 ## 配布ビルド
 
 ```powershell
