@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from loguru import logger
 
 from jatic_library.constants import APP_NAME
+from jatic_library.core.playwright_env import INSTALL_COMMAND, failures_look_like_missing_browser
 from jatic_library.settings.config import NotificationSettings
 
 
@@ -18,6 +19,7 @@ class DownloadSummary:
     succeeded: int
     skipped: int
     failed: int
+    failed_details: tuple[tuple[str, str], ...] = ()
 
 
 class Notifier:
@@ -36,10 +38,16 @@ class Notifier:
         """Notify when a download batch completes."""
         if not self._settings.on_complete:
             return
-        body = (
-            f"{summary.publish_ym}: 成功 {summary.succeeded}, "
-            f"スキップ {summary.skipped}, 失敗 {summary.failed}"
-        )
+        if summary.failed and failures_look_like_missing_browser(list(summary.failed_details)):
+            body = (
+                f"{summary.publish_ym}: Chromium 未セットアップのため "
+                f"失敗 {summary.failed} 件。{INSTALL_COMMAND} を実行してください。"
+            )
+        else:
+            body = (
+                f"{summary.publish_ym}: 成功 {summary.succeeded}, "
+                f"スキップ {summary.skipped}, 失敗 {summary.failed}"
+            )
         self._toast("ダウンロード完了", body)
 
     def notify_error(self, message: str) -> None:

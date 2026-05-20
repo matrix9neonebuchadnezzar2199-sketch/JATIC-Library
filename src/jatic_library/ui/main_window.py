@@ -28,6 +28,11 @@ from jatic_library.core.exporter import (
 )
 from jatic_library.core.library_scanner import LibraryFileItem
 from jatic_library.core.manifest import Manifest
+from jatic_library.core.playwright_env import (
+    INSTALL_HINT,
+    chromium_missing_message,
+    failures_look_like_missing_browser,
+)
 from jatic_library.core.playwright_scraper import scrape_and_save_targets
 from jatic_library.core.repository import Repository
 from jatic_library.core.scheduler import CheckOutcome, StartupScheduler
@@ -208,13 +213,24 @@ class MainWindow(QMainWindow):
             self.unsetCursor()
         self.statusBar().showMessage(message)
 
+    def _warn_playwright_chromium_missing(self) -> bool:
+        """Show setup dialog when Chromium is missing. Returns True if blocked."""
+        hint = chromium_missing_message()
+        if hint is None:
+            return False
+        QMessageBox.warning(self, "Playwright のセットアップ", hint)
+        return True
+
     def _start_worker(
         self,
         coro_factory: Callable[[], Coroutine[Any, Any, object]],
         *,
         busy_message: str,
         on_success: Callable[[object], None],
+        require_playwright: bool = False,
     ) -> None:
+        if require_playwright and self._warn_playwright_chromium_missing():
+            return
         if self._active_worker is not None and self._active_worker.isRunning():
             QMessageBox.information(self, "処理中", "別のバックグラウンド処理が実行中です。")
             return
@@ -270,6 +286,13 @@ class MainWindow(QMainWindow):
                 f"スキップ {outcome.skipped} / エラー {outcome.errors}",
                 10_000,
             )
+            download = outcome.download_result
+            if (
+                outcome.errors > 0
+                and download is not None
+                and failures_look_like_missing_browser(download.failed)
+            ):
+                QMessageBox.warning(self, "ダウンロード失敗", INSTALL_HINT)
 
         if self._active_worker is not None and self._active_worker.isRunning():
             QMessageBox.information(self, "処理中", "別のバックグラウンド処理が実行中です。")
@@ -278,6 +301,9 @@ class MainWindow(QMainWindow):
         if self._config.download.save_root is None:
             QMessageBox.warning(self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。")
             self._tabs.setCurrentWidget(self._settings_tab)
+            progress_dialog.reject()
+            return
+        if self._warn_playwright_chromium_missing():
             progress_dialog.reject()
             return
 
@@ -318,7 +344,12 @@ class MainWindow(QMainWindow):
             )
             self.statusBar().showMessage(f"再スキャン完了: {count} 件", 10_000)
 
-        self._start_worker(_task, busy_message="サイトを再スキャンしています…", on_success=_on_success)
+        self._start_worker(
+            _task,
+            busy_message="サイトを再スキャンしています…",
+            on_success=_on_success,
+            require_playwright=True,
+        )
 
     def _refresh_data_tabs(self) -> None:
         self._library_tab.refresh()

@@ -126,10 +126,21 @@ class StartupScheduler:
                 succeeded=len(result.succeeded),
                 skipped=len(result.skipped),
                 failed=len(result.failed),
+                failed_details=tuple(result.failed),
             )
         )
         if result.failed:
-            notifier.notify_error(f"{len(result.failed)} region(s) failed")
+            from jatic_library.core.playwright_env import (
+                INSTALL_COMMAND,
+                failures_look_like_missing_browser,
+            )
+
+            if failures_look_like_missing_browser(result.failed):
+                notifier.notify_error(
+                    f"Chromium 未インストール。{INSTALL_COMMAND} を実行してください。"
+                )
+            else:
+                notifier.notify_error(f"{len(result.failed)} region(s) failed")
 
         if self._config.download.save_root is not None and (
             result.succeeded or result.skipped
