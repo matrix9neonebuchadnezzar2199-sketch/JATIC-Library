@@ -5,9 +5,12 @@ from __future__ import annotations
 from importlib import resources
 from typing import Literal
 
-from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QApplication, QStyleFactory
 
 ThemeName = Literal["light", "dark"]
+
+_UI_FONTS = ["Segoe UI", "Yu Gothic UI", "Meiryo UI", "sans-serif"]
 
 
 def theme_stylesheet(name: ThemeName) -> str:
@@ -19,5 +22,13 @@ def theme_stylesheet(name: ThemeName) -> str:
 
 
 def apply_theme(app: QApplication, name: ThemeName) -> None:
-    """Apply *name* theme to *app*."""
+    """Apply Fusion base style, UI font, and *name* palette."""
+    fusion = QStyleFactory.create("Fusion")
+    if fusion is not None:
+        app.setStyle(fusion)
+
+    font = QFont()
+    font.setFamilies(_UI_FONTS)
+    font.setPointSize(10)
+    app.setFont(font)
     app.setStyleSheet(theme_stylesheet(name))

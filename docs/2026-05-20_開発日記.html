@@ -381,6 +381,7 @@ body.diary > footer {
       <tr><td>16:41</td><td>モックテストスイート実行・記録</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1641">#entry-1641</a></td></tr>
       <tr><td>16:45</td><td>SQLite スレッドエラー修正・GUI 再起動</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1645">#entry-1645</a></td></tr>
       <tr><td>16:48</td><td>設定タブ 2 列レイアウト</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1648">#entry-1648</a></td></tr>
+      <tr><td>16:53</td><td>UI テーマ刷新（Fusion + QSS）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1653">#entry-1653</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -521,6 +522,20 @@ body.diary > footer {
   </ul>
   <h3>検証</h3>
   <p><code>uv run pytest -q</code> 99 passed / <code>ruff</code> / <code>mypy</code>。Commit: <code>fa03c3f</code></p>
+</section>
+
+  <section class="entry" id="entry-1653">
+  <h2>UI テーマ刷新</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>古い Win32 風の見た目を改善。<strong>Fusion</strong> ベース + <code>light.qss</code> / <code>dark.qss</code> を拡充（タブ・グループ・リスト・ツリー・カレンダー・スクロールバー等）。カレンダータブはカード型レイアウトとテーマ連動のマーカー色に変更。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-mod">M</span> ui/theme.py, ui/themes/light.qss, dark.qss</li>
+    <li><span class="op op-mod">M</span> ui/tabs/calendar_tab.py</li>
+  </ul>
+  <h3>検証</h3>
+  <p><code>pytest -q</code> 99 passed。Commit: <code>pending</code></p>
 </section>
 </main>
 
