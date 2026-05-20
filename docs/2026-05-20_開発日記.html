@@ -359,7 +359,7 @@ body.diary > footer {
 <body class="diary">
 <header>
   <h1>2026-05-20 開発日記</h1>
-  <p class="subtitle">JATIC-Library — INST #01-#08（DL・CLI まで）</p>
+  <p class="subtitle">JATIC-Library — INST #01-#10（GUI・設定タブまで）</p>
 </header>
 
 <section class="diary-toc">
@@ -372,6 +372,7 @@ body.diary > footer {
             <tr><td>11:56</td><td>INST #01-#04 照合・コミット4件</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1156">#entry-1156</a></td></tr>
       <tr><td>12:07</td><td>INST #05-#08 指示書・DL/CLI 実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1207">#entry-1207</a></td></tr>
       <tr><td>12:08</td><td>開発日記追記・GitHub push</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1208">#entry-1208</a></td></tr>
+      <tr><td>12:16</td><td>INST #09-#10 GUI・設定タブ</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1216">#entry-1216</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -412,6 +413,20 @@ body.diary > footer {
   <p>マスター依頼に従い開発日記を整備し、<code>#01</code>〜<code>#08</code> 分（コミット <code>6540ec7</code>〜<code>c05f0ff</code>）を GitHub <code>origin/master</code> へ push した。</p>
   <h3>検証</h3>
   <p><code>git push -u origin master</code> 成功（<code>fad82be</code> 含む全履歴）。リモート: https://github.com/matrix9neonebuchadnezzar2199-sketch/JATIC-Library</p>
+</section>
+
+  <section class="entry" id="entry-1216">
+  <h2>INST #09〜#10 PySide6 GUI</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p><strong>MainWindow</strong>（4タブ）、<strong>設定タブ</strong>（51地域・保存・更新確認・再スキャン）、<code>python -m jatic_library</code> で GUI 起動。pytest 68件。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-add">+</span> app.py, ui/main_window.py, ui/tabs/*, ui/widgets/region_selector.py</li>
+    <li><span class="op op-mod">M</span> __main__.py, themes/*.qss, README, ROADMAP</li>
+  </ul>
+  <h3>検証</h3>
+  <p><code>uv run pytest -q</code> 68 passed — pending push</p>
 </section>
 </main>
 
