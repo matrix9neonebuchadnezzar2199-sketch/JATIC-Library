@@ -376,6 +376,7 @@ body.diary > footer {
       <tr><td>13:01</td><td>INST #11 保管庫タブ</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1301">#entry-1301</a></td></tr>
       <tr><td>13:06</td><td>README 刷新・DEV_STATUS 設計</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1306">#entry-1306</a></td></tr>
       <tr><td>13:19</td><td>INST #13-#21 全機能実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1319">#entry-1319</a></td></tr>
+      <tr><td>13:26</td><td>残作業一覧の整理（配布フェーズ）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1326">#entry-1326</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -464,6 +465,15 @@ body.diary > footer {
   <p><code>downloader.py</code> / <code>library_tab.py</code> / <code>calendar_tab.py</code> / <code>compare_tab.py</code> / <code>main_window.py</code> / <code>exporter.py</code> / <code>git_sync.py</code> / <code>tray.py</code> / <code>startup.py</code> / <code>build.bat</code> / <code>docs/DEV_STATUS.md</code> ほか指示書・テスト。</p>
   <h3>検証</h3>
   <p><code>uv run pytest -q</code> 80 passed / <code>ruff</code> / <code>mypy</code> 通過。Commit: <code>0df758a</code></p>
+</section>
+
+  <section class="entry" id="entry-1326">
+  <h2>残作業一覧の整理（配布フェーズ）</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">docs</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>#01〜#21 完了後の正本を更新。機能は実装済み、<strong>残りは exe 配布の仕上げ</strong>（PyInstaller 検証・Playwright 同梱・マニュアル）と明記。</p>
+  <h3>変更ファイル</h3>
+  <p><code>docs/DEV_STATUS.md</code> §5 残作業、<code>ROADMAP.md</code>、<code>README.md</code>、<code>ALIGNMENT.md</code>、<code>DESIGN.md</code>、<code>USER_MANUAL.md</code></p>
 </section>
 </main>
 

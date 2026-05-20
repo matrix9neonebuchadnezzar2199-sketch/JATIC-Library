@@ -178,10 +178,10 @@ CREATE TABLE event_logs (...);
 
 ## 12. ロードマップ
 
-- **進捗正本:** [DEV_STATUS.md](DEV_STATUS.md)（指示書トラッカー・機能マトリクス・バックログ）
-- 実装指示書: [instructions/README.md](instructions/README.md)（#01〜#11 完了）
+- **進捗正本:** [DEV_STATUS.md](DEV_STATUS.md)（指示書トラッカー・機能マトリクス・残作業）
+- 実装指示書: [instructions/README.md](instructions/README.md)（#01〜#21 完了）
 - Phase 表: [ROADMAP.md](ROADMAP.md)
 
 ## 実装進捗
 
-詳細は [DEV_STATUS.md](DEV_STATUS.md) を参照。サマリ: MVP Core（#01〜#11）完了。#12 以降は指示書未作成・バックログ管理。
+詳細は [DEV_STATUS.md](DEV_STATUS.md) を参照。サマリ: 機能実装（#01〜#21）完了。**残作業は配布・実行形式の仕上げ**（PyInstaller 検証、Playwright 同梱、マニュアル、配布 zip）。一覧は [DEV_STATUS.md §5](DEV_STATUS.md#5-残作業リリース配布まで)。
