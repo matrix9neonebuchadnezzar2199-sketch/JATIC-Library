@@ -14,7 +14,8 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 08 | [INST_08_scheduler_cli.md](INST_08_scheduler_cli.md) | スケジューラ・CLI | **完了** |
 | 09 | [INST_09_main_window.md](INST_09_main_window.md) | メインウィンドウ・起動 | **完了** |
 | 10 | [INST_10_settings_tab.md](INST_10_settings_tab.md) | 設定タブ | **完了** |
-| 11〜20 | — | 保管庫 / 常駐 / 拡張 / ビルド | 未作成 |
+| 11 | [INST_11_library_tab.md](INST_11_library_tab.md) | 保管庫タブ | **完了** |
+| 12〜20 | — | 常駐 / 拡張 / ビルド | 未作成 |
 
 - 差分メモ: [ALIGNMENT.md](ALIGNMENT.md)
 - 正本設計: [../DESIGN.md](../DESIGN.md)
@@ -22,5 +23,5 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 ## 依存関係
 
 ```
-01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → ...
+01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → 12 → ...
 ```
