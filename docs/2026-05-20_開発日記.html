@@ -371,6 +371,7 @@ body.diary > footer {
     <tbody>
             <tr><td>11:56</td><td>INST #01-#04 照合・コミット4件</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1156">#entry-1156</a></td></tr>
       <tr><td>12:07</td><td>INST #05-#08 指示書・DL/CLI 実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1207">#entry-1207</a></td></tr>
+      <tr><td>12:08</td><td>開発日記追記・GitHub push</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1208">#entry-1208</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -401,7 +402,16 @@ body.diary > footer {
   <h3>設計判断</h3>
   <p>DL 時の 404 自動再スクレイプは #09 以降に回し、手動 <code>scrape</code> で <code>targets.json</code> を更新する運用とした（ALIGNMENT 記載）。</p>
   <h3>検証</h3>
-  <p><code>uv run pytest -q</code> 63 passed — Commits: 2e0a5a6, 6dcad91, 2281c0e, e706967, 3ca712e</p>
+  <p><code>uv run pytest -q</code> 63 passed — Commits: 2e0a5a6, 6dcad91, 2281c0e, e706967, 3ca712e, c05f0ff</p>
+</section>
+
+  <section class="entry" id="entry-1208">
+  <h2>記録整備・リモート push</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>マスター依頼に従い開発日記を整備し、<code>#01</code>〜<code>#08</code> 分（コミット <code>6540ec7</code>〜<code>c05f0ff</code>）を GitHub <code>origin/master</code> へ push した。</p>
+  <h3>検証</h3>
+  <p><code>git push -u origin master</code> — リモート: <code>matrix9neonebuchadnezzar2199-sketch/JATIC-Library</code></p>
 </section>
 </main>
 
