@@ -1,0 +1,80 @@
+[project]
+name = "jatic-library"
+version = "0.1.0"
+description = "JARTIC断面交通量情報の自動取得・管理ツール"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license = { text = "MIT" }
+authors = [{ name = "matrix9neonebuchadnezzar2199-sketch" }]
+dependencies = [
+    "PySide6==6.7.2",
+    "httpx[http2]==0.27.0",
+    "selectolax==0.3.21",
+    "polars==1.5.0",
+    "pyqtgraph==0.13.7",
+    "GitPython==3.1.43",
+    "pydantic==2.8.2",
+    "pydantic-settings==2.4.0",
+    "win11toast==0.35",
+    "playwright==1.45.0",
+    "loguru==0.7.2",
+    "chardet==5.2.0",
+    "tzdata>=2024.1",
+]
+
+[project.scripts]
+jatic-library = "jatic_library.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest==8.3.2",
+    "pytest-qt==4.4.0",
+    "pytest-asyncio==0.23.8",
+    "ruff==0.5.7",
+    "mypy==1.11.1",
+    "pyinstaller==6.10.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+jatic_library = ["resources/**/*", "ui/themes/*.qss"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "PL", "RUF", "S"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "PLR2004"]
+"src/jatic_library/core/targets.py" = ["E501"]
+"src/jatic_library/core/repository.py" = ["S608", "PLR2004"]
+"src/jatic_library/core/url_builder.py" = ["PLR2004"]
+"tests/test_url_builder.py" = ["PLR0913"]
+"tests/test_repository.py" = ["SIM117"]
+"tests/test_store.py" = ["SIM117"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+mypy_path = ["src"]
+packages = ["jatic_library"]
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["pyqtgraph.*", "win11toast.*", "playwright.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q"
