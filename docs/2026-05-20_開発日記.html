@@ -505,7 +505,7 @@ body.diary > footer {
   <h3>原因</h3>
   <p><code>AsyncTaskWorker</code>（QThread）内の <code>StartupScheduler</code> が、メインスレッドで開いた <code>self._repo</code> を参照していた。</p>
   <h3>対応</h3>
-  <p>DL / 再 DL はワーカー内で <code>Repository(DB_PATH)</code> を別接続。PRAGMA WAL + <code>check_same_thread=False</code> は保険。<code>test_repository_threading.py</code> 追加。</p>
+  <p>DL / 再 DL はワーカー内で <code>Repository(DB_PATH)</code> を別接続。PRAGMA WAL + <code>check_same_thread=False</code> は保険。<code>test_repository_threading.py</code> 追加。Commit: <code>d150b2d</code>。GUI 再起動済み。</p>
 </section>
 </main>
 
