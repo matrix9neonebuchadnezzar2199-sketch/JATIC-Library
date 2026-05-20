@@ -1,145 +1,204 @@
 # JATIC-Library
 
-JARTIC（日本道路交通情報センター）が公開する **断面交通量情報（typeB）** を、Windows 上で自動取得・整理・閲覧するためのデスクトップアプリです。
+<p align="center">
+  <strong>JARTIC 断面交通量（typeB）の自動取得・保管・閲覧</strong><br>
+  Windows 向けデスクトップアプリケーション
+</p>
 
-毎月1日頃に更新されるオープンデータを、手作業で51ボタンを押して落とす代わりに、**起動時チェック・並列ダウンロード・保管庫管理**まで一括で行います。
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11-blue?style=flat-square&logo=python&logoColor=white" alt="Python 3.11"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"></a>
+  <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6?style=flat-square&logo=windows&logoColor=white" alt="Windows">
+  <a href="docs/DEV_STATUS.md"><img src="https://img.shields.io/badge/status-MVP%20Core%20(shipped)-success?style=flat-square" alt="Status"></a>
+</p>
 
-- リポジトリ: https://github.com/matrix9neonebuchadnezzar2199-sketch/JATIC-Library
-- 詳細設計: [docs/DESIGN.md](docs/DESIGN.md)
-- 実装指示書: [docs/instructions/](docs/instructions/)（Cursor 投入用 #01〜）
-- 開発手順: [docs/DEV_SETUP.md](docs/DEV_SETUP.md)
-
----
-
-## このツールでできること
-
-### 自動ダウンロード
-
-- JARTIC オープンデータページの **断面交通量（typeB）** ZIP を、**最大51地域**（北海道5方面＋46都府県）から取得
-- 公開ルールに合わせたフォルダ名（例: `2026_3` = 2026年03月分）で保存
-- **起動時の自動チェック**（既定: 24時間に1回まで）と **「今すぐ更新確認」** ボタン
-- 並列ダウンロード（同時数 1〜5）、リトライ、SHA256 ハッシュ記録
-- 部分取得済みの月は **不足地域だけ** 追加ダウンロード
-- URL テンプレート方式を主とし、404 時は **Playwright によるサイト再スキャン**で `filename_key` を学習・更新
-
-### 保管庫（ライブラリ）
-
-- **年 → 月フォルダ → 地域ファイル** の3階層ツリー表示
-- ソート（日付・地域・サイズ・ステータス）、フィルタ（年範囲・地方・タグ）
-- 地域名・年月の **インクリメンタル検索**
-- 選択ファイルのメタ情報（DL日時、サイズ、SHA256、元URL）
-- ZIP 内 CSV の **プレビュー**（先頭1000行、文字コード自動判定）
-- **簡易グラフ**（時間帯別交通量の折れ線など）
-- **欠損月の検出**（2019年6月〜現在の穴を警告表示）
-- 右クリック: エクスプローラーで開く / 再DL / 削除 / タグ編集 / エクスポート
-
-### カレンダー・通知
-
-- 公開済み月のマーカー、**次回公開予定日**（翌月1日）のハイライトとカウントダウン
-- Windows **トースト通知**（新規公開・完了・エラー）
-- **タスクトレイ常駐**（オプション）、スタートアップ登録
-
-### 比較・エクスポート
-
-- 同一地域の **2か月分を並べて比較**（テーブル＋差分グラフ）
-- 複数月の **ZIP 一括** / **統合 CSV** / Parquet 出力
-- 任意の **タグ付け** とタグ検索
-
-### GitHub 連携（任意）
-
-- ダウンロード完了後、指定ローカルリポジトリへ **自動 commit & push**（OFF が既定）
-- 大容量データ向けに LFS 推奨の警告表示
-
-### 見た目・運用
-
-- **ライト / ダーク** テーマ（QSS、即時切替）
-- 設定の JSON 永続化（`%LOCALAPPDATA%\JATIC-Library\config.json`）
-- 取得履歴 SQLite（高速検索・タグ・イベントログ）
+<p align="center">
+  <a href="docs/DESIGN.md">設計</a> ·
+  <a href="docs/DEV_STATUS.md">開発状況</a> ·
+  <a href="docs/DEV_SETUP.md">開発環境</a> ·
+  <a href="docs/instructions/">実装指示書</a> ·
+  <a href="https://github.com/matrix9neonebuchadnezzar2199-sketch/JATIC-Library">GitHub</a>
+</p>
 
 ---
 
-## 開発状況
+JARTIC（日本道路交通情報センター）が毎月公開する **断面交通量情報（typeB）** を、51 地域分の ZIP として自動取得し、ローカルに整理して閲覧するためのツールです。手作業でオープンデータページのボタンを押し続ける運用を、**起動時チェック・並列ダウンロード・保管庫ブラウザ** に置き換えます。
 
-| 指示書 | 内容 | 状態 |
-|--------|------|------|
-| #01 | プロジェクト初期化（Hello / setuptools） | 完了 |
-| #02 | 定数・51地域マスタ・URL生成 | 完了 |
-| #03 | Pydantic 設定・JSON 永続化 | 完了 |
-| #04 | SQLite リポジトリ（CRUD） | 完了 |
-| #05 | ロガー（loguru）・Windows トースト | 完了 |
-| #06 | HTTP/2→1.1、マニフェスト、並列 DL | 完了 |
-| #07 | Playwright スクレイパ・targets 学習 | 完了 |
-| #08 | 起動スケジューラ・CLI | 完了 |
-| #09 | PySide6 メインウィンドウ・4タブ骨格 | 完了 |
-| #10 | 設定タブ（地域選択・保存・更新確認） | 完了 |
-| #11 | 保管庫タブ（年→月→地域ツリー・詳細・CSVプレビュー） | 完了 |
-| #12〜 | 常駐・拡張・ビルド | 未着手 |
-
-| Phase | 内容 | 状態 |
-|-------|------|------|
-| P2 | downloader, manifest, scheduler, CLI | 完了 |
-| P3 | MainWindow + SettingsTab | 完了 |
-| P4 | 保管庫タブ | 完了 |
-| P5〜P10 | スクレイパ、通知、カレンダー、ビルド等 | 未着手 |
-
-> README の機能説明は、実装が進むたびに **「できること」と「開発状況」** を更新します。
+> **現在のリリース段階:** MVP Core（設定・DL・CLI・保管庫タブまで利用可能）。ロードマップ上の拡張機能は [開発状況](docs/DEV_STATUS.md) を参照してください。
 
 ---
 
-## 前提・制限
+## 目次
 
-- **対象は JARTIC が現在公開している月分のみ**（サイトは過去月を残さないため、遡及取得は不可）
-- 公開は毎月1日想定だが、作業遅延があり得る（24時間間隔の再チェックで対応）
-- 地域 ZIP は **数十 MB〜数 GB** あり得る。Git 管理時は LFS を推奨
-- Windows 10/11 向け（トースト・スタートアップ登録）
+- [特長](#特長)
+- [スクリーンショット](#スクリーンショット)
+- [クイックスタート](#クイックスタート)
+- [ドキュメント](#ドキュメント)
+- [アーキテクチャ](#アーキテクチャ)
+- [データの保存先](#データの保存先)
+- [前提と制限](#前提と制限)
+- [ライセンス](#ライセンス)
 
 ---
 
-## クイックスタート（開発者）
+## 特長
+
+### いま使える機能
+
+| 領域 | 内容 |
+|------|------|
+| **取得** | 最大 51 地域の typeB ZIP を並列 DL（HTTP/2、リトライ、SHA256） |
+| **スケジュール** | 起動時自動チェック（既定 24 時間に 1 回）／手動「今すぐ更新確認」 |
+| **学習** | Playwright による `filename_key` 再スキャン → `targets.json` 更新 |
+| **保管庫** | 年 → 月 → 地域のツリー、メタデータ詳細、ZIP 内 CSV プレビュー（最大 1000 行） |
+| **CLI** | `check` / `download` / `scrape` — ヘッドレス運用・自動化向け |
+| **UI** | PySide6、ライト／ダークテーマ、Windows トースト通知 |
+
+### ロードマップ（未実装）
+
+カレンダー、タスクトレイ常駐、欠損月検出、比較ビュー、グラフ、エクスポート、Git 自動同期、インストーラ配布などは [開発状況](docs/DEV_STATUS.md) のバックログに記載しています。**README 上の将来機能は設計目標であり、すべてが実装済みではありません。**
+
+---
+
+## スクリーンショット
+
+> 配布ビルド（PyInstaller）完成後に画面キャプチャを追加予定です。
+
+| 保管庫 | 設定 |
+|--------|------|
+| _準備中_ | _準備中_ |
+
+---
+
+## クイックスタート
+
+### エンドユーザー（GUI）
 
 ```powershell
-cd F:\Cursor\JATIC-Library
+git clone https://github.com/matrix9neonebuchadnezzar2199-sketch/JATIC-Library.git
+cd JATIC-Library
 uv venv --python 3.11
-uv sync --group dev
+uv sync
 uv run playwright install chromium
 uv run python -m jatic_library
 ```
 
-引数なしで **GUI** が起動します（#09）。CLI だけ使う場合は下記サブコマンドを指定してください。
+1. **設定**タブで保存先フォルダを指定し、「設定を保存」
+2. 「今すぐ更新確認」または起動時自動チェックで DL
+3. **保管庫**タブで取得済み ZIP を閲覧
 
-### CLI（#08 時点）
-
-`config.json` に `download.save_root` を設定したうえで:
+### 開発者
 
 ```powershell
-uv run python -m jatic_library scrape              # filename_key を targets.json に保存
-uv run python -m jatic_library download -r tokyo   # 1地域 DL
-uv run python -m jatic_library download --all      # 51地域
-uv run python -m jatic_library check               # 起動時相当の更新確認
+uv sync --group dev
+uv run pytest -q
+uv run ruff check src tests
+uv run mypy
 ```
 
-配布ビルド: `build.bat` → `dist\JATIC-Library\`
+### CLI リファレンス
+
+`%LOCALAPPDATA%\JATIC-Library\config.json` に `download.save_root` を設定したうえで:
+
+| コマンド | 説明 |
+|----------|------|
+| `uv run python -m jatic_library` | GUI 起動 |
+| `uv run python -m jatic_library check` | 更新確認（起動時チェック相当） |
+| `uv run python -m jatic_library download -r tokyo` | 単一地域 DL |
+| `uv run python -m jatic_library download --all` | 全 51 地域 |
+| `uv run python -m jatic_library scrape` | サイト再スキャン |
 
 ---
 
-## 保存先のフォルダ構造（ユーザーデータ）
+## ドキュメント
 
-```
-[保存先]/
-├── 2026_3/
-│   ├── 東京都.zip
-│   └── _manifest.json
-└── ...
+| 文書 | 説明 |
+|------|------|
+| [docs/DESIGN.md](docs/DESIGN.md) | 全体設計・要件定義 |
+| [docs/DEV_STATUS.md](docs/DEV_STATUS.md) | **実装進捗の正本**（指示書 #01〜#11、Phase、機能マトリクス） |
+| [docs/DEV_SETUP.md](docs/DEV_SETUP.md) | 開発環境・検証手順 |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Phase ロードマップ |
+| [docs/instructions/](docs/instructions/) | Cursor 向け実装指示書（#01〜#11 完了） |
+| [docs/USER_MANUAL.md](docs/USER_MANUAL.md) | ユーザーマニュアル（整備中） |
 
-%LOCALAPPDATA%\JATIC-Library\
-├── config.json
-├── history.db
-├── targets.json      # Playwright で学習した filename_key
-└── logs/
+---
+
+## アーキテクチャ
+
+```mermaid
+flowchart LR
+  subgraph UI["PySide6 UI"]
+    MW[MainWindow]
+    ST[SettingsTab]
+    LT[LibraryTab]
+  end
+  subgraph Core["Core"]
+    SCH[Scheduler]
+    DL[Downloader]
+    PW[Playwright Scraper]
+    REP[Repository]
+  end
+  subgraph Store["Persistence"]
+    CFG[config.json]
+    DB[(history.db)]
+    FS[(save_root / YYYY_M)]
+  end
+  MW --> ST
+  MW --> LT
+  MW --> SCH
+  SCH --> DL
+  DL --> FS
+  DL --> REP
+  PW --> CFG
+  ST --> CFG
+  LT --> FS
+  LT --> REP
+  REP --> DB
 ```
+
+| レイヤ | 技術 |
+|--------|------|
+| GUI | PySide6 6.7 |
+| HTTP | httpx（HTTP/2 → 1.1 フォールバック） |
+| 動的取得 | Playwright（Chromium） |
+| データ | SQLite、JSON manifest、polars（CSV プレビュー） |
+| 配布（予定） | PyInstaller `--onedir` |
+
+---
+
+## データの保存先
+
+**ダウンロードデータ**（ユーザー指定）:
+
+```text
+[save_root]/
+└── 2026_3/
+    ├── 東京都.zip
+    └── _manifest.json
+```
+
+**アプリデータ**（`%LOCALAPPDATA%\JATIC-Library\`）:
+
+```text
+config.json      # 設定
+history.db       # 取得履歴・メタデータ
+targets.json     # 学習済み filename_key
+logs/            # アプリログ
+```
+
+公開フォルダ名 `2026_3` は「2026 年 3 月分データ」（公開は 2 か月遅れ）に対応します。詳細は [DESIGN.md](docs/DESIGN.md)。
+
+---
+
+## 前提と制限
+
+- JARTIC が **現在公開している月分のみ** 取得可能（過去月の遡及 DL は不可）
+- 公開は毎月 1 日想定だが遅延があり得る — 24 時間間隔の再チェックで吸収
+- 地域 ZIP は数十 MB〜数 GB。Git 管理する場合は **Git LFS** を推奨
+- 対象 OS: Windows 10 / 11（トースト・エクスプローラ連携）
 
 ---
 
 ## ライセンス
 
-MIT — 詳細は [LICENSE](LICENSE)
+[MIT](LICENSE) — Copyright (c) matrix9neonebuchadnezzar2199-sketch

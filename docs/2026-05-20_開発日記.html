@@ -374,6 +374,7 @@ body.diary > footer {
       <tr><td>12:08</td><td>開発日記追記・GitHub push</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1208">#entry-1208</a></td></tr>
       <tr><td>12:16</td><td>INST #09-#10 GUI・設定タブ</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1216">#entry-1216</a></td></tr>
       <tr><td>13:01</td><td>INST #11 保管庫タブ</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1301">#entry-1301</a></td></tr>
+      <tr><td>13:06</td><td>README 刷新・DEV_STATUS 設計</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1306">#entry-1306</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -442,6 +443,15 @@ body.diary > footer {
   </ul>
   <h3>検証</h3>
   <p><code>uv run pytest -q</code> 74 passed — Commits: 50708cf, 22c5ff5, 3550aa1, 10b43ce</p>
+</section>
+
+  <section class="entry" id="entry-1306">
+  <h2>README 刷新・開発状況ドキュメント再設計</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">docs</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>README を GitHub 向けに再構成（バッジ・目次・利用可/予定の分離・Mermaid）。進捗の正本を <code>docs/DEV_STATUS.md</code> に移し、<strong>#12 は指示書未作成</strong>・バックログ管理と明記。</p>
+  <h3>設計判断</h3>
+  <p>README の「#12〜 未着手」行は廃止。次フェーズは DEV_STATUS §5 で優先度を決めてから INST 番号を割り当てる運用に統一。</p>
 </section>
 </main>
 

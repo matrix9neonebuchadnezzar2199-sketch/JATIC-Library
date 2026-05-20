@@ -2,7 +2,9 @@
 
 実装順は [DESIGN.md](DESIGN.md) §12 に準拠します。
 
-Cursor 向けの細分化指示書は [instructions/README.md](instructions/README.md) を参照。
+**進捗・機能の実装済み／未実装の区別は [DEV_STATUS.md](DEV_STATUS.md) を正本とする。** 本ファイルは Phase 単位の俯瞰用です。
+
+Cursor 向けの実装指示書は [instructions/README.md](instructions/README.md)（#01〜#11 完了、#12 以降は設計後に追加）を参照。
 
 | Phase | 成果物 | 状態 |
 |-------|--------|------|
@@ -18,4 +20,4 @@ Cursor 向けの細分化指示書は [instructions/README.md](instructions/READ
 | **P9** | GitHub連携、ダークモード仕上げ | 一部完了 |
 | **P10** | PyInstallerビルド、配布zip、ユーザーマニュアル | 未着手 |
 
-完了した Phase は README の「開発状況」表も更新してください。
+Phase またはマイルストーンが変わったら [DEV_STATUS.md](DEV_STATUS.md) と README を更新してください。
