@@ -60,3 +60,31 @@ async def test_download_publication_one_region(tmp_path: Path) -> None:
     assert zip_path.is_file()
     manifest_path = save_root / info.folder_name / "_manifest.json"
     assert manifest_path.is_file()
+
+
+@pytest.mark.asyncio
+async def test_download_empty_targets_raises(tmp_path: Path) -> None:
+    db = tmp_path / "empty.db"
+    settings = DownloadSettings(save_root=tmp_path / "data")
+    info = compute_publish_info(date(2026, 5, 15))
+    with Repository(db) as repo:
+        downloader = Downloader(settings, repo)
+        with pytest.raises(ValueError, match="empty"):
+            await downloader.download_publication(info, [])
+
+
+@pytest.mark.asyncio
+async def test_download_updates_db_status_complete(tmp_path: Path) -> None:
+    db = tmp_path / "status.db"
+    save_root = tmp_path / "data"
+    info = compute_publish_info(date(2026, 5, 15))
+    settings = DownloadSettings(save_root=save_root, concurrency=1, retry=0)
+    targets = [by_code("tokyo")]
+
+    with Repository(db) as repo:
+        downloader = Downloader(settings, repo)
+        with patch("jatic_library.core.downloader.JarticHttpClient", _FakeHttp):
+            await downloader.download_publication(info, targets)
+        pub = repo.get_publication(info.folder_name)
+    assert pub is not None
+    assert pub.status == "complete"

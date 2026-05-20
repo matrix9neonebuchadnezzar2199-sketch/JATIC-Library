@@ -38,7 +38,17 @@ def sync_publication_folder(
 
     try:
         repo = Repo(str(repo_path))
-        rel = folder.relative_to(repo_path) if folder.is_relative_to(repo_path) else folder
+        folder_resolved = folder.resolve()
+        repo_resolved = repo_path.resolve()
+        try:
+            rel = folder_resolved.relative_to(repo_resolved)
+        except ValueError:
+            logger.warning(
+                "Publication folder is outside git repo_path (folder={}, repo={}), skipping",
+                folder_resolved,
+                repo_resolved,
+            )
+            return
         repo.index.add([str(rel)])
         if repo.is_dirty():
             message = f"chore(data): add JARTIC publication {publish_ym}"

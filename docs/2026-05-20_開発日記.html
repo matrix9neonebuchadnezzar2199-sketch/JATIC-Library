@@ -377,6 +377,7 @@ body.diary > footer {
       <tr><td>13:06</td><td>README 刷新・DEV_STATUS 設計</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1306">#entry-1306</a></td></tr>
       <tr><td>13:19</td><td>INST #13-#21 全機能実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1319">#entry-1319</a></td></tr>
       <tr><td>13:26</td><td>残作業一覧の整理（配布フェーズ）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1326">#entry-1326</a></td></tr>
+      <tr><td>16:39</td><td>DL・常駐動線のバグ修正とテスト拡充</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1639">#entry-1639</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -474,6 +475,15 @@ body.diary > footer {
   <p>#01〜#21 完了後の正本を更新。機能は実装済み、<strong>残りは exe 配布の仕上げ</strong>（PyInstaller 検証・Playwright 同梱・マニュアル）と明記。</p>
   <h3>変更ファイル</h3>
   <p><code>docs/DEV_STATUS.md</code> §5 残作業、<code>ROADMAP.md</code>、<code>README.md</code>、<code>ALIGNMENT.md</code>、<code>DESIGN.md</code>、<code>USER_MANUAL.md</code></p>
+</section>
+
+  <section class="entry" id="entry-1639">
+  <h2>DL・常駐動線のバグ修正とテスト拡充</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>ダウンロード完了判定（部分地域で <code>complete</code> になる不具合）、Git 同期のパス外 add、トレイ未初期化時の close、進捗ダイアログ残留を修正。<code>test_publication_status</code> / <code>test_scheduler_flow</code> / <code>test_tray</code> 等を追加。</p>
+  <h3>検証</h3>
+  <p><code>uv run pytest -q</code> 98 passed / <code>ruff</code> / <code>mypy</code></p>
 </section>
 </main>
 

@@ -40,7 +40,11 @@ def set_startup_enabled(enabled: bool, *, executable: Path | None = None) -> Non
     import winreg
 
     exe = executable or Path(sys.executable)
-    command = f'"{exe}"'
+    command = (
+        f'"{exe}"'
+        if getattr(sys, "frozen", False)
+        else f'"{exe}" -m jatic_library'
+    )
 
     with _run_key() as key:
         if enabled:

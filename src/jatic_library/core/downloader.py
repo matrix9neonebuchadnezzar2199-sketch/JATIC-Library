@@ -46,6 +46,27 @@ class DownloadResult:
 ProgressCallback = Callable[[DownloadProgress], None]
 
 
+def publication_status_for_result(
+    result: DownloadResult,
+    *,
+    target_count: int,
+) -> PublicationStatus:
+    """Derive publication status from a download run.
+
+    ``complete`` only when every requested target succeeded or was skipped.
+    """
+    if target_count <= 0:
+        return "pending"
+    if result.failed:
+        return "partial"
+    finished = len(result.succeeded) + len(result.skipped)
+    if finished >= target_count:
+        return "complete"
+    if finished > 0:
+        return "partial"
+    return "pending"
+
+
 class Downloader:
     """Download typeB ZIP files for a publication month."""
 
@@ -68,6 +89,8 @@ class Downloader:
         """Download all *targets* for *info* into save_root."""
         if self._settings.save_root is None:
             raise ValueError("download.save_root is not configured")
+        if not targets:
+            raise ValueError("targets list is empty")
 
         save_root = Path(self._settings.save_root)
         folder = save_root / info.folder_name
@@ -115,8 +138,8 @@ class Downloader:
         manifest.downloaded_at = now_jst_iso()
         manifest.save(folder)
 
-        pub_status: PublicationStatus = "complete" if not result.failed else "partial"
-        if result.succeeded or result.skipped:
+        pub_status = publication_status_for_result(result, target_count=len(targets))
+        if result.succeeded or result.skipped or result.failed:
             self._repo.upsert_publication(info.folder_name, pub_date, pub_status)
         return result
 

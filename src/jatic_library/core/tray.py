@@ -29,6 +29,17 @@ class TrayController:
         self._tray: QSystemTrayIcon | None = None
         self._parent = parent
 
+    def is_active(self) -> bool:
+        """Return True when a tray icon is shown."""
+        return self._tray is not None
+
+    def teardown(self) -> None:
+        """Hide and destroy the tray icon."""
+        if self._tray is not None:
+            self._tray.hide()
+            self._tray.deleteLater()
+            self._tray = None
+
     def setup(self) -> bool:
         """Create tray icon when enabled and platform supports it."""
         if not self._settings.enable_tray:

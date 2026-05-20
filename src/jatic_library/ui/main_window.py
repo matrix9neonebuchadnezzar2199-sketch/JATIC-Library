@@ -139,13 +139,14 @@ class MainWindow(QMainWindow):
 
     def _quit_application(self) -> None:
         self._quitting = True
+        self._tray.teardown()
         QApplication.quit()
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if (
             not self._quitting
-            and self._config.tray.enable_tray
             and self._config.tray.minimize_to_tray
+            and self._tray.is_active()
         ):
             event.ignore()
             self.hide()
@@ -175,6 +176,15 @@ class MainWindow(QMainWindow):
         else:
             with contextlib.suppress(OSError):
                 set_startup_enabled(False)
+        self._tray.teardown()
+        self._tray = TrayController(
+            config.tray,
+            on_check_now=lambda: self.run_update_check(force=True),
+            on_show_window=self._show_from_tray,
+            on_quit=self._quit_application,
+            parent=self,
+        )
+        self._tray.setup()
         app = QApplication.instance()
         if isinstance(app, QApplication):
             apply_theme(app, config.ui.theme)
@@ -260,10 +270,6 @@ class MainWindow(QMainWindow):
                 10_000,
             )
 
-        def _on_fail(message: str) -> None:
-            progress_dialog.reject()
-            QMessageBox.critical(self, "エラー", message)
-
         if self._active_worker is not None and self._active_worker.isRunning():
             QMessageBox.information(self, "処理中", "別のバックグラウンド処理が実行中です。")
             progress_dialog.reject()
@@ -282,6 +288,12 @@ class MainWindow(QMainWindow):
             self._set_busy(False, "準備完了")
             self._active_worker = None
             _on_success(result)
+
+        def _on_fail(message: str) -> None:
+            progress_dialog.reject()
+            self._set_busy(False, "エラー")
+            self._active_worker = None
+            QMessageBox.critical(self, "エラー", message)
 
         worker.finished_ok.connect(_done)
         worker.failed.connect(_on_fail)
