@@ -27,6 +27,7 @@ from jatic_library.ui.tabs.compare_tab import CompareTab
 from jatic_library.ui.tabs.library_tab import LibraryTab
 from jatic_library.ui.tabs.settings_tab import SettingsTab
 from jatic_library.ui.theme import apply_theme
+from jatic_library.ui.widgets.download_progress_dialog import DownloadProgressDialog
 from jatic_library.ui.workers import AsyncTaskWorker
 
 
@@ -168,12 +169,23 @@ class MainWindow(QMainWindow):
 
     def run_update_check(self, *, force: bool) -> None:
         """Run scheduler check in a background thread."""
+        progress_dialog = DownloadProgressDialog(self)
+        progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        progress_dialog.show()
 
         async def _task() -> CheckOutcome:
             scheduler = StartupScheduler(self._config, self._repo)
-            return await scheduler.run_check(force=force)
+
+            def _progress_cb(progress: object) -> None:
+                from jatic_library.core.downloader import DownloadProgress
+
+                if isinstance(progress, DownloadProgress):
+                    progress_dialog.report(progress)
+
+            return await scheduler.run_check(force=force, progress_cb=_progress_cb)
 
         def _on_success(result: object) -> None:
+            progress_dialog.accept()
             outcome = result
             assert isinstance(outcome, CheckOutcome)
             self._settings_tab.load_from_config()
@@ -184,7 +196,32 @@ class MainWindow(QMainWindow):
                 10_000,
             )
 
-        self._start_worker(_task, busy_message="更新を確認しています…", on_success=_on_success)
+        def _on_fail(message: str) -> None:
+            progress_dialog.reject()
+            QMessageBox.critical(self, "エラー", message)
+
+        if self._active_worker is not None and self._active_worker.isRunning():
+            QMessageBox.information(self, "処理中", "別のバックグラウンド処理が実行中です。")
+            progress_dialog.reject()
+            return
+        if self._config.download.save_root is None:
+            QMessageBox.warning(self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。")
+            self._tabs.setCurrentWidget(self._settings_tab)
+            progress_dialog.reject()
+            return
+
+        self._set_busy(True, "更新を確認しています…")
+        worker = AsyncTaskWorker(_task, self)
+        self._active_worker = worker
+
+        def _done(result: object) -> None:
+            self._set_busy(False, "準備完了")
+            self._active_worker = None
+            _on_success(result)
+
+        worker.finished_ok.connect(_done)
+        worker.failed.connect(_on_fail)
+        worker.start()
 
     def run_scrape(self) -> None:
         """Rescan JARTIC site for typeB links."""

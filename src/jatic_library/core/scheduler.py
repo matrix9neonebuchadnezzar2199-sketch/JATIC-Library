@@ -9,7 +9,12 @@ from zoneinfo import ZoneInfo
 from loguru import logger
 
 from jatic_library.constants import DB_PATH, LOG_DIR, TZ_JST
-from jatic_library.core.downloader import Downloader, DownloadResult, resolve_targets
+from jatic_library.core.downloader import (
+    Downloader,
+    DownloadResult,
+    ProgressCallback,
+    resolve_targets,
+)
 from jatic_library.core.logger import setup_logging
 from jatic_library.core.models import CheckResult
 from jatic_library.core.notifier import DownloadSummary, Notifier
@@ -72,7 +77,12 @@ class StartupScheduler:
 
         return CheckDecision(True, f"publication {info.folder_name} incomplete or missing")
 
-    async def run_check(self, *, force: bool = False) -> CheckOutcome:
+    async def run_check(
+        self,
+        *,
+        force: bool = False,
+        progress_cb: ProgressCallback | None = None,
+    ) -> CheckOutcome:
         """Run check and download missing targets when appropriate."""
         decision = self.should_check_now(force=force)
         info = compute_publish_info(date.today())
@@ -92,7 +102,11 @@ class StartupScheduler:
         targets = resolve_targets(self._config.targets.selected_codes)
         downloader = Downloader(self._config.download, self._repo)
         try:
-            result = await downloader.download_publication(info, targets)
+            result = await downloader.download_publication(
+                info,
+                targets,
+                progress_cb=progress_cb,
+            )
         except Exception as exc:
             logger.exception("Check run failed")
             self._repo.add_check_history("error", str(exc))
