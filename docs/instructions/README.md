@@ -12,13 +12,15 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 06 | [INST_06_downloader_manifest.md](INST_06_downloader_manifest.md) | ダウンローダ・マニフェスト・HTTP | **完了** |
 | 07 | [INST_07_playwright_scraper.md](INST_07_playwright_scraper.md) | スクレイパ（Playwright） | **完了** |
 | 08 | [INST_08_scheduler_cli.md](INST_08_scheduler_cli.md) | スケジューラ・CLI | **完了** |
-| 09〜20 | — | UI / 拡張 / ビルド | 未作成 |
+| 09 | [INST_09_main_window.md](INST_09_main_window.md) | メインウィンドウ・起動 | **完了** |
+| 10 | [INST_10_settings_tab.md](INST_10_settings_tab.md) | 設定タブ | **完了** |
+| 11〜20 | — | 保管庫 / 常駐 / 拡張 / ビルド | 未作成 |
 
-- 差分メモ（照合時）: [ALIGNMENT.md](ALIGNMENT.md)
+- 差分メモ: [ALIGNMENT.md](ALIGNMENT.md)
 - 正本設計: [../DESIGN.md](../DESIGN.md)
 
 ## 依存関係
 
 ```
-01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → ...
+01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → ...
 ```

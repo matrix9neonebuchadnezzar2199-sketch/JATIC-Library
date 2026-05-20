@@ -1,28 +1,23 @@
-# 現行コードと指示書 #01〜#08 の差分
+# 現行コードと指示書 #01〜#10 の差分
 
-**2026-05-20 更新: #01〜#08 照合完了。** 以降は #09 から UI 実装。
+**2026-05-20 更新: #01〜#10 照合完了。** 以降は #11 保管庫タブから。
 
 ## 完了サマリ
 
 | # | 主な成果 | 検証 |
 |---|----------|------|
-| 01 | setuptools、`Hello from JATIC-Library`、ディレクトリ雛形 | `python -m jatic_library` |
-| 02 | constants / targets / url_builder / targets.json | pytest |
-| 03 | AppConfig + ConfigStore（破損JSONバックアップ） | pytest |
-| 04 | models + Repository 全CRUD | pytest |
-| 05 | loguru 設定、win11toast Notifier | pytest |
-| 06 | JarticHttpClient、Manifest、Downloader | pytest（モック HTTP） |
-| 07 | Playwright スクレイパ、targets.json 更新 | pytest（モック） |
-| 08 | StartupScheduler、CLI（check/download/scrape） | pytest |
+| 01〜08 | （前回まで）CLI まで | pytest |
+| 09 | `run_app`, MainWindow, 4 タブプレースホルダ、テーマ QSS | pytest-qt |
+| 10 | SettingsTab, RegionSelector, 保存・更新確認・再スキャン | pytest-qt |
 
 ## 意図的な差分（許容）
 
 | 項目 | 指示書 | 採用 |
 |------|--------|------|
-| パッケージマネージャ | pip / venv 記載 | **uv** も `run.bat` / README で併記 |
-| `LEARNED_TARGETS_PATH` | `TARGETS_CACHE_PATH` 名 | 同義で `TARGETS_CACHE_PATH` を使用 |
-| DL 時 404 再スクレイプ | DESIGN に記載 | **#08 時点未実装**（`scrape` コマンドで手動更新） |
+| エントリ | #09 で GUI のみ | **引数なし → GUI**、サブコマンド → CLI |
+| 再スキャン後 UI | 一覧即時更新 | targets.json 保存のみ（再起動で反映） |
+| DL 404 再スクレイプ | DESIGN | 未実装（#11 以降） |
 
 ## 次の指示書
 
-#09 PySide6 メインウィンドウ・タブ骨格 から。
+#11 保管庫タブ（年→月→地域ツリー）から。
