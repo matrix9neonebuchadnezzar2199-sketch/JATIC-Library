@@ -359,7 +359,7 @@ body.diary > footer {
 <body class="diary">
 <header>
   <h1>2026-05-20 開発日記</h1>
-  <p class="subtitle">JATIC-Library — INST #01-#10（GUI・設定タブまで）</p>
+  <p class="subtitle">JATIC-Library — INST #01-#11（保管庫タブまで）</p>
 </header>
 
 <section class="diary-toc">
@@ -373,6 +373,7 @@ body.diary > footer {
       <tr><td>12:07</td><td>INST #05-#08 指示書・DL/CLI 実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1207">#entry-1207</a></td></tr>
       <tr><td>12:08</td><td>開発日記追記・GitHub push</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1208">#entry-1208</a></td></tr>
       <tr><td>12:16</td><td>INST #09-#10 GUI・設定タブ</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1216">#entry-1216</a></td></tr>
+      <tr><td>13:01</td><td>INST #11 保管庫タブ</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1301">#entry-1301</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -427,6 +428,20 @@ body.diary > footer {
   </ul>
   <h3>検証</h3>
   <p><code>uv run pytest -q</code> 68 passed — Commits: 3f4d4f3, 73fc468, 576268a, b113d70</p>
+</section>
+
+  <section class="entry" id="entry-1301">
+  <h2>INST #11 保管庫タブ</h2>
+  <p class="meta"><span class="date">2026-05-20</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p><strong>年→月→地域</strong> ツリー、manifest/SQLite マージ詳細ペイン、ZIP 内 CSV プレビュー（polars・最大1000行）、検索・再読込・コンテキストメニューを実装。pytest 74件。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-add">+</span> core/library_scanner.py, csv_loader.py</li>
+    <li><span class="op op-add">+</span> ui/tabs/library_tab.py, widgets/file_detail_panel.py, csv_preview.py</li>
+  </ul>
+  <h3>検証</h3>
+  <p><code>uv run pytest -q</code> 74 passed — pending push</p>
 </section>
 </main>
 

@@ -10,7 +10,7 @@ Cursor 向けの細分化指示書は [instructions/README.md](instructions/READ
 | **P1** | `constants` / `targets` / `url_builder` / `config` / `repository` | 完了 |
 | **P2** | `downloader` + `manifest` + `scheduler`（CLI動作確認） | 完了 |
 | **P3** | PySide6 `MainWindow` + `SettingsTab` | 完了 |
-| **P4** | `LibraryTab` ツリー・詳細・プレビュー | 未着手 |
+| **P4** | `LibraryTab` ツリー・詳細・プレビュー | 完了 |
 | **P5** | `playwright_scraper` フォールバック統合（DL 404 時） | 一部完了 |
 | **P6** | 通知、トレイ常駐、進捗ダイアログ | 未着手 |
 | **P7** | カレンダータブ、欠損検出、タグ | 未着手 |
