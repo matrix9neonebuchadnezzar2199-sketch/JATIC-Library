@@ -254,7 +254,9 @@ class SettingsTab(QWidget):
     def save_to_store(self) -> None:
         """Validate, save config, and emit ``config_saved``."""
         self.apply_to_config()
-        self._config.download.save_root.mkdir(parents=True, exist_ok=True)
+        save_root = self._config.download.save_root or default_save_root()
+        self._config.download.save_root = save_root
+        save_root.mkdir(parents=True, exist_ok=True)
         try:
             self._store.save(self._config)
         except OSError as exc:

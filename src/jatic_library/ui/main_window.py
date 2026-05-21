@@ -150,11 +150,7 @@ class MainWindow(QMainWindow):
         QApplication.quit()
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        if (
-            not self._quitting
-            and self._config.tray.minimize_to_tray
-            and self._tray.is_active()
-        ):
+        if not self._quitting and self._config.tray.minimize_to_tray and self._tray.is_active():
             event.ignore()
             self.hide()
             self.statusBar().showMessage("トレイに格納しました", 5000)
@@ -235,7 +231,9 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "処理中", "別のバックグラウンド処理が実行中です。")
             return
         if self._config.download.save_root is None:
-            QMessageBox.warning(self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。")
+            QMessageBox.warning(
+                self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。"
+            )
             self._tabs.setCurrentWidget(self._settings_tab)
             return
 
@@ -299,7 +297,9 @@ class MainWindow(QMainWindow):
             progress_dialog.reject()
             return
         if self._config.download.save_root is None:
-            QMessageBox.warning(self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。")
+            QMessageBox.warning(
+                self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。"
+            )
             self._tabs.setCurrentWidget(self._settings_tab)
             progress_dialog.reject()
             return

@@ -142,9 +142,7 @@ class StartupScheduler:
             else:
                 notifier.notify_error(f"{len(result.failed)} region(s) failed")
 
-        if self._config.download.save_root is not None and (
-            result.succeeded or result.skipped
-        ):
+        if self._config.download.save_root is not None and (result.succeeded or result.skipped):
             sync_publication_folder(
                 self._config.github,
                 self._config.download.save_root,

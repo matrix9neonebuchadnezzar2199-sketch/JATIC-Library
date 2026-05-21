@@ -297,9 +297,7 @@ class Repository:
     def get_last_check(self) -> CheckHistoryRow | None:
         """Return the most recent check history row."""
         conn = self._conn_required()
-        row = conn.execute(
-            "SELECT * FROM check_history ORDER BY id DESC LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT * FROM check_history ORDER BY id DESC LIMIT 1").fetchone()
         if row is None:
             return None
         return CheckHistoryRow(
@@ -338,12 +336,8 @@ class Repository:
 
     def list_tags(self) -> list[TagRow]:
         """List all tags."""
-        rows = self._conn_required().execute(
-            "SELECT * FROM tags ORDER BY name"
-        ).fetchall()
-        return [
-            TagRow(id=int(r["id"]), name=str(r["name"]), color=r["color"]) for r in rows
-        ]
+        rows = self._conn_required().execute("SELECT * FROM tags ORDER BY name").fetchall()
+        return [TagRow(id=int(r["id"]), name=str(r["name"]), color=r["color"]) for r in rows]
 
     def delete_tag(self, tag_id: int) -> None:
         """Delete a tag (assignments cascade)."""
@@ -365,25 +359,31 @@ class Repository:
 
     def list_tags_for(self, scope: TagScope, scope_key: str) -> list[TagRow]:
         """List tags assigned to a scope key."""
-        rows = self._conn_required().execute(
-            """
+        rows = (
+            self._conn_required()
+            .execute(
+                """
             SELECT t.* FROM tags t
             JOIN tag_assignments a ON t.id = a.tag_id
             WHERE a.scope = ? AND a.scope_key = ?
             ORDER BY t.name
             """,
-            (scope, scope_key),
-        ).fetchall()
-        return [
-            TagRow(id=int(r["id"]), name=str(r["name"]), color=r["color"]) for r in rows
-        ]
+                (scope, scope_key),
+            )
+            .fetchall()
+        )
+        return [TagRow(id=int(r["id"]), name=str(r["name"]), color=r["color"]) for r in rows]
 
     def list_targets_with_tag(self, tag_id: int, scope: TagScope) -> list[str]:
         """List scope keys that have the given tag."""
-        rows = self._conn_required().execute(
-            "SELECT scope_key FROM tag_assignments WHERE tag_id = ? AND scope = ?",
-            (tag_id, scope),
-        ).fetchall()
+        rows = (
+            self._conn_required()
+            .execute(
+                "SELECT scope_key FROM tag_assignments WHERE tag_id = ? AND scope = ?",
+                (tag_id, scope),
+            )
+            .fetchall()
+        )
         return [str(r["scope_key"]) for r in rows]
 
     def add_event_log(self, level: str, category: str, message: str) -> int:

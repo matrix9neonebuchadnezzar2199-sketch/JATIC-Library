@@ -62,8 +62,12 @@ class RegionSelector(QWidget):
             region_all = QPushButton("この地方を全選択")
             region_none = QPushButton("この地方を全解除")
             region_targets = by_region.get(region, [])
-            region_all.clicked.connect(lambda _checked=False, r=region: self._select_region(r, True))
-            region_none.clicked.connect(lambda _checked=False, r=region: self._select_region(r, False))
+            region_all.clicked.connect(
+                lambda _checked=False, r=region: self._select_region(r, True)
+            )
+            region_none.clicked.connect(
+                lambda _checked=False, r=region: self._select_region(r, False)
+            )
             row.addWidget(region_all)
             row.addWidget(region_none)
             row.addStretch()

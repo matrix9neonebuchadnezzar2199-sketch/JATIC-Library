@@ -77,7 +77,9 @@ class JarticScraper:
             browser = await playwright.chromium.launch(headless=True)
             try:
                 page = await browser.new_page()
-                await page.goto(JARTIC_OPENDATA_PAGE, wait_until="domcontentloaded", timeout=120_000)
+                await page.goto(
+                    JARTIC_OPENDATA_PAGE, wait_until="domcontentloaded", timeout=120_000
+                )
                 text = await page.inner_text("body")
                 return text[:500]
             finally:
@@ -92,7 +94,10 @@ def merge_scraped_keys(links: list[ScrapedLink]) -> list[Target]:
         scraped = key_map.get(target.filename_key)
         if scraped is None:
             for link in links:
-                if target.display_name in link.display_name or link.display_name in target.display_name:
+                if (
+                    target.display_name in link.display_name
+                    or link.display_name in target.display_name
+                ):
                     scraped = link
                     break
         if scraped is not None:
