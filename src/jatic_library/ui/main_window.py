@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
 
 from jatic_library import __app_name__, __version__
 from jatic_library.constants import DB_PATH, REPO_URL, TARGETS_CACHE_PATH
-from jatic_library.core.downloader import Downloader
+from jatic_library.core.downloader import Downloader, resolve_targets
 from jatic_library.core.exporter import (
     ExportError,
     default_export_name,
@@ -42,8 +42,6 @@ from jatic_library.core.tray import TrayController
 from jatic_library.core.url_builder import publish_info_from_folder
 from jatic_library.settings.config import AppConfig
 from jatic_library.settings.store import ConfigStore
-from jatic_library.ui.tabs.calendar_tab import CalendarTab
-from jatic_library.ui.tabs.compare_tab import CompareTab
 from jatic_library.ui.tabs.library_tab import LibraryTab
 from jatic_library.ui.tabs.settings_tab import SettingsTab
 from jatic_library.ui.theme import apply_theme
@@ -52,7 +50,7 @@ from jatic_library.ui.workers import AsyncTaskWorker
 
 
 class MainWindow(QMainWindow):
-    """Primary window with four feature tabs."""
+    """Primary window with library and settings tabs."""
 
     def __init__(
         self,
@@ -76,12 +74,8 @@ class MainWindow(QMainWindow):
         self._tabs = QTabWidget()
         self._library_tab = LibraryTab(config, repo)
         self._settings_tab = SettingsTab(config, store)
-        self._calendar_tab = CalendarTab(config, repo)
-        self._compare_tab = CompareTab(config)
         self._tabs.addTab(self._library_tab, "保管庫")
         self._tabs.addTab(self._settings_tab, "設定")
-        self._tabs.addTab(self._calendar_tab, "カレンダー")
-        self._tabs.addTab(self._compare_tab, "比較")
         self.setCentralWidget(self._tabs)
 
         self._tray = TrayController(
@@ -104,11 +98,19 @@ class MainWindow(QMainWindow):
         self._library_tab.export_month_requested.connect(self._on_export_month)
         self._library_tab.sort_changed.connect(self._on_library_sort_changed)
 
-        if config.is_initial_setup_needed():
-            self._tabs.setCurrentWidget(self._settings_tab)
-            self.statusBar().showMessage("保存先フォルダを設定してください（設定タブ）")
-        elif run_startup_check and config.schedule.auto_check_on_startup:
+        self._center_on_screen()
+
+        if run_startup_check and config.schedule.auto_check_on_startup:
             self.run_update_check(force=False)
+
+    def _center_on_screen(self) -> None:
+        """Place the window at the center of the primary screen."""
+        screen = QApplication.primaryScreen()
+        if screen is None:
+            return
+        frame = self.frameGeometry()
+        frame.moveCenter(screen.availableGeometry().center())
+        self.move(frame.topLeft())
 
     def _build_menus(self) -> None:
         file_menu = self.menuBar().addMenu("ファイル")
@@ -171,8 +173,6 @@ class MainWindow(QMainWindow):
     def _on_config_saved(self, config: AppConfig) -> None:
         self._config = config
         self._library_tab.update_config(config)
-        self._calendar_tab.update_config(config)
-        self._compare_tab.update_config(config)
         if config.tray.start_with_windows:
             try:
                 set_startup_enabled(True)
@@ -303,9 +303,6 @@ class MainWindow(QMainWindow):
             self._tabs.setCurrentWidget(self._settings_tab)
             progress_dialog.reject()
             return
-        if self._warn_playwright_chromium_missing():
-            progress_dialog.reject()
-            return
 
         self._set_busy(True, "更新を確認しています…")
         worker = AsyncTaskWorker(_task, self)
@@ -353,8 +350,6 @@ class MainWindow(QMainWindow):
 
     def _refresh_data_tabs(self) -> None:
         self._library_tab.refresh()
-        self._calendar_tab.refresh()
-        self._compare_tab.refresh()
 
     def _on_redownload_file(self, file_item: object) -> None:
         if not isinstance(file_item, LibraryFileItem) or file_item.target_code is None:
@@ -371,7 +366,12 @@ class MainWindow(QMainWindow):
         async def _task() -> object:
             with Repository(DB_PATH) as worker_repo:
                 downloader = Downloader(self._config.download, worker_repo)
-                return await downloader.download_publication(info, [target])
+                merge_targets = resolve_targets(self._config.targets.selected_codes)
+                return await downloader.download_publication(
+                    info,
+                    [target],
+                    merge_targets=merge_targets,
+                )
 
         def _on_success(_result: object) -> None:
             self._refresh_data_tabs()

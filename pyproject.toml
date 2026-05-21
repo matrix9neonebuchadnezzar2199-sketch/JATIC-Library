@@ -1,6 +1,6 @@
 [project]
 name = "jatic-library"
-version = "0.1.0"
+version = "0.1.0-beta"
 description = "JARTIC断面交通量情報の自動取得・管理ツール"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"

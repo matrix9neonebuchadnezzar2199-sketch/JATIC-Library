@@ -6,9 +6,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
-import polars as pl
-
-from jatic_library.core.csv_loader import CsvPreviewError, find_first_csv_name
+from jatic_library.core.csv_loader import CsvLoadError, merge_region_zip_csvs
 
 
 class ExportError(Exception):
@@ -43,34 +41,12 @@ def export_merged_csv(
     if not folder.is_dir():
         raise ExportError(f"Publication folder not found: {folder}")
 
-    frames: list[pl.DataFrame] = []
-    for index, zip_path in enumerate(sorted(folder.glob("*.zip"))):
-        if index >= max_files:
-            break
-        try:
-            csv_name = find_first_csv_name(zip_path)
-        except CsvPreviewError:
-            continue
-        with zipfile.ZipFile(zip_path) as archive:
-            raw = archive.read(csv_name)
-        for encoding in ("utf-8", "cp932"):
-            try:
-                frame = pl.read_csv(
-                    raw,
-                    encoding=encoding,
-                    infer_schema_length=0,
-                    ignore_errors=True,
-                )
-                frame = frame.with_columns(pl.lit(zip_path.stem).alias("_region"))
-                frames.append(frame)
-                break
-            except Exception:  # noqa: S112 — try next encoding
-                continue
+    zip_paths = sorted(folder.glob("*.zip"))[:max_files]
+    try:
+        merged = merge_region_zip_csvs(zip_paths)
+    except CsvLoadError as exc:
+        raise ExportError(str(exc)) from exc
 
-    if not frames:
-        raise ExportError("No CSV content found to merge")
-
-    merged = pl.concat(frames, how="diagonal_relaxed")
     dest_csv.parent.mkdir(parents=True, exist_ok=True)
     merged.write_csv(dest_csv)
     return dest_csv

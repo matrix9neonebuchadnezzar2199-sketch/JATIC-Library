@@ -32,7 +32,7 @@ uv run mypy
 uv run pytest
 ```
 
-### モック中心テスト（DL・常駐・スクレイプ動線）
+### モック中心テスト（DL・PC起動チェック・スクレイプ動線）
 
 ネットワーク・実サイト・トレイ実機に依存しないサブセット（2026-05-20 時点 **22 件**）:
 
@@ -45,11 +45,18 @@ uv run pytest tests/test_downloader.py tests/test_downloader_rescrape.py `
 
 全件: `uv run pytest -q`（**98 passed**、GUI/Qt 含む）。
 
-## 配布ビルド
+## 配布ビルド（ベータ）
 
 ```powershell
 .\build.bat
+.\scripts\package-beta.ps1
 ```
+
+- 出力フォルダ: `dist\JATIC-Library\`（`JATIC-Library.exe` + `_internal\`）
+- 配布 zip: `dist\JATIC-Library-0.1.0-beta-win64.zip`
+- テスト手順: [BETA_TEST.md](BETA_TEST.md)
+
+`build.bat` は `python -m uv run pyinstaller` を使用します（`uv` が PATH に無くても可）。
 
 `src\jatic_library\resources\icons\app.ico` が無い場合は PyInstaller の `--icon` を外すか、アイコンを配置してください。
 

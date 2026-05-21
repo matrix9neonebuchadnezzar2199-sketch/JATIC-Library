@@ -9,7 +9,14 @@ from loguru import logger
 from pydantic import ValidationError
 
 from jatic_library.constants import APP_DATA_DIR, CONFIG_PATH
+from jatic_library.paths import normalize_save_root
 from jatic_library.settings.config import AppConfig
+
+
+def _finalize_config(config: AppConfig) -> AppConfig:
+    """Ensure ``save_root`` points at the app-adjacent data folder when unset."""
+    config.download.save_root = normalize_save_root(config.download.save_root)
+    return config
 
 
 class ConfigStore:
@@ -21,19 +28,19 @@ class ConfigStore:
     def load(self) -> AppConfig:
         """Load config from disk or return defaults without creating a file."""
         if not self.path.is_file():
-            return AppConfig.default()
+            return _finalize_config(AppConfig.default())
         try:
             raw = json.loads(self.path.read_text(encoding="utf-8"))
-            return AppConfig.model_validate(raw)
+            return _finalize_config(AppConfig.model_validate(raw))
         except json.JSONDecodeError as exc:
             self._backup_broken(exc)
-            return AppConfig.default()
+            return _finalize_config(AppConfig.default())
         except ValidationError as exc:
             self._backup_broken(exc)
-            return AppConfig.default()
+            return _finalize_config(AppConfig.default())
         except OSError as exc:
             logger.warning("Failed to read config {}: {}", self.path, exc)
-            return AppConfig.default()
+            return _finalize_config(AppConfig.default())
 
     def save(self, config: AppConfig) -> None:
         """Write config atomically via a temporary file."""

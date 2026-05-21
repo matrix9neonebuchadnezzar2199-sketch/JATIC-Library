@@ -213,10 +213,33 @@ QListWidget::item:hover:!selected {
     background-color: #1e293b;
 }
 
+QWidget#libraryTreeHeader {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+QLabel#libraryTreeHeaderTitle {
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+QLabel#libraryTreeHeaderUsage {
+    color: #64748b;
+    font-size: 12px;
+}
+
 QTreeWidget {
     background-color: #0f172a;
     border: 1px solid #334155;
-    border-radius: 8px;
+    border-top: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
     padding: 4px;
     outline: none;
 }
@@ -242,6 +265,33 @@ QHeaderView::section {
     border: none;
     border-bottom: 1px solid #334155;
     font-weight: 600;
+}
+
+QTableView,
+QTableWidget {
+    background-color: #1e293b;
+    color: #e2e8f0;
+    alternate-background-color: #334155;
+    gridline-color: #475569;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    outline: none;
+}
+
+QTableView::item,
+QTableWidget::item {
+    padding: 4px 8px;
+}
+
+QTableView::item:selected,
+QTableWidget::item:selected {
+    background-color: #1e3a5f;
+    color: #93c5fd;
+}
+
+QTableView::item:hover:!selected,
+QTableWidget::item:hover:!selected {
+    background-color: #475569;
 }
 
 QCalendarWidget {

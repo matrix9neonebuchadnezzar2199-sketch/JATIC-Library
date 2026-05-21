@@ -20,11 +20,13 @@ def setup_logging(log_dir: Path, log_settings: LogSettings | None = None) -> Non
     settings = log_settings or LogSettings()
     retention = _RETENTION_MAP.get(settings.retention, "90 days")
     logger.remove()
-    logger.add(
-        sys.stderr,
-        level=settings.level,
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level:<8} | {message}",
-    )
+    # PyInstaller windowed exe (console=False) has sys.stderr is None.
+    if sys.stderr is not None:
+        logger.add(
+            sys.stderr,
+            level=settings.level,
+            format="{time:YYYY-MM-DD HH:mm:ss} | {level:<8} | {message}",
+        )
     try:
         log_dir.mkdir(parents=True, exist_ok=True)
         logger.add(

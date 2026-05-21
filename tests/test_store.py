@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
+from jatic_library.paths import default_save_root
 from jatic_library.settings.config import AppConfig
 from jatic_library.settings.store import ConfigStore
 
@@ -14,7 +15,8 @@ def test_load_missing_returns_default(tmp_path: Path) -> None:
     path = tmp_path / "config.json"
     store = ConfigStore(path)
     cfg = store.load()
-    assert cfg.is_initial_setup_needed() is True
+    assert cfg.download.save_root == default_save_root()
+    assert cfg.is_initial_setup_needed() is False
     assert not path.exists()
 
 
@@ -35,7 +37,8 @@ def test_broken_json_backup(tmp_path: Path) -> None:
     path.write_text("not json", encoding="utf-8")
     store = ConfigStore(path)
     cfg = store.load()
-    assert cfg.is_initial_setup_needed() is True
+    assert cfg.download.save_root == default_save_root()
+    assert cfg.is_initial_setup_needed() is False
     backups = list(tmp_path.glob("config.broken.*.json"))
     assert len(backups) == 1
 

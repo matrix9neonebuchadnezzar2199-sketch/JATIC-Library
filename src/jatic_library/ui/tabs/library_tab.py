@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
     QInputDialog,
+    QLabel,
     QLineEdit,
     QMenu,
     QMessageBox,
@@ -26,11 +27,12 @@ from jatic_library.core.library_scanner import (
     LibraryFileItem,
     LibraryMonthItem,
     LibraryYearItem,
+    format_library_file_label,
     scan_library,
 )
+from jatic_library.core.library_storage import format_storage_usage_label
 from jatic_library.core.repository import Repository
 from jatic_library.settings.config import AppConfig
-from jatic_library.ui.widgets.csv_preview import CsvPreviewWidget
 from jatic_library.ui.widgets.file_detail_panel import FileDetailPanel
 
 ROLE_NODE_KIND = Qt.ItemDataRole.UserRole
@@ -87,31 +89,55 @@ class LibraryTab(QWidget):
         toolbar.addWidget(refresh_btn)
         left_layout.addLayout(toolbar)
 
+        import_hint = QLabel(
+            "以前ダウンロードした ZIP があれば、保存先（既定はアプリ直下の data）内に "
+            "「YYYY_M」フォルダ（例: 2026_3 ＝データ月）を作成し、その中へ "
+            "地域の ZIP を配置してから「再読込」すると保管庫に反映されます。"
+            "ダウンロード完了時は ZIP を解凍し、選択地域の CSV を「統合.csv」に結合します。"
+        )
+        import_hint.setObjectName("sectionHint")
+        import_hint.setWordWrap(True)
+        left_layout.addWidget(import_hint)
+
+        header_row = QHBoxLayout()
+        header_row.setContentsMargins(8, 8, 8, 8)
+        self._header_title = QLabel("保管庫")
+        self._header_title.setObjectName("libraryTreeHeaderTitle")
+        self._header_usage = QLabel("")
+        self._header_usage.setObjectName("libraryTreeHeaderUsage")
+        self._header_usage.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        header_row.addWidget(self._header_title)
+        header_row.addStretch(1)
+        header_row.addWidget(self._header_usage)
+        self._tree_header = QWidget()
+        self._tree_header.setObjectName("libraryTreeHeader")
+        self._tree_header.setLayout(header_row)
+
         self._tree = QTreeWidget()
-        self._tree.setHeaderLabels(["保管庫"])
+        self._tree.setHeaderHidden(True)
         self._tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._tree.customContextMenuRequested.connect(self._open_context_menu)
         self._tree.currentItemChanged.connect(self._on_selection_changed)
+        left_layout.addWidget(self._tree_header)
         left_layout.addWidget(self._tree)
 
-        right_splitter = QSplitter(Qt.Orientation.Vertical)
         self._detail = FileDetailPanel()
-        self._preview = CsvPreviewWidget()
-        right_splitter.addWidget(self._detail)
-        right_splitter.addWidget(self._preview)
-        right_splitter.setStretchFactor(0, 1)
-        right_splitter.setStretchFactor(1, 2)
 
         splitter.addWidget(left)
-        splitter.addWidget(right_splitter)
-        splitter.setStretchFactor(0, 2)
-        splitter.setStretchFactor(1, 3)
+        splitter.addWidget(self._detail)
+        splitter.setStretchFactor(0, 3)
+        splitter.setStretchFactor(1, 2)
         root.addWidget(splitter)
 
     def update_config(self, config: AppConfig) -> None:
         """Replace config reference and refresh the tree."""
         self._config = config
         self.refresh()
+
+    def showEvent(self, event) -> None:  # type: ignore[no-untyped-def]
+        """Refresh storage label when the tab becomes visible."""
+        super().showEvent(event)
+        self._update_storage_header()
 
     def refresh(self) -> None:
         """Rescan save_root and rebuild the tree."""
@@ -121,6 +147,11 @@ class LibraryTab(QWidget):
         self._sync_sort_combo(sort_key)
         self._rebuild_tree()
         self._apply_search_filter(self._search.text())
+        self._update_storage_header()
+
+    def _update_storage_header(self) -> None:
+        """Show library size vs disk capacity in the tree header band."""
+        self._header_usage.setText(format_storage_usage_label(self._config.download.save_root))
 
     def _sync_sort_combo(self, sort_key: str) -> None:
         for index in range(self._sort.count()):
@@ -158,7 +189,12 @@ class LibraryTab(QWidget):
         month_node.setData(0, ROLE_NODE_KIND, KIND_MONTH)
         month_node.setExpanded(True)
         for file_item in month.files:
-            file_node = QTreeWidgetItem([file_item.display_name])
+            label = format_library_file_label(
+                file_item.display_name,
+                file_item.file_size,
+                file_item.row_count,
+            )
+            file_node = QTreeWidgetItem([label])
             file_node.setData(0, ROLE_NODE_KIND, KIND_FILE)
             file_node.setData(0, ROLE_FILE_ITEM, file_item)
             month_node.addChild(file_node)
@@ -211,12 +247,10 @@ class LibraryTab(QWidget):
     ) -> None:
         if current is None:
             self._detail.clear()
-            self._preview.clear()
             return
         kind = current.data(0, ROLE_NODE_KIND)
         if kind != KIND_FILE:
             self._detail.clear()
-            self._preview.clear()
             return
         file_item = current.data(0, ROLE_FILE_ITEM)
         if not isinstance(file_item, LibraryFileItem):
@@ -224,7 +258,6 @@ class LibraryTab(QWidget):
         scope_key = self._file_scope_key(file_item)
         tag_names = [row.name for row in self._repo.list_tags_for("file", scope_key)]
         self._detail.show_file(file_item, tags=tag_names)
-        self._preview.load_zip(file_item.file_path)
 
     @staticmethod
     def _file_scope_key(file_item: LibraryFileItem) -> str:
@@ -249,6 +282,7 @@ class LibraryTab(QWidget):
         redownload_action = QAction("再ダウンロード", self)
         delete_action = QAction("削除", self)
         tag_action = QAction("タグを管理…", self)
+        is_merged = file_item.target_code == "merged"
 
         def open_in_explorer() -> None:
             folder = file_item.file_path.parent
@@ -264,13 +298,15 @@ class LibraryTab(QWidget):
 
         open_action.triggered.connect(open_in_explorer)
         copy_action.triggered.connect(copy_path)
-        redownload_action.triggered.connect(lambda: self.redownload_requested.emit(file_item))
+        if not is_merged:
+            redownload_action.triggered.connect(lambda: self.redownload_requested.emit(file_item))
         delete_action.triggered.connect(lambda: self._confirm_delete(file_item))
         tag_action.triggered.connect(lambda: self._manage_tags(file_item))
         menu.addAction(open_action)
         menu.addAction(copy_action)
         menu.addSeparator()
-        menu.addAction(redownload_action)
+        if not is_merged:
+            menu.addAction(redownload_action)
         menu.addAction(delete_action)
         menu.addAction(tag_action)
         menu.exec(self._tree.viewport().mapToGlobal(position))

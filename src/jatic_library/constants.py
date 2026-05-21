@@ -3,7 +3,7 @@
 from pathlib import Path
 
 APP_NAME = "JATIC-Library"
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.1.0-beta"
 ORG_NAME = "matrix9neonebuchadnezzar2199-sketch"
 REPO_URL = "https://github.com/matrix9neonebuchadnezzar2199-sketch/JATIC-Library"
 
@@ -18,7 +18,6 @@ DEFAULT_CHECK_INTERVAL_HOURS = 24
 DEFAULT_CONCURRENCY = 3
 DEFAULT_RETRY = 3
 DEFAULT_TIMEOUT_SEC = 60
-
 APP_DATA_DIR = Path.home() / "AppData" / "Local" / APP_NAME
 CONFIG_PATH = APP_DATA_DIR / "config.json"
 DB_PATH = APP_DATA_DIR / "history.db"
@@ -26,5 +25,8 @@ LOG_DIR = APP_DATA_DIR / "logs"
 TARGETS_CACHE_PATH = APP_DATA_DIR / "targets.json"
 
 MANIFEST_FILENAME = "_manifest.json"
+EXTRACTED_DIR_NAME = "extracted"
+MERGED_CSV_FILENAME = "統合.csv"
+MERGED_CSV_DISPLAY_NAME = "統合CSV"
 
 TZ_JST = "Asia/Tokyo"

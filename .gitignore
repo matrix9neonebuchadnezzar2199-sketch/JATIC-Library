@@ -14,6 +14,9 @@ htmlcov/
 .env
 .env.local
 
+# Downloaded publications (default: ./data next to the app)
+/data/
+
 # App runtime data (local dev)
 _app/
 *.log

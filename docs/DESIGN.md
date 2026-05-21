@@ -147,11 +147,11 @@ CREATE TABLE event_logs (...);
 | `repository` | SQLite |
 | `git_sync` | 任意 commit & push |
 | `notifier` | win11toast |
-| `tray` | QSystemTrayIcon 常駐 |
+| `tray` | QSystemTrayIcon（任意・手動操作用） |
 
 ## 7. UI 仕様
 
-タブ: 保管庫 / 設定 / カレンダー / 比較。3ペイン保管庫、51 地域チェックリスト、進捗・タグ・About ダイアログ。`dark.qss` / `light.qss`。
+タブ: 保管庫 / 設定。3ペイン保管庫、51 地域チェックリスト、進捗・タグ・About ダイアログ。`dark.qss` / `light.qss`。
 
 画面ワイヤ・メニュー構成はマスター指示書 §7。
 

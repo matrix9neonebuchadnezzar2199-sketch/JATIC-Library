@@ -13,6 +13,7 @@ from jatic_library.constants import (
     DEFAULT_TIMEOUT_SEC,
 )
 from jatic_library.core.targets import all_codes
+from jatic_library.paths import default_save_root
 
 
 class TargetSelection(BaseModel):
@@ -106,7 +107,7 @@ class AppConfig(BaseModel):
     @classmethod
     def default(cls) -> "AppConfig":
         """Return a fresh default configuration."""
-        return cls()
+        return cls(download=DownloadSettings(save_root=default_save_root()))
 
     def is_initial_setup_needed(self) -> bool:
         """Return True when save_root has not been configured."""

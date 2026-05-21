@@ -17,7 +17,9 @@ from jatic_library.settings.config import (
 
 def test_default_config() -> None:
     cfg = AppConfig.default()
-    assert cfg.is_initial_setup_needed() is True
+    assert cfg.download.save_root is not None
+    assert cfg.download.save_root.name == "data"
+    assert cfg.is_initial_setup_needed() is False
 
 
 def test_initial_setup_with_save_root() -> None:

@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from jatic_library.core.targets import all_codes
+from jatic_library.paths import default_save_root
 from jatic_library.settings.config import AppConfig
 from jatic_library.settings.store import ConfigStore
 from jatic_library.ui.widgets.region_selector import RegionSelector
@@ -83,13 +84,26 @@ class SettingsTab(QWidget):
         save_row.addWidget(self._save_root)
         save_row.addWidget(browse)
         basic_form.addRow("保存先フォルダ", save_row)
+        save_hint = QLabel(
+            "初期値はアプリと同じフォルダ内の data です（例: JATIC-Library\\data）。"
+            "直下に「YYYY_M」フォルダ（例: 2026_3）が作成され、地域 ZIP と統合.csv が保存されます。"
+        )
+        save_hint.setObjectName("sectionHint")
+        save_hint.setWordWrap(True)
+        basic_form.addRow("", save_hint)
         self._theme = QComboBox()
         self._theme.addItems(["light", "dark"])
         basic_form.addRow("テーマ", self._theme)
         right_layout.addWidget(basic)
 
-        schedule = QGroupBox("起動時チェック")
+        schedule = QGroupBox("PC起動と同時にチェック")
         schedule_form = QFormLayout(schedule)
+        schedule_hint = QLabel(
+            "PC起動と同時にチェックするには、下の「Windows 起動時に自動起動」を ON にして"
+            "「設定を保存」してください。"
+        )
+        schedule_hint.setWordWrap(True)
+        schedule_form.addRow(schedule_hint)
         self._auto_check = QCheckBox("起動時に自動チェックする")
         schedule_form.addRow(self._auto_check)
         self._interval_hours = QSpinBox()
@@ -181,7 +195,8 @@ class SettingsTab(QWidget):
     def load_from_config(self) -> None:
         """Populate widgets from ``self._config``."""
         cfg = self._config
-        self._save_root.setText(str(cfg.download.save_root) if cfg.download.save_root else "")
+        root = cfg.download.save_root or default_save_root()
+        self._save_root.setText(str(root))
         self._theme.setCurrentText(cfg.ui.theme)
         self._region_selector.set_selected_codes(cfg.targets.selected_codes)
         self._update_region_summary()
@@ -206,7 +221,7 @@ class SettingsTab(QWidget):
     def apply_to_config(self) -> AppConfig:
         """Copy widget state into ``self._config``."""
         path_text = self._save_root.text().strip()
-        self._config.download.save_root = Path(path_text) if path_text else None
+        self._config.download.save_root = Path(path_text) if path_text else default_save_root()
         self._config.ui.theme = cast(Literal["light", "dark"], self._theme.currentText())
         selected = self._region_selector.selected_codes()
         total = len(all_codes())
@@ -239,9 +254,7 @@ class SettingsTab(QWidget):
     def save_to_store(self) -> None:
         """Validate, save config, and emit ``config_saved``."""
         self.apply_to_config()
-        if self._config.download.save_root is None:
-            QMessageBox.warning(self, "設定", "保存先フォルダを指定してください。")
-            return
+        self._config.download.save_root.mkdir(parents=True, exist_ok=True)
         try:
             self._store.save(self._config)
         except OSError as exc:

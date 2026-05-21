@@ -6,12 +6,25 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from jatic_library.constants import MERGED_CSV_DISPLAY_NAME, MERGED_CSV_FILENAME
+from jatic_library.core.csv_loader import count_data_rows_for_path, uncompressed_csv_size_in_zip
 from jatic_library.core.manifest import Manifest, ManifestFileEntry
 from jatic_library.core.models import FileRow
 from jatic_library.core.repository import Repository
 from jatic_library.core.url_builder import parse_folder_name
 
 _FOLDER_RE = re.compile(r"^(\d{4})_(\d{1,2})$")
+
+
+def format_library_file_label(
+    display_name: str,
+    file_size: int,
+    row_count: int | None,
+) -> str:
+    """Build tree label with row count and uncompressed-equivalent size in GB."""
+    rows = f"{row_count:,}行" if row_count is not None else "—行"
+    size_gb = file_size / (1024**3)
+    return f"{display_name}  {rows}  {size_gb:.2f}GB"
 
 
 @dataclass(frozen=True)
@@ -27,7 +40,8 @@ class LibraryFileItem:
     sha256: str | None
     source_url: str | None
     downloaded_at: str | None
-    status: str | None
+    status: str | None = None
+    row_count: int | None = None
 
 
 @dataclass
@@ -77,17 +91,20 @@ def _merge_file(
         source_url = db_row.source_url
         downloaded_at = db_row.downloaded_at
 
+    # Display uncompressed CSV size; *size* is the on-disk ZIP (compressed).
+    display_size = uncompressed_csv_size_in_zip(zip_path) or size
     return LibraryFileItem(
         publish_ym=publish_ym,
         file_name=zip_path.name,
         file_path=zip_path,
         display_name=display,
         target_code=target_code,
-        file_size=db_row.file_size if db_row is not None else size,
+        file_size=display_size,
         sha256=sha256,
         source_url=source_url,
         downloaded_at=downloaded_at,
         status=db_row.status if db_row is not None else None,
+        row_count=count_data_rows_for_path(zip_path),
     )
 
 
@@ -110,6 +127,25 @@ def _scan_month_folder(
         pub_status = pub.status if pub else None
 
     files: list[LibraryFileItem] = []
+    merged_csv = folder / MERGED_CSV_FILENAME
+    if merged_csv.is_file():
+        size = merged_csv.stat().st_size
+        files.append(
+            LibraryFileItem(
+                publish_ym=folder_name,
+                file_name=merged_csv.name,
+                file_path=merged_csv,
+                display_name=MERGED_CSV_DISPLAY_NAME,
+                target_code="merged",
+                file_size=size,
+                sha256=None,
+                source_url=None,
+                downloaded_at=None,
+                status=None,
+                row_count=count_data_rows_for_path(merged_csv),
+            )
+        )
+
     for zip_path in sorted(folder.glob("*.zip"), key=lambda p: p.name):
         manifest_entry = manifest_by_name.get(zip_path.name)
         db_row = db_by_name.get(zip_path.name)

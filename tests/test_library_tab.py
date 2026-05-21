@@ -45,6 +45,24 @@ def _seed_library(save_root: Path) -> None:
     ).save(folder)
 
 
+def test_library_tab_builds_tree_from_zip_only(qapp: QApplication, tmp_path: Path) -> None:
+    """ZIP on disk without manifest is picked up on refresh (manual import)."""
+    save_root = tmp_path / "data"
+    folder = save_root / "2026_3"
+    folder.mkdir(parents=True)
+    with zipfile.ZipFile(folder / "東京都.zip", "w") as archive:
+        archive.writestr("traffic.csv", b"hour,volume\n8,100\n")
+    config = AppConfig.default()
+    config.download.save_root = save_root
+    db = tmp_path / "lib_only.zip.db"
+    with Repository(db) as repo:
+        tab = LibraryTab(config, repo)
+        assert tab._tree.topLevelItemCount() == 1
+        month = tab._tree.topLevelItem(0).child(0)
+        assert month is not None
+        assert month.childCount() == 1
+
+
 def test_library_tab_builds_tree(qapp: QApplication, tmp_path: Path) -> None:
     save_root = tmp_path / "data"
     _seed_library(save_root)

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import contextlib
 import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from jatic_library.constants import APP_DATA_DIR, DB_PATH, LOG_DIR
+from jatic_library.paths import default_save_root, normalize_save_root
 from jatic_library.core.logger import setup_logging
 from jatic_library.core.repository import Repository
 from jatic_library.settings.store import ConfigStore
@@ -26,6 +28,13 @@ def run_app(*, run_startup_check: bool = True) -> int:
 
     store = ConfigStore()
     config = store.load()
+    if config.download.save_root and any("pytest-of" in part for part in config.download.save_root.parts):
+        config.download.save_root = default_save_root()
+        with contextlib.suppress(OSError):
+            store.save(config)
+    save_root = normalize_save_root(config.download.save_root)
+    config.download.save_root = save_root
+    save_root.mkdir(parents=True, exist_ok=True)
     APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
     setup_logging(LOG_DIR, config.log)
     apply_theme(app, config.ui.theme)

@@ -13,6 +13,7 @@ from jatic_library.settings.config import AppConfig
 
 def test_should_check_when_save_root_missing(tmp_path: Path) -> None:
     config = AppConfig.default()
+    config.download.save_root = None
     db = tmp_path / "sched.db"
     with Repository(db) as repo:
         decision = StartupScheduler(config, repo).should_check_now()

@@ -31,7 +31,9 @@ def test_main_window_tabs(qapp: QApplication, tmp_path) -> None:
             repo,
             run_startup_check=False,
         )
-        assert window._tabs.count() == 4
+        assert window._tabs.count() == 2
+        assert window._tabs.tabText(0) == "保管庫"
+        assert window._tabs.tabText(1) == "設定"
         assert window.windowTitle().startswith("JATIC-Library")
 
 

@@ -16,6 +16,10 @@ from jatic_library.constants import APP_VERSION, TARGETS_CACHE_PATH
 from jatic_library.core.http_client import JarticHttpClient
 from jatic_library.core.manifest import Manifest, ManifestFileEntry
 from jatic_library.core.models import FileRow, PublicationStatus
+from jatic_library.core.publication_postprocess import (
+    PostprocessError,
+    postprocess_publication_folder,
+)
 from jatic_library.core.repository import Repository, now_jst_iso
 from jatic_library.core.targets import Target, load_overrides
 from jatic_library.core.url_builder import PublishInfo, build_zip_url
@@ -85,6 +89,7 @@ class Downloader:
         progress_cb: ProgressCallback | None = None,
         *,
         publish_date: str | None = None,
+        merge_targets: list[Target] | None = None,
     ) -> DownloadResult:
         """Download all *targets* for *info* into save_root."""
         if self._settings.save_root is None:
@@ -137,6 +142,27 @@ class Downloader:
 
         manifest.downloaded_at = now_jst_iso()
         manifest.save(folder)
+
+        if result.succeeded or result.skipped:
+            merge_list = merge_targets if merge_targets is not None else targets
+
+            def _postprocess_progress(code: str, done: int, total: int, status: str) -> None:
+                if progress_cb is None:
+                    return
+                progress_cb(
+                    DownloadProgress(
+                        target_code=code,
+                        bytes_done=done,
+                        bytes_total=max(total, 1),
+                        speed_bps=0.0,
+                        status=status,
+                    )
+                )
+
+            try:
+                postprocess_publication_folder(folder, merge_list, _postprocess_progress)
+            except PostprocessError as exc:
+                logger.warning("Post-download merge/extract failed: {}", exc)
 
         pub_status = publication_status_for_result(result, target_count=len(targets))
         if result.succeeded or result.skipped or result.failed:
