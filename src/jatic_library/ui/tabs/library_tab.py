@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from PySide6.QtCore import QPoint, Qt, Signal
+from PySide6.QtCore import QPoint, Qt, QTimer, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
@@ -61,6 +61,11 @@ class LibraryTab(QWidget):
         self._config = config
         self._repo = repo
         self._tree_data: list[LibraryYearItem] = []
+        self._pending_sort_key: str | None = None
+        self._sort_persist_timer = QTimer(self)
+        self._sort_persist_timer.setSingleShot(True)
+        self._sort_persist_timer.setInterval(300)
+        self._sort_persist_timer.timeout.connect(self._emit_sort_changed)
         self._build_ui()
         self.refresh()
 
@@ -165,9 +170,29 @@ class LibraryTab(QWidget):
         sort_key = self._sort.currentData()
         if not isinstance(sort_key, str):
             return
+        if sort_key == self._config.ui.library_default_sort:
+            return
         self._config.ui.library_default_sort = sort_key
-        self.sort_changed.emit(sort_key)
         self.refresh()
+        self._schedule_sort_persist(sort_key)
+
+    def _schedule_sort_persist(self, key: str) -> None:
+        """Debounce persisting sort preference to config.json."""
+        self._pending_sort_key = key
+        self._sort_persist_timer.start()
+
+    def _emit_sort_changed(self) -> None:
+        """Emit sort_changed after debounce (triggers ConfigStore.save in MainWindow)."""
+        if self._pending_sort_key is None:
+            return
+        self.sort_changed.emit(self._pending_sort_key)
+        self._pending_sort_key = None
+
+    def flush_pending_sort(self) -> None:
+        """Force-persist pending sort key (app quit or window close)."""
+        if self._sort_persist_timer.isActive():
+            self._sort_persist_timer.stop()
+            self._emit_sort_changed()
 
     def _rebuild_tree(self) -> None:
         self._tree.clear()

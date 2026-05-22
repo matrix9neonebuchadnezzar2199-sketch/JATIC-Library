@@ -148,6 +148,7 @@ class MainWindow(QMainWindow):
     def _quit_application(self) -> None:
         self._quitting = True
         self._tray.teardown()
+        self._library_tab.flush_pending_sort()
         with contextlib.suppress(sqlite3.Error):
             self._repo.checkpoint()
         QApplication.quit()
@@ -158,6 +159,7 @@ class MainWindow(QMainWindow):
             self.hide()
             self.statusBar().showMessage("トレイに格納しました", 5000)
             return
+        self._library_tab.flush_pending_sort()
         super().closeEvent(event)
 
     def _set_theme(self, theme: str) -> None:

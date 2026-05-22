@@ -27,7 +27,7 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 19 | [INST_19_git_sync.md](INST_19_git_sync.md) | Git 連携 | **完了** |
 | 20 | [INST_20_system_tray.md](INST_20_system_tray.md) | トレイ・スタートアップ | **完了** |
 | 21 | [INST_21_pyinstaller.md](INST_21_pyinstaller.md) | PyInstaller | **完了** |
-| 22 | [INST_22_library_sort_debounce.md](INST_22_library_sort_debounce.md) | 保管庫ソート保存デバウンス | **未着手** |
+| 22 | [INST_22_library_sort_debounce.md](INST_22_library_sort_debounce.md) | 保管庫ソート保存デバウンス | **完了** |
 | 23 | [INST_23_settings_dirty_indicator.md](INST_23_settings_dirty_indicator.md) | 設定タブ未保存インジケータ | **未着手** |
 | 24 | [INST_24_delete_order_safety.md](INST_24_delete_order_safety.md) | 削除順序の見直し | **完了** |
 | 25 | [INST_25_playwright_guard_expand.md](INST_25_playwright_guard_expand.md) | Playwright ガード拡張 | **完了** |
@@ -41,7 +41,7 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 
 | # | リンク | 概要 |
 |---|---|---|
-| 22 | [INST_22_library_sort_debounce.md](./INST_22_library_sort_debounce.md) | 保管庫ソート保存のデバウンス・同値ガード |
+| 22 | [INST_22_library_sort_debounce.md](./INST_22_library_sort_debounce.md) | 保管庫ソート保存のデバウンス・同値ガード（完了） |
 | 23 | [INST_23_settings_dirty_indicator.md](./INST_23_settings_dirty_indicator.md) | 設定タブの未保存インジケータ |
 | 24 | [INST_24_delete_order_safety.md](./INST_24_delete_order_safety.md) | ファイル削除の順序見直し（完了） |
 | 25 | [INST_25_playwright_guard_expand.md](./INST_25_playwright_guard_expand.md) | Chromium ガードを更新確認にも展開（完了） |

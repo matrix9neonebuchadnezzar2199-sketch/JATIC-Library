@@ -39,7 +39,7 @@
 | 16 | カレンダー・欠損月 | 先送り | Phase P11（`MainWindow` 未配線） |
 | 17 | 比較タブ | 先送り | Phase P11（`MainWindow` 未配線） |
 | 18 | エクスポート・グラフ | 一部 | 月次 ZIP/CSV エクスポートは済。`TrafficChartWidget` は Phase P11 |
-| 22 | 保管庫ソート保存デバウンス | 未着手 | [INST_22](./instructions/INST_22_library_sort_debounce.md) |
+| 22 | 保管庫ソート保存デバウンス | 完了 | [INST_22](./instructions/INST_22_library_sort_debounce.md) |
 | 23 | 設定タブ未保存インジケータ | 未着手 | [INST_23](./instructions/INST_23_settings_dirty_indicator.md) |
 | 24 | 削除順序の見直し | 完了 | [INST_24](./instructions/INST_24_delete_order_safety.md) |
 | 25 | Playwright ガード拡張 | 完了 | [INST_25](./instructions/INST_25_playwright_guard_expand.md) |
@@ -108,7 +108,7 @@
 
 | # | 目的 | 区分 |
 |---|------|------|
-| 22 | ソート保存の I/O 削減 | UX |
+| 22 | ソート保存の I/O 削減 | UX（完了） |
 | 23 | 設定タブ未保存状態の可視化 | UX |
 | 24 | 削除処理の不整合防止 | 堅牢性（完了） |
 | 25 | Chromium 未導入時の事故防止 | 堅牢性（完了） |
