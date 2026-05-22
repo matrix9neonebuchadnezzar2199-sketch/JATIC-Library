@@ -194,4 +194,4 @@ CREATE TABLE event_logs (...);
 
 ## 実装進捗
 
-詳細は [DEV_STATUS.md](DEV_STATUS.md) を参照。サマリ: 機能実装（#01〜#21）完了。**残作業は配布・実行形式の仕上げ**（PyInstaller 検証、Playwright 同梱、マニュアル、配布 zip）。一覧は [DEV_STATUS.md §5](DEV_STATUS.md#5-残作業リリース配布まで)。
+詳細は [DEV_STATUS.md](DEV_STATUS.md) を参照。サマリ: 機能・Hardening・ビルド（#01〜#28）完了。**残作業は INST_29（smoke / pre-release）と INST_30（マニュアル仕上げ）**。一覧は [DEV_STATUS.md §5](DEV_STATUS.md#5-残作業リリース配布まで)。

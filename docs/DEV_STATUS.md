@@ -3,7 +3,7 @@
 本ドキュメントが **実装進捗の正本** です。README の機能説明は製品ビジョン、本ファイルは事実ベースの状態を記録します。
 
 **最終更新:** 2026-05-22  
-**現在のマイルストーン:** Full Feature（#01〜#21 完了）+ Pre-release Hardening（#22〜#26 完了）
+**現在のマイルストーン:** Beta 配布検証（INST_29）— 機能 #01〜#28 完了、pre-release 公開待ち
 
 ---
 
@@ -13,7 +13,7 @@
 |------|------|------|
 | **MVP Core** | 完了 | 設定・DL・CLI・保管庫ツリー・CSV プレビュー |
 | **UX 拡張** | 完了 | 進捗ダイアログ、トレイ、エクスポート、タグ（カレンダー・比較タブは削除） |
-| **配布** | 一部 | ビルドスクリプトのみ。exe 検証・配布 zip は未 |
+| **配布** | 一部 | `build.bat` → zip 生成済（`0.1.0-beta.1`）。GUI smoke・Release は INST_29 |
 
 ---
 
@@ -39,14 +39,17 @@
 | 16 | カレンダー・欠損月 | 先送り | Phase P11（`MainWindow` 未配線） |
 | 17 | 比較タブ | 先送り | Phase P11（`MainWindow` 未配線） |
 | 18 | エクスポート・グラフ | 一部 | 月次 ZIP/CSV エクスポートは済。`TrafficChartWidget` は Phase P11 |
+| 19 | Git 自動 commit | 完了 | `git_sync`（push は手動） |
+| 20 | トレイ・スタートアップ | 完了 | Run キー登録 |
+| 21 | PyInstaller 初期 | 完了 | INST_28 で上書き・拡張 |
 | 22 | 保管庫ソート保存デバウンス | 完了 | [INST_22](./instructions/INST_22_library_sort_debounce.md) |
 | 23 | 設定タブ未保存インジケータ | 完了 | [INST_23](./instructions/INST_23_settings_dirty_indicator.md) |
 | 24 | 削除順序の見直し | 完了 | [INST_24](./instructions/INST_24_delete_order_safety.md) |
 | 25 | Playwright ガード拡張 | 完了 | [INST_25](./instructions/INST_25_playwright_guard_expand.md) |
-| 26 | SQLite WAL モード化 | 完了 | [INST_26](./instructions/INST_26_sqlite_wal_mode.md)（timeout・checkpoint 補強） |
-| 19 | Git 自動 commit | 完了 | `git_sync`（push は手動） |
-| 20 | トレイ・スタートアップ | 完了 | Run キー登録 |
-| 21 | PyInstaller | 一部 | INST_28: `build.bat` → zip 生成済。深い smoke は INST_29 |
+| 26 | SQLite WAL モード化 | 完了 | [INST_26](./instructions/INST_26_sqlite_wal_mode.md) |
+| 27 | Chromium セットアップ UI | 完了 | [INST_27](./instructions/INST_27_playwright_first_run_setup.md) |
+| 28 | PyInstaller ビルド・zip | 完了 | [INST_28](./instructions/INST_28_pyinstaller_build_refine.md) |
+| 29 | smoke test・Release | 進行中 | [INST_29](./instructions/INST_29_release_smoke_test.md) |
 
 ---
 
@@ -64,7 +67,7 @@
 | P7 | カレンダー・欠損検出・タグ | 完了 |
 | P8 | 比較・可視化・エクスポート | 完了 |
 | P9 | GitHub 連携・テーマ | 完了（commit のみ自動） |
-| P10 | PyInstaller 配布 | 一部 | スクリプト完了。成果物検証・zip 化は残 |
+| P10 | PyInstaller 配布 | 一部 | zip 生成済（INST_28）。smoke・Release・マニュアル（INST_29/30） |
 
 詳細 Phase 表: [ROADMAP.md](ROADMAP.md)
 
@@ -92,7 +95,8 @@
 | Git 自動 commit | 済 | — | push は手動 #19 |
 | DL 進捗ダイアログ | 済 | — | #12 |
 | トレイ・スタートアップ | 済 | — | #20 |
-| PyInstaller 配布（exe） | — | — | 一部（§6 参照） |
+| PyInstaller 配布（exe） | 済 | — | ビルド済・smoke は INST_29（§5.1 R1） |
+| exe 初回 Chromium セットアップ | 済 | — | INST_27 ダイアログ |
 | Git 自動 push | — | — | 未（commit のみ #19） |
 
 ---
@@ -101,18 +105,23 @@
 
 機能実装（指示書 #01〜#21）は完了。**以降は「実行形式として配れる品」に仕上げる作業**が中心です。
 
-### 5.0 Pre-release Hardening（#22〜#26）
+### 5.0 Pre-release Hardening（#22〜#26）— 完了
 
-リリースビルド前に以下の堅牢化を完了させます。PyInstaller ビルド（#21）と並行可。
-詳細は各指示書を参照。
+| # | 目的 | 区分 | 状態 |
+|---|------|------|------|
+| 22 | ソート保存の I/O 削減 | UX | 完了 |
+| 23 | 設定タブ未保存状態の可視化 | UX | 完了 |
+| 24 | 削除処理の不整合防止 | 堅牢性 | 完了 |
+| 25 | Chromium 未導入時の事故防止 | 堅牢性 | 完了 |
+| 26 | SQLite `database is locked` 予防 | 堅牢性 | 完了 |
 
-| # | 目的 | 区分 |
+### 5.0b 配布パイプライン（#27〜#29）
+
+| # | 目的 | 状態 |
 |---|------|------|
-| 22 | ソート保存の I/O 削減 | UX（完了） |
-| 23 | 設定タブ未保存状態の可視化 | UX（完了） |
-| 24 | 削除処理の不整合防止 | 堅牢性（完了） |
-| 25 | Chromium 未導入時の事故防止 | 堅牢性（完了） |
-| 26 | SQLite `database is locked` 予防 | 堅牢性（完了） |
+| 27 | アプリ内 Chromium インストール（方式 B） | 完了 |
+| 28 | `build.bat` / `.spec` / zip `0.1.0-beta.1` | 完了 |
+| 29 | smoke test・GitHub pre-release | **進行中**（[BETA_TEST_LOG.md](BETA_TEST_LOG.md)） |
 
 ### 5.1 必須（配布ブロッカー）
 
@@ -129,8 +138,14 @@
 |------|------|------|------|
 | R5 | **USER_MANUAL.md** | 全タブ・トレイ・エクスポート・Git 連携の操作手順 | ドラフトのみ |
 | R6 | **README 仕上げ** | スクリーンショット、ステータスバッジ、exe 利用者向け導線 | 一部 |
-| R7 | **DEV_SETUP** | PyInstaller ビルド手順・既知の制限（Playwright 等） | 要追記 |
+| R7 | **DEV_SETUP** | PyInstaller ビルド手順・既知の制限（Playwright 等） | 一部（INST_30 で仕上げ） |
 | R8 | **実サイト回帰** | 当月 typeB の HEAD/DL・404→再スクレイプの手動確認 | 随時 |
+
+### 5.2b 公開後ドキュメント（INST_30 想定）
+
+| 優先 | 項目 | 内容 | 状態 |
+|------|------|------|------|
+| — | **INST_30** | R5 USER_MANUAL / R6 README / R7 DEV_SETUP 仕上げ | 未着手 |
 
 ### 5.3 先送り（Phase P11 以降）
 
