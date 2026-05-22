@@ -41,3 +41,5 @@ uv sync --group dev
 GitHub Issues: https://github.com/matrix9neonebuchadnezzar2199-sketch/JATIC-Library/issues
 
 報告時: ヘルプのバージョン、`download.save_root`（パスのみ）、直近ログ。
+
+開発者向け検証記録: [BETA_TEST_LOG.md](BETA_TEST_LOG.md)

@@ -34,6 +34,7 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 26 | [INST_26_sqlite_wal_mode.md](INST_26_sqlite_wal_mode.md) | SQLite WAL モード化 | **完了** |
 | 27 | [INST_27_playwright_first_run_setup.md](INST_27_playwright_first_run_setup.md) | Chromium セットアップ UI | **完了** |
 | 28 | [INST_28_pyinstaller_build_refine.md](INST_28_pyinstaller_build_refine.md) | PyInstaller ビルド・zip | **完了** |
+| 29 | [INST_29_release_smoke_test.md](INST_29_release_smoke_test.md) | smoke test・Release | **進行中** |
 
 ## Pre-release Hardening（#22〜#26）
 
@@ -55,7 +56,7 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 |---|---|---|
 | 27 | [INST_27_playwright_first_run_setup.md](./INST_27_playwright_first_run_setup.md) | アプリ内 Chromium インストール UI（完了） |
 | 28 | [INST_28_pyinstaller_build_refine.md](./INST_28_pyinstaller_build_refine.md) | `.spec` / `build.bat` 改善（完了） |
-| 29 | [INST_29_release_smoke_test.md](./INST_29_release_smoke_test.md) | smoke test / クリーン環境検証（未着手） |
+| 29 | [INST_29_release_smoke_test.md](./INST_29_release_smoke_test.md) | smoke test / クリーン環境検証（進行中） |
 
 - 差分メモ: [ALIGNMENT.md](ALIGNMENT.md)
 - 正本設計: [../DESIGN.md](../DESIGN.md)
