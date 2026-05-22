@@ -46,7 +46,7 @@
 | 26 | SQLite WAL モード化 | 完了 | [INST_26](./instructions/INST_26_sqlite_wal_mode.md)（timeout・checkpoint 補強） |
 | 19 | Git 自動 commit | 完了 | `git_sync`（push は手動） |
 | 20 | トレイ・スタートアップ | 完了 | Run キー登録 |
-| 21 | PyInstaller | 一部 | `build.bat` / `.spec` あり。ビルド検証・同梱方針は残 |
+| 21 | PyInstaller | 一部 | INST_28: `build.bat` → zip 生成済。深い smoke は INST_29 |
 
 ---
 
@@ -118,9 +118,9 @@
 
 | 優先 | 項目 | 内容 | 状態 |
 |------|------|------|------|
-| R1 | **PyInstaller ビルド検証** | `build.bat` 実行 → `dist/JATIC-Library/` で GUI 起動・DL・保管庫まで smoke test | 未 |
+| R1 | **PyInstaller ビルド検証** | `build.bat` 完走・exe/zip 生成済（2026-05-22）。GUI/DL smoke は INST_29 | 一部 |
 | R2 | **Playwright 同梱方針** | 方式 B: アプリ内インストール UI（INST_27 完了）。ビルド同梱・初回 DL 検証は R1/R4 残 | 一部 |
-| R3 | **配布物の形** | onedir zip 化、バージョン表記、README の「exe 向けクイックスタート」 | 未 |
+| R3 | **配布物の形** | `JATIC-Library-0.1.0-beta.1-win64.zip` + BETA_TEST 同梱（INST_28） | 完了 |
 | R4 | **クリーン環境確認** | Python / uv 未インストールの Windows 10/11 で R1 成果物のみ動作確認 | 未 |
 
 ### 5.2 推奨（品質・運用）

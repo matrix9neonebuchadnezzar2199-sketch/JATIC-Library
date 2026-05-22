@@ -5,7 +5,7 @@ from jatic_library import constants as c
 
 def test_app_identity() -> None:
     assert c.APP_NAME == "JATIC-Library"
-    assert c.APP_VERSION == "0.1.0-beta"
+    assert c.APP_VERSION == "0.1.0-beta.1"
 
 
 def test_jartic_urls() -> None:

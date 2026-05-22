@@ -3,7 +3,7 @@
 from pathlib import Path
 
 APP_NAME = "JATIC-Library"
-APP_VERSION = "0.1.0-beta"
+APP_VERSION = "0.1.0-beta.1"
 ORG_NAME = "matrix9neonebuchadnezzar2199-sketch"
 REPO_URL = "https://github.com/matrix9neonebuchadnezzar2199-sketch/JATIC-Library"
 
