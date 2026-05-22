@@ -373,6 +373,7 @@ body.diary > footer {
       <tr><td>09:15</td><td>UI_FLOW・INST_22〜26・DEV_STATUS ドキュメント整備</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-0915">#entry-0915</a></td></tr>
       <tr><td>10:42</td><td>Pre-release Hardening #22〜#26 実装完了</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1042">#entry-1042</a></td></tr>
       <tr><td>10:48</td><td>配布 R1〜R4 方針整理・PyInstaller 同梱パス確認</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-1048">#entry-1048</a></td></tr>
+      <tr><td>—</td><td>INST_27〜29 草案レビュー（方式 B・意思決定待ち）</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-inst27-draft">#entry-inst27-draft</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -453,6 +454,21 @@ body.diary > footer {
   <p><code>src/jatic_library/resources</code> — <strong>あり</strong>（<code>targets.json</code>, <code>version.txt</code>）。<code>src/jatic_library/ui/themes</code> — <strong>あり</strong>（<code>dark.qss</code>, <code>light.qss</code>）。現行 <code>.spec</code> の <code>datas</code> 2 行は実在パスと一致。</p>
   <h3>残課題</h3>
   <p>pytest 表記を DEV_STATUS §6 で <strong>139 passed</strong> に更新（08:38 エントリの 118 は当時正）。INST_21 指示書・<code>.spec</code> 改善は (1) 決定後に着手。HEAD: <code>76bc334</code></p>
+</section>
+
+  <section class="entry" id="entry-inst27-draft">
+  <h2>配布 INST_27〜29 草案（方式 B）</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">docs</span> <span class="tag tag-warn">warn</span></p>
+  <h3>概要</h3>
+  <p>R1〜R4 を <code>INST_27</code>（初回 Chromium UI）→ <code>INST_28</code>（spec/build）→ <code>INST_29</code>（smoke）に分割する案を受領。現行 <code>_warn_playwright_chromium_missing</code> は <code>QMessageBox</code> のみ（INST_25 ガード経路は実装済み）。</p>
+  <h3>設計判断（推奨・未確定）</h3>
+  <ul>
+    <li><strong>(1) 発動タイミング</strong>: 案 A（操作時のみ）— 推奨。</li>
+    <li><strong>(2) インストール起動</strong>: 凍結時は <code>node.exe</code> + <code>cli.js</code>（<code>compute_driver_executable()</code> は <code>Tuple[str,str]</code>）。開発時は <code>sys.executable -m playwright</code> 分岐。INST_27 草案の <code>cmd = [str(driver), ...]</code> は要修正。</li>
+    <li><strong>同梱パス</strong>: <code>resources/</code>・<code>ui/themes/</code>（<code>dark.qss</code> / <code>light.qss</code>）とも実在。</li>
+  </ul>
+  <h3>残課題</h3>
+  <p>マスターが (1)(2) を確定後、<code>INST_27</code> を <code>docs/instructions/</code> に確定版として保存 → 実装。INST_28/29 は INST_27 レビュー後。</p>
 </section>
 </main>
 
