@@ -64,7 +64,8 @@ class PlaywrightSetupDialog(QDialog):
 
     def _start_install(self) -> None:
         self._buttons.setEnabled(False)
-        self._label.setText("Chromium をインストールしています…")
+        self._label.setText("Chromium をインストールしています…（数分かかることがあります）")
+        self._log.clear()
         self._log.setVisible(True)
 
         self._thread = QThread(self)
@@ -77,19 +78,36 @@ class PlaywrightSetupDialog(QDialog):
 
     def _on_finished(self, ok: bool, message: str) -> None:
         self._result_ok = ok
-        self._label.setText(message)
+        status = "完了" if ok else "失敗"
+        self._label.setText(f"【{status}】\n{message}")
+        self._log.appendPlainText("")
+        self._log.appendPlainText(f"--- {status} ---")
+        self._log.appendPlainText(message)
 
-        new_buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        new_buttons.clicked.connect(lambda _btn: self.accept() if ok else self.reject())
+        if ok:
+            buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+            buttons.clicked.connect(self.accept)
+        else:
+            buttons = QDialogButtonBox(
+                QDialogButtonBox.StandardButton.Retry | QDialogButtonBox.StandardButton.Close
+            )
+            buttons.button(QDialogButtonBox.StandardButton.Retry).clicked.connect(
+                self._retry_install
+            )
+            buttons.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self.reject)
 
         layout = self.layout()
         assert isinstance(layout, QVBoxLayout)
-        layout.replaceWidget(self._buttons, new_buttons)
+        layout.replaceWidget(self._buttons, buttons)
         self._buttons.deleteLater()
-        self._buttons = new_buttons
+        self._buttons = buttons
 
         if self._thread is not None:
             self._thread.quit()
             self._thread.wait()
             self._thread = None
         self._worker = None
+
+    def _retry_install(self) -> None:
+        """Re-run installer after a failed attempt."""
+        self._start_install()
