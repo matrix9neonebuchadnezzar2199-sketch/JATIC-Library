@@ -374,6 +374,7 @@ body.diary > footer {
       <tr><td>10:42</td><td>Pre-release Hardening #22〜#26 実装完了</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1042">#entry-1042</a></td></tr>
       <tr><td>10:48</td><td>配布 R1〜R4 方針整理・PyInstaller 同梱パス確認</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-1048">#entry-1048</a></td></tr>
       <tr><td>—</td><td>INST_27〜29 草案レビュー（方式 B・意思決定待ち）</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-inst27-draft">#entry-inst27-draft</a></td></tr>
+      <tr><td>10:53</td><td>INST_27 Chromium セットアップ UI 実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1053">#entry-1053</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -469,6 +470,23 @@ body.diary > footer {
   </ul>
   <h3>残課題</h3>
   <p>マスターが (1)(2) を確定後、<code>INST_27</code> を <code>docs/instructions/</code> に確定版として保存 → 実装。INST_28/29 は INST_27 レビュー後。</p>
+</section>
+
+  <section class="entry" id="entry-1053">
+  <h2>INST_27: Chromium セットアップ UI</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>案 A + ハイブリッド install を実装。<code>_resolve_install_command()</code>（<code>sys.frozen</code>）、<code>PlaywrightSetupDialog</code>、<code>_warn_playwright_chromium_missing</code> 差し替え。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-mod">M</span> playwright_env.py</li>
+    <li><span class="op op-add">+</span> playwright_setup_dialog.py</li>
+    <li><span class="op op-mod">M</span> main_window.py</li>
+    <li><span class="op op-add">+</span> tests/test_playwright_setup_dialog.py</li>
+    <li><span class="op op-add">+</span> docs/instructions/INST_27_*.md</li>
+  </ul>
+  <h3>検証</h3>
+  <p>ruff / mypy / pytest <strong>147 passed</strong>。Commit: <code>75d791d</code>。INST_28/29 は未着手。</p>
 </section>
 </main>
 

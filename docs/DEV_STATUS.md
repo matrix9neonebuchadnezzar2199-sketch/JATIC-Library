@@ -119,7 +119,7 @@
 | 優先 | 項目 | 内容 | 状態 |
 |------|------|------|------|
 | R1 | **PyInstaller ビルド検証** | `build.bat` 実行 → `dist/JATIC-Library/` で GUI 起動・DL・保管庫まで smoke test | 未 |
-| R2 | **Playwright 同梱方針** | 配布 exe から `scrape` / 404 再スクレイプが動くよう Chromium の配置または初回セットアップ手順を確定 | 未 |
+| R2 | **Playwright 同梱方針** | 方式 B: アプリ内インストール UI（INST_27 完了）。ビルド同梱・初回 DL 検証は R1/R4 残 | 一部 |
 | R3 | **配布物の形** | onedir zip 化、バージョン表記、README の「exe 向けクイックスタート」 | 未 |
 | R4 | **クリーン環境確認** | Python / uv 未インストールの Windows 10/11 で R1 成果物のみ動作確認 | 未 |
 
@@ -160,7 +160,7 @@
 ## 6. 検証基準（開発時）
 
 ```text
-uv run pytest -q    # 139 passed（2026-05-22 時点・INST_23 以降）
+uv run pytest -q    # 147 passed（2026-05-22 時点・INST_27 以降）
 uv run ruff check src tests
 uv run mypy
 ```
