@@ -3,7 +3,9 @@
 本ドキュメントが **実装進捗の正本** です。README の機能説明は製品ビジョン、本ファイルは事実ベースの状態を記録します。
 
 **最終更新:** 2026-05-22  
-**現在のマイルストーン:** **v0.1.0-beta.1** 公開済（pre-release）。残りは P11 機能・R4 事後検証・任意改善
+**現在のマイルストーン:** **v0.1.0-beta.1** 公開済（pre-release）。**`v0.1.0-beta.2` は [INST_32 計測](instructions/PERF_MEASUREMENT_RULES.md) 達成後のみ**（実装は land 済み・計測待ち）。
+
+**性能計測ルール（正本）:** [instructions/PERF_MEASUREMENT_RULES.md](instructions/PERF_MEASUREMENT_RULES.md) — 実装と計測は別タイミング可。未達のまま beta タグ付与しない。
 
 ---
 
@@ -17,7 +19,7 @@
 | **Hardening + 配布パイプライン** | 完了 | #22〜#29 |
 | **QA 回帰修正** | 完了 | 2026-05-22 — dirty/ソート/テーマ/エクスポート等（`QA_REVIEW_2026-05-22.md`） |
 | **INST_31 信頼性・性能** | 完了 | 2026-05-22 — 保管庫キャッシュ・404/HTTP ロック・統合 CSV タグ・CSV OOM |
-| **INST_32 保管庫・CSV** | 完了 | 2026-05-22 — キャッシュ掃除・ROLE_MONTH_ITEM・ストリーミング merge |
+| **INST_32 保管庫・CSV** | 実装完了・**計測待ち** | 2026-05-22 — land 済。ラボ計測（#1 表示 / #3 RSS）後にクローズ |
 
 ---
 
@@ -38,7 +40,7 @@
 | 29 | smoke test・Release | 完了 | 自動ゲート + 文書化（[BETA_TEST_LOG](BETA_TEST_LOG.md)） |
 | 30 | 公開後ドキュメント | 完了 | USER_MANUAL / README / DEV_SETUP |
 | 31 | 信頼性・性能パッチ | 完了 | `INST_31` #1〜#5（`ff7ef52`〜`8ad846e`） |
-| 32 | 保管庫応答性・ツリー／CSV | 完了 | `INST_32` #1〜#3（`b3944a7`〜） |
+| 32 | 保管庫応答性・ツリー／CSV | 実装完了・計測待ち | `INST_32` #1〜#3 land 済。計測: [PERF_MEASUREMENT_RULES](instructions/PERF_MEASUREMENT_RULES.md) |
 
 ---
 

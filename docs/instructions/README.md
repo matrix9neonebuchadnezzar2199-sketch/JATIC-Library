@@ -4,6 +4,8 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 
 **進捗の正本:** [../DEV_STATUS.md](../DEV_STATUS.md)
 
+**性能計測ルール（INST_32 以降）:** [PERF_MEASUREMENT_RULES.md](PERF_MEASUREMENT_RULES.md) — 実装 land と計測は別タイミング可。beta タグは計測「達成」後のみ。
+
 | # | ファイル | タイトル | 状態 |
 |---|----------|----------|------|
 | 01 | [INST_01_project_init.md](INST_01_project_init.md) | プロジェクト初期化 | **完了** |
@@ -37,7 +39,7 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 29 | [INST_29_release_smoke_test.md](INST_29_release_smoke_test.md) | smoke test・Release | **完了** |
 | 30 | [INST_30_release_docs.md](INST_30_release_docs.md) | 公開後ドキュメント（R5〜R7） | **完了** |
 | 31 | [INST_31_reliability_perf_patch.md](INST_31_reliability_perf_patch.md) | 信頼性・性能パッチ（#1〜#5） | **完了** |
-| 32 | [INST_32_library_tab_responsiveness.md](INST_32_library_tab_responsiveness.md) | 保管庫応答性フォローアップ・ツリー／CSV 結合 | **完了** |
+| 32 | [INST_32_library_tab_responsiveness.md](INST_32_library_tab_responsiveness.md) | 保管庫応答性フォローアップ・ツリー／CSV 結合 | **実装完了・計測待ち** |
 
 ## Post-beta 改善（#31〜#32）
 
