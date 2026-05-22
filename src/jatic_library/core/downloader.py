@@ -81,6 +81,7 @@ class Downloader:
     ) -> None:
         self._settings = settings
         self._repo = repo
+        self._rescrape_lock = asyncio.Lock()
 
     async def download_publication(
         self,
@@ -243,19 +244,20 @@ class Downloader:
         raise last_error
 
     async def _maybe_rescrape_on_404(self, exc: Exception, rescrape_state: dict[str, bool]) -> bool:
-        if rescrape_state.get("done"):
-            return False
         status_code = None
         if isinstance(exc, httpx.HTTPStatusError):
             status_code = exc.response.status_code
         if status_code != httpx.codes.NOT_FOUND:
             return False
-        logger.warning("404 for ZIP URL, running one-time Playwright rescrape")
-        from jatic_library.core.playwright_scraper import scrape_and_save_targets
+        async with self._rescrape_lock:
+            if rescrape_state.get("done"):
+                return False
+            logger.warning("404 for ZIP URL, running one-time Playwright rescrape")
+            from jatic_library.core.playwright_scraper import scrape_and_save_targets
 
-        await scrape_and_save_targets()
-        rescrape_state["done"] = True
-        return True
+            await scrape_and_save_targets()
+            rescrape_state["done"] = True
+            return True
 
     def _refresh_target(self, target: Target) -> Target:
         master = load_overrides(TARGETS_CACHE_PATH)
