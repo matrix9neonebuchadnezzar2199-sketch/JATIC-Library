@@ -2,57 +2,58 @@
 
 ## 目的
 
-`_warn_playwright_chromium_missing` は現在 `run_scrape()` のみで呼ばれる。
-しかし **404 再ダウンロード時の自動再スクレイプ**（INST_13）でも Playwright が必要なため、
-exe 配布環境で Chromium 未導入だと「更新確認」中に黙って失敗する可能性がある。
+`_warn_playwright_chromium_missing()` は `_start_worker(..., require_playwright=True)` 経由で
+呼ばれているが、以下 2 経路では未適用のため、Chromium 未導入の exe 環境で
+「黙って失敗する」可能性がある。
 
-ガードを共通化し、Playwright を **使う可能性のある経路**すべてに適用する。
+1. **`run_update_check`**: `_start_worker` を経由しない独自実装のため `require_playwright` フラグが効かない。
+2. **`_on_redownload_file`**: 404 再ダウンロード時に `Downloader._maybe_rescrape_on_404` で Playwright へ連鎖するが、`require_playwright=False`（デフォルト）。
+
+両経路に **事前ガード**を追加し、exe 配布版での事故を防ぐ。
 
 ## 対象ファイル
 
 - `src/jatic_library/ui/main_window.py`
-- `src/jatic_library/core/playwright_env.py`（既存ヘルパの再利用）
-- `src/jatic_library/core/scheduler.py`（任意：エラー型を明確化）
-- `tests/test_playwright_env.py` または `tests/test_main_window.py`（新規 or 拡張）
+- `tests/test_playwright_guard.py`（新規）
+
+`_warn_playwright_chromium_missing()` 本体と `chromium_missing_message()` /
+`INSTALL_HINT` は既存のまま流用する。新規ヘルパーは不要。
 
 ## 実装手順
 
-### 1. ガードを共通ヘルパに昇格
+### 1. `run_update_check` の冒頭にガード挿入
+
+`progress_dialog.show()` の **前** に呼ぶ。警告が出たらダイアログも開かずに return。
 
 ```python
-def _require_playwright_chromium(self, *, reason: str) -> bool:
-    """Chromium 未導入時は警告ダイアログを出し False を返す。"""
-    hint = chromium_missing_message()
-    if hint is None:
-        return True
-    QMessageBox.warning(self, "Playwright のセットアップ", f"{reason}\n\n{hint}")
-    return False
+if self._warn_playwright_chromium_missing():
+    return
 ```
 
-### 2. 呼び出し箇所
+### 2. `_on_redownload_file` を `require_playwright=True` で起動
 
-- `run_scrape()`：既存どおり呼ぶ。
-- `run_update_check(force=...)`：**`targets.json` が無い場合**にガード発動。
-  常時要求すると通常運用が止まるため、短期対応はこの条件のみ。
-- `_on_redownload_file()`：404 再スクレイプが走る可能性がある場合にガード（`targets.json` 欠如時）。
+`_start_worker` の呼び出し引数に `require_playwright=True` を追加する。
 
-### 3. Scheduler 層からの明示エラー（推奨・任意）
+### 3. `run_scrape` は現状維持
 
-`scheduler.run_check()` が再スクレイプ中に専用例外を投げ、
-`MainWindow` でキャッチして案内するパターンも採用可能。
-本指示書では UI 側ガードを最低ラインとする。
+既に `require_playwright=True` で起動しているため変更不要。
+
+### 4. 事後判定の維持
+
+`run_update_check` の `_on_success` 内の `failures_look_like_missing_browser` は
+事前ガード通過後の保険として残す（二段構え）。
 
 ## 受け入れ基準
 
-- Chromium 未導入の環境で「サイト再スキャン」を押すと従来どおり警告が出る。
-- 同環境で「今すぐ更新確認」を押した時、`targets.json` が無ければ警告が出て worker は開始しない。
-- 404 再ダウンロード経路でも、Chromium 必須となった場合に警告される。
+- Chromium 未導入で「今すぐ更新確認」→ `progress_dialog` 前に警告、worker 未起動。
+- Chromium 未導入で「再ダウンロード」→ 警告、worker 未起動。
+- 「サイト再スキャン」は従来どおり（変更なし）。
+- Chromium 導入済みでは全経路が従来どおり動作。
+- `targets.json` の有無はガード判定に影響しない。
 
 ## テスト
 
-- `test_guard_blocks_scrape_when_chromium_missing`
-- `test_guard_blocks_check_when_targets_missing_and_chromium_missing`
-- `test_guard_passes_when_chromium_available`
+`tests/test_playwright_guard.py` に 4 件（update_check blocked/proceeds、redownload blocked/proceeds）。
 
 ## コミット
 

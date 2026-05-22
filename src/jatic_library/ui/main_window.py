@@ -260,6 +260,9 @@ class MainWindow(QMainWindow):
 
     def run_update_check(self, *, force: bool) -> None:
         """Run scheduler check in a background thread."""
+        if self._warn_playwright_chromium_missing():
+            return
+
         progress_dialog = DownloadProgressDialog(self)
         progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
         progress_dialog.show()
@@ -380,7 +383,12 @@ class MainWindow(QMainWindow):
             self._refresh_data_tabs()
             self.statusBar().showMessage("再ダウンロードが完了しました", 8000)
 
-        self._start_worker(_task, busy_message="再ダウンロード中…", on_success=_on_success)
+        self._start_worker(
+            _task,
+            busy_message="再ダウンロード中…",
+            on_success=_on_success,
+            require_playwright=True,
+        )
 
     def _on_delete_file(self, file_item: object) -> None:
         if not isinstance(file_item, LibraryFileItem):
