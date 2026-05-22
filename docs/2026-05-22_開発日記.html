@@ -384,6 +384,7 @@ body.diary > footer {
       <tr><td>14:52</td><td>INST_31 #2 404 再スクレイプ asyncio ロック</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1452">#entry-1452</a></td></tr>
       <tr><td>14:54</td><td>INST_31 #3 HTTP/1.1 フォールバック競合防止</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1454">#entry-1454</a></td></tr>
       <tr><td>14:56</td><td>INST_31 #4 統合 CSV 削除時タグ掃除</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1456">#entry-1456</a></td></tr>
+      <tr><td>14:58</td><td>INST_31 #5 CSV ローダ例外・型精緻化</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1458">#entry-1458</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -585,6 +586,15 @@ body.diary > footer {
   <p>DB 行が無い <code>merged</code> でも <code>delete_tag_assignments</code> を実行。DB 削除とタグ削除を同一 <code>try</code> にまとめ分岐数を抑制。</p>
   <h3>検証</h3>
   <p><code>test_delete_merged_csv_removes_tag_assignments</code>。Commit: <code>3b9b34a</code></p>
+</section>
+
+  <section class="entry" id="entry-1458">
+  <h2>INST_31 #5: CSV ローダの型・例外精緻化</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p><code>read_csv_frame_from_bytes</code> を <code>IO[bytes]</code> 化。<code>MemoryError</code> は握り潰さず再送出、その他のみ <code>CsvLoadError</code> にラップ。</p>
+  <h3>検証</h3>
+  <p>INST_31 全 5 件完了。pytest <strong>165 passed</strong>。Commit: <code>8ad846e</code>（docs: <code>instructions/README</code> 完了化は続コミット）</p>
 </section>
 </main>
 
