@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import ssl
 from types import TracebackType
 
@@ -29,6 +30,7 @@ class JarticHttpClient:
         self._timeout = timeout_sec
         self._client: httpx.AsyncClient | None = None
         self._use_http2 = not _http1_only
+        self._fallback_lock = asyncio.Lock()
 
     async def __aenter__(self) -> JarticHttpClient:
         await self._ensure_client()
@@ -55,15 +57,18 @@ class JarticHttpClient:
 
     async def _fallback_to_http1(self) -> None:
         global _http1_only, _fallback_logged
-        if self._client is not None:
-            await self._client.aclose()
-            self._client = None
-        _http1_only = True
-        self._use_http2 = False
-        if not _fallback_logged:
-            logger.warning("HTTP/2 unavailable, fell back to HTTP/1.1")
-            _fallback_logged = True
-        await self._ensure_client()
+        async with self._fallback_lock:
+            if not self._use_http2 and self._client is not None:
+                return
+            if self._client is not None:
+                await self._client.aclose()
+                self._client = None
+            _http1_only = True
+            self._use_http2 = False
+            if not _fallback_logged:
+                logger.warning("HTTP/2 unavailable, fell back to HTTP/1.1")
+                _fallback_logged = True
+            await self._ensure_client()
 
     async def head(self, url: str) -> httpx.Response:
         """Send HEAD with optional HTTP/2 fallback."""

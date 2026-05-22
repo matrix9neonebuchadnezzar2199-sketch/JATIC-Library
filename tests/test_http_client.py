@@ -1,5 +1,8 @@
 """Tests for HTTP client."""
 
+import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
 import pytest
 
@@ -52,3 +55,22 @@ async def test_stream_get() -> None:
         await response.aclose()
         await client.aclose()
     assert body == b"data"
+
+
+@pytest.mark.asyncio
+async def test_fallback_to_http1_is_idempotent_under_concurrency() -> None:
+    client = JarticHttpClient(timeout_sec=5.0)
+    mock_httpx = MagicMock()
+    mock_httpx.aclose = AsyncMock()
+    client._client = mock_httpx
+    client._use_http2 = True
+
+    with patch(
+        "jatic_library.core.http_client.httpx.AsyncClient",
+        return_value=MagicMock(),
+    ) as mock_ctor:
+        await asyncio.gather(*[client._fallback_to_http1() for _ in range(5)])
+
+    assert mock_httpx.aclose.await_count == 1
+    assert client._use_http2 is False
+    assert mock_ctor.call_count == 1
