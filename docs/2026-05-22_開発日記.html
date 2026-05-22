@@ -359,7 +359,7 @@ body.diary > footer {
 <body class="diary">
 <header>
   <h1>2026-05-22 開発日記</h1>
-  <p class="subtitle">JATIC-Library — 品質チェック修正</p>
+  <p class="subtitle">JATIC-Library — 品質チェック・Pre-release Hardening</p>
 </header>
 
 <section class="diary-toc">
@@ -371,6 +371,7 @@ body.diary > footer {
     <tbody>
       <tr><td>08:38</td><td>品質チェック失敗の修正（ruff / mypy / pytest）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-0838">#entry-0838</a></td></tr>
       <tr><td>09:15</td><td>UI_FLOW・INST_22〜26・DEV_STATUS ドキュメント整備</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-0915">#entry-0915</a></td></tr>
+      <tr><td>10:42</td><td>Pre-release Hardening #22〜#26 実装完了</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1042">#entry-1042</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -414,6 +415,26 @@ body.diary > footer {
   </ul>
   <h3>設計判断</h3>
   <p>削除シーケンス図は <code>INST_24</code> 適用後の目標順（DB→manifest→file）を記載。現行コードは未変更（B 段階で実装）。</p>
+</section>
+
+  <section class="entry" id="entry-1042">
+  <h2>Pre-release Hardening #22〜#26 実装完了</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>指示書 <code>INST_22</code>〜<code>INST_26</code> を順に実装。#23 は設定タブの <strong>dirty インジケータ</strong>（タイトル <code>*</code>、保存ボタン、更新チェック前ガード）と <code>tests/test_settings_dirty.py</code>（6 件）。</p>
+  <h3>変更ファイル（代表）</h3>
+  <ul class="changes">
+    <li><span class="op op-mod">M</span> library_tab.py（#22 ソートデバウンス）</li>
+    <li><span class="op op-mod">M</span> settings_tab.py, main_window.py（#23）</li>
+    <li><span class="op op-mod">M</span> region_selector.py（<code>stateChanged</code> 引数不一致修正）</li>
+    <li><span class="op op-mod">M</span> library_tab / repository（#24 削除順序）</li>
+    <li><span class="op op-mod">M</span> app.py / downloader（#25 Playwright ガード）</li>
+    <li><span class="op op-mod">M</span> repository.py（#26 WAL timeout・checkpoint）</li>
+    <li><span class="op op-add">+</span> tests/test_settings_dirty.py 他</li>
+    <li><span class="op op-mod">M</span> docs/DEV_STATUS.md, instructions/README.md</li>
+  </ul>
+  <h3>検証</h3>
+  <p><code>uv run ruff check</code> / <code>mypy</code> / <code>pytest</code> すべて成功。最終 HEAD: <code>3e5da3a</code>（#23）。コミット列: <code>77aacf6</code>（#22）→ <code>3e5da3a</code>（#23）。#24〜#26 は先行 push 済み。</p>
 </section>
 </main>
 
