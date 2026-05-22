@@ -7,7 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from jatic_library.core.csv_loader import CsvLoadError, find_first_csv_name, merge_region_zip_csvs
+from jatic_library.core.csv_loader import (
+    CsvLoadError,
+    find_first_csv_name,
+    merge_region_zip_csvs,
+    read_csv_frame_from_bytes,
+)
 
 
 def test_find_first_csv_in_zip(tmp_path: Path) -> None:
@@ -38,3 +43,14 @@ def test_find_first_csv_missing(tmp_path: Path) -> None:
 
     with pytest.raises(CsvLoadError):
         find_first_csv_name(zip_path)
+
+
+def test_memory_error_is_not_swallowed(monkeypatch: pytest.MonkeyPatch) -> None:
+    import polars as pl
+
+    def boom(*_args: object, **_kwargs: object) -> pl.DataFrame:
+        raise MemoryError("simulated OOM")
+
+    monkeypatch.setattr(pl, "read_csv", boom)
+    with pytest.raises(MemoryError):
+        read_csv_frame_from_bytes(b"a,b\n1\n")

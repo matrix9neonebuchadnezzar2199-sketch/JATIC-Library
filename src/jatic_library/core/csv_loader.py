@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import zipfile
 from pathlib import Path
+from typing import IO
 
 import polars as pl
 
@@ -13,12 +14,10 @@ class CsvLoadError(Exception):
     """Raised when CSV data cannot be read from an archive."""
 
 
-def _count_newlines_in_binary_stream(stream: zipfile.ZipExtFile | object) -> int:
+def _count_newlines_in_binary_stream(stream: IO[bytes]) -> int:
     """Count newline bytes while streaming."""
     total = 0
-    while chunk := stream.read(1024 * 1024):  # type: ignore[union-attr]
-        if isinstance(chunk, str):
-            chunk = chunk.encode("utf-8")
+    while chunk := stream.read(1024 * 1024):
         total += chunk.count(b"\n")
     return total
 
@@ -79,7 +78,7 @@ def read_csv_frame_from_bytes(raw: bytes) -> pl.DataFrame:
                 infer_schema_length=0,
                 ignore_errors=True,
             )
-        except Exception as exc:
+        except (UnicodeDecodeError, pl.exceptions.ComputeError) as exc:
             last_error = exc
     raise CsvLoadError(str(last_error or "Could not decode CSV"))
 
