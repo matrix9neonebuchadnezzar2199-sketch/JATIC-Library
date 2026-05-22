@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -10,8 +11,10 @@ import pytest
 from jatic_library.core.playwright_env import (
     INSTALL_HINT,
     _find_chromium_in_cache,
+    chromium_is_bundled,
     chromium_is_ready,
     chromium_missing_message,
+    configure_playwright_runtime,
     failures_look_like_missing_browser,
     install_chromium,
 )
@@ -34,6 +37,23 @@ def test_chromium_missing_message_when_ready(tmp_path: Path) -> None:
         return_value=exe,
     ):
         assert chromium_missing_message() is None
+
+
+def test_chromium_is_bundled_when_frozen_and_cache_present(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    bundle_root = tmp_path / "ms-playwright"
+    chrome_dir = bundle_root / "chromium-1" / "chrome-win64"
+    chrome_dir.mkdir(parents=True)
+    (chrome_dir / "chrome.exe").write_bytes(b"x")
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "_MEIPASS", str(tmp_path), raising=False)
+    configure_playwright_runtime()
+    assert chromium_is_bundled() is True
+    ok, msg = install_chromium()
+    assert ok is True
+    assert "同梱" in msg
 
 
 def test_find_chromium_in_cache(tmp_path: Path) -> None:
@@ -64,7 +84,7 @@ def test_install_success_when_cache_has_chrome_after_exit_zero(
         lambda: (["fake"], None),
     )
     monkeypatch.setattr(
-        "jatic_library.core.playwright_env._browsers_cache_dir",
+        "jatic_library.core.playwright_env._user_browsers_cache_dir",
         lambda: tmp_path,
     )
     monkeypatch.setattr(

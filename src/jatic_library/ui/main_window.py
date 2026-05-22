@@ -31,6 +31,7 @@ from jatic_library.core.library_scanner import LibraryFileItem
 from jatic_library.core.manifest import Manifest
 from jatic_library.core.playwright_env import (
     INSTALL_HINT,
+    chromium_is_bundled,
     chromium_is_ready,
     failures_look_like_missing_browser,
 )
@@ -230,7 +231,7 @@ class MainWindow(QMainWindow):
 
     def _warn_playwright_chromium_missing(self) -> bool:
         """Show setup dialog when Chromium is missing. Returns True if blocked."""
-        if chromium_is_ready():
+        if chromium_is_bundled() or chromium_is_ready():
             return False
 
         dialog = PlaywrightSetupDialog(self)

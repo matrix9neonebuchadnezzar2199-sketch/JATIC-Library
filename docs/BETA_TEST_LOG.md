@@ -61,9 +61,9 @@
 
 | # | 項目 | 期待結果 | 結果 | 実測 |
 |---|------|----------|------|------|
-| D-01 | zip サイズ | 約 136 MB | pass | 136.1 MB |
-| D-02 | 展開後（Chromium 前） | 350〜450 MB | pass | onedir 展開済み（build 時） |
-| D-03 | Chromium 後 | 550〜650 MB | 未計測 | 初回 DL 後にテスター記入可 |
+| D-01 | zip サイズ | 約 450 MB（Chromium 同梱） | pass | 276.4 MB（圧縮後） |
+| D-02 | 展開後 onedir | 650〜750 MB | pass | 707.6 MB（Chromium 同梱） |
+| D-03 | 初回ブラウザ DL | 不要 | pass | `build.bat` で同梱 |
 | D-04 | 初回起動 | 5 秒以内 | 未計測 | 手動 |
 | D-05 | `_internal/` datas | 過不足なし | pass | `playwright/driver/node.exe` 存在 |
 | D-06 | ログ | INFO+、機密なし | pass | 設計どおり `%LOCALAPPDATA%` |

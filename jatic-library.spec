@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller spec for JATIC-Library (onedir)."""
+"""PyInstaller spec for JATIC-Library (onedir, Chromium bundled)."""
 
 from __future__ import annotations
 
@@ -18,21 +18,36 @@ sys.path.pop(0)
 
 playwright_root = Path(playwright.__file__).parent
 playwright_driver = playwright_root / "driver"
+browser_cache = root / "build" / "browser_cache"
+
+_CHROMIUM_GLOBS = (
+    "chromium-*/chrome-win/chrome.exe",
+    "chromium-*/chrome-win64/chrome.exe",
+)
+
+
+def _browser_bundle_ready(cache: Path) -> bool:
+    if not cache.is_dir():
+        return False
+    return any(cache.glob(pat) for pat in _CHROMIUM_GLOBS)
+
+
+if not _browser_bundle_ready(browser_cache):
+    raise SystemExit(
+        "Chromium bundle missing. Run: uv run python scripts/prepare_browser_bundle.py\n"
+        "Or use build.bat which runs this step automatically."
+    )
 
 hiddenimports = [
     "pyqtgraph",
-    # Playwright internal driver (INST_27 frozen install path)
     "playwright._impl._driver",
     "playwright.sync_api",
     "playwright.async_api",
-    # Pydantic v2
     "pydantic",
     "pydantic.deprecated.decorator",
     "pydantic_core",
-    # Loguru
     "loguru",
     "loguru._defaults",
-    # Windows toast
     "win11toast",
     "zoneinfo",
 ]
@@ -41,6 +56,7 @@ datas = [
     (str(root / "src" / "jatic_library" / "resources"), "jatic_library/resources"),
     (str(root / "src" / "jatic_library" / "ui" / "themes"), "jatic_library/ui/themes"),
     (str(playwright_driver), "playwright/driver"),
+    (str(browser_cache), "ms-playwright"),
 ]
 
 a = Analysis(
@@ -88,5 +104,4 @@ coll = COLLECT(
     name="JATIC-Library",
 )
 
-# APP_VERSION is read by build.bat via `from jatic_library import __version__`
 _ = APP_VERSION

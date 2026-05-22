@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QApplication, QMessageBox
 
 from jatic_library.constants import APP_DATA_DIR, DB_PATH, LOG_DIR
 from jatic_library.core.logger import setup_logging
+from jatic_library.core.playwright_env import configure_playwright_runtime
 from jatic_library.core.repository import Repository
 from jatic_library.paths import default_save_root, normalize_save_root
 from jatic_library.settings.store import ConfigStore
@@ -19,6 +20,7 @@ from jatic_library.ui.theme import apply_theme
 
 def run_app(*, run_startup_check: bool = True) -> int:
     """Start the PySide6 GUI."""
+    configure_playwright_runtime()
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )

@@ -14,9 +14,9 @@ INSTALL_COMMAND = "uv run playwright install chromium"
 
 INSTALL_HINT = (
     "Playwright の Chromium が未インストールです。\n\n"
-    "プロジェクト直下で次を実行してください:\n"
+    "開発環境では次を実行してください:\n"
     f"  {INSTALL_COMMAND}\n\n"
-    "完了後、アプリを再起動して更新チェックをやり直してください。"
+    "配布版 exe では Chromium が同梱されている必要があります。"
 )
 
 PROXY_HINT = (
@@ -24,37 +24,67 @@ PROXY_HINT = (
     "  set HTTPS_PROXY=http://your-proxy:port"
 )
 
-_CHROME_EXE_NAMES = ("chrome.exe", "chromium.exe")
+_CHROMIUM_GLOB_PATTERNS = (
+    "chromium-*/chrome-win/chrome.exe",
+    "chromium-*/chrome-win64/chrome.exe",
+    "chromium_headless_shell-*/chrome-win/chrome.exe",
+    "chromium_headless_shell-*/chrome-win64/chrome.exe",
+)
 
 
-def _browsers_cache_dir() -> Path:
-    """Default Playwright browser download location on Windows."""
+def _user_browsers_cache_dir() -> Path:
+    """Per-user Playwright browser download location (development / fallback)."""
     local = os.environ.get("LOCALAPPDATA")
     if local:
         return Path(local) / "ms-playwright"
     return Path.home() / "AppData" / "Local" / "ms-playwright"
 
 
-def _apply_browsers_env() -> Path:
-    """Pin browser cache path for install subprocess and runtime checks."""
-    cache = _browsers_cache_dir()
+def _bundled_browsers_dir() -> Path | None:
+    """Return ``_internal/ms-playwright`` when the frozen build ships Chromium."""
+    if not getattr(sys, "frozen", False):
+        return None
+    meipass = getattr(sys, "_MEIPASS", None)
+    if not meipass:
+        return None
+    root = Path(meipass) / "ms-playwright"
+    if _find_chromium_in_cache(root) is None:
+        return None
+    return root
+
+
+def configure_playwright_runtime() -> Path:
+    """Set ``PLAYWRIGHT_BROWSERS_PATH`` before any Playwright import (call at startup)."""
+    bundled = _bundled_browsers_dir()
+    if bundled is not None:
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(bundled)
+        return bundled
+    cache = _user_browsers_cache_dir()
     cache.mkdir(parents=True, exist_ok=True)
     os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(cache)
     return cache
 
 
+def chromium_is_bundled() -> bool:
+    """True when running a frozen build that includes Chromium under ``_internal``."""
+    return _bundled_browsers_dir() is not None
+
+
+def _active_browsers_dir() -> Path:
+    """Currently configured browser cache (bundled or per-user)."""
+    bundled = _bundled_browsers_dir()
+    if bundled is not None:
+        return bundled
+    return _user_browsers_cache_dir()
+
+
 def _find_chromium_in_cache(cache: Path | None = None) -> Path | None:
-    """Locate Chromium under ``ms-playwright`` when Playwright API resolution fails."""
-    root = cache or _browsers_cache_dir()
+    """Locate Chromium under a ``ms-playwright``-style directory tree."""
+    root = cache if cache is not None else _active_browsers_dir()
     if not root.is_dir():
         return None
     candidates: list[Path] = []
-    for pattern in (
-        "chromium-*/chrome-win/chrome.exe",
-        "chromium-*/chrome-win64/chrome.exe",
-        "chromium_headless_shell-*/chrome-win/chrome.exe",
-        "chromium_headless_shell-*/chrome-win64/chrome.exe",
-    ):
+    for pattern in _CHROMIUM_GLOB_PATTERNS:
         candidates.extend(root.glob(pattern))
     existing = [path for path in candidates if path.is_file()]
     if not existing:
@@ -64,7 +94,7 @@ def _find_chromium_in_cache(cache: Path | None = None) -> Path | None:
 
 def chromium_executable_path() -> Path | None:
     """Return Chromium executable path if Playwright can resolve it."""
-    _apply_browsers_env()
+    configure_playwright_runtime()
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -97,7 +127,11 @@ def chromium_missing_message() -> str | None:
 
 def _subprocess_env(base: dict[str, str] | None) -> dict[str, str]:
     """Build environment for ``playwright install`` with a stable browser cache."""
-    cache = _apply_browsers_env()
+    if chromium_is_bundled():
+        cache = _bundled_browsers_dir()
+        assert cache is not None
+    else:
+        cache = configure_playwright_runtime()
     env = dict(os.environ)
     if base is not None:
         env.update(base)
@@ -140,7 +174,7 @@ def _resolve_install_command() -> tuple[list[str] | None, dict[str, str] | None]
 
 
 def install_chromium(on_line: ProgressLine | None = None) -> tuple[bool, str]:
-    """Run Playwright Chromium installer.
+    """Run Playwright Chromium installer (development / repair only when not bundled).
 
     Args:
         on_line: Optional callback for each stdout line from the installer.
@@ -148,7 +182,12 @@ def install_chromium(on_line: ProgressLine | None = None) -> tuple[bool, str]:
     Returns:
         ``(success, message)`` for UI display.
     """
-    cache = _apply_browsers_env()
+    if chromium_is_bundled():
+        exe = _find_chromium_in_cache()
+        detail = f"\n\n同梱: {exe}" if exe else ""
+        return True, f"Chromium は配布物に同梱されています。{detail}"
+
+    cache = configure_playwright_runtime()
     cmd, env = _resolve_install_command()
     if cmd is None:
         return False, (
@@ -188,7 +227,7 @@ def install_chromium(on_line: ProgressLine | None = None) -> tuple[bool, str]:
     if code != 0:
         return False, f"インストール失敗 (exit={code})\n\n{PROXY_HINT}"
 
-    _apply_browsers_env()
+    configure_playwright_runtime()
     cached = _find_chromium_in_cache()
     if chromium_is_ready():
         detail = ""

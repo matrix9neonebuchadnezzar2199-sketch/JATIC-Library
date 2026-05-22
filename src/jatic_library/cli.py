@@ -13,6 +13,7 @@ from jatic_library.constants import DB_PATH, LOG_DIR
 from jatic_library.core.downloader import Downloader, resolve_targets
 from jatic_library.core.logger import setup_logging
 from jatic_library.core.notifier import DownloadSummary, Notifier
+from jatic_library.core.playwright_env import configure_playwright_runtime
 from jatic_library.core.playwright_scraper import scrape_and_save_targets
 from jatic_library.core.repository import Repository
 from jatic_library.core.scheduler import run_cli_check
@@ -38,6 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
+    configure_playwright_runtime()
     parser = build_parser()
     args = parser.parse_args(argv)
 
