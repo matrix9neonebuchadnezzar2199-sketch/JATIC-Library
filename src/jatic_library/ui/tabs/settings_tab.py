@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal, cast
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QSignalBlocker, Signal
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -36,6 +36,7 @@ class SettingsTab(QWidget):
     config_saved = Signal(AppConfig)
     check_requested = Signal(bool)
     scrape_requested = Signal()
+    dirty_changed = Signal(bool)
 
     def __init__(
         self,
@@ -46,7 +47,10 @@ class SettingsTab(QWidget):
         super().__init__(parent)
         self._config = config
         self._store = store
+        self._dirty = False
         self._build_ui()
+        self._wire_dirty_signals()
+        self._save_button.setEnabled(False)
         self.load_from_config()
 
     def _build_ui(self) -> None:
@@ -168,13 +172,13 @@ class SettingsTab(QWidget):
         right_layout.addWidget(github_group)
 
         actions = QHBoxLayout()
-        save_btn = QPushButton("設定を保存")
-        save_btn.clicked.connect(self.save_to_store)
+        self._save_button = QPushButton("設定を保存")
+        self._save_button.clicked.connect(self.save_to_store)
         check_btn = QPushButton("今すぐ更新確認")
         check_btn.clicked.connect(lambda: self.check_requested.emit(True))
         scrape_btn = QPushButton("サイト再スキャン")
         scrape_btn.clicked.connect(self.scrape_requested.emit)
-        actions.addWidget(save_btn)
+        actions.addWidget(self._save_button)
         actions.addWidget(check_btn)
         actions.addWidget(scrape_btn)
         actions.addStretch()
@@ -189,6 +193,43 @@ class SettingsTab(QWidget):
         if path:
             self._save_root.setText(path)
 
+    def _wire_dirty_signals(self) -> None:
+        """Connect editor widgets to the dirty-state handler."""
+        self._region_selector.selection_changed.connect(self._mark_dirty)
+        self._save_root.textChanged.connect(self._mark_dirty)
+        self._theme.currentIndexChanged.connect(self._mark_dirty)
+        self._auto_check.toggled.connect(self._mark_dirty)
+        self._interval_hours.valueChanged.connect(self._mark_dirty)
+        self._concurrency.valueChanged.connect(self._mark_dirty)
+        self._retry.valueChanged.connect(self._mark_dirty)
+        self._timeout.valueChanged.connect(self._mark_dirty)
+        self._notify_new.toggled.connect(self._mark_dirty)
+        self._notify_complete.toggled.connect(self._mark_dirty)
+        self._notify_error.toggled.connect(self._mark_dirty)
+        self._log_level.currentIndexChanged.connect(self._mark_dirty)
+        self._log_retention.currentIndexChanged.connect(self._mark_dirty)
+        self._enable_tray.toggled.connect(self._mark_dirty)
+        self._minimize_tray.toggled.connect(self._mark_dirty)
+        self._start_with_windows.toggled.connect(self._mark_dirty)
+        self._github_enabled.toggled.connect(self._mark_dirty)
+        self._github_repo.textChanged.connect(self._mark_dirty)
+        self._github_auto_commit.toggled.connect(self._mark_dirty)
+
+    def _mark_dirty(self, *_: object) -> None:
+        self._set_dirty(True)
+
+    def _set_dirty(self, value: bool) -> None:
+        if self._dirty == value:
+            return
+        self._dirty = value
+        self.dirty_changed.emit(value)
+        self._save_button.setEnabled(value)
+
+    @property
+    def is_dirty(self) -> bool:
+        """Return True when widget edits have not been saved."""
+        return self._dirty
+
     def _update_region_summary(self) -> None:
         self._region_summary.setText(self._region_selector.selection_summary())
 
@@ -196,6 +237,28 @@ class SettingsTab(QWidget):
         """Populate widgets from ``self._config``."""
         cfg = self._config
         root = cfg.download.save_root or default_save_root()
+        blockers = [
+            QSignalBlocker(self._save_root),
+            QSignalBlocker(self._theme),
+            QSignalBlocker(self._region_selector),
+            QSignalBlocker(self._auto_check),
+            QSignalBlocker(self._interval_hours),
+            QSignalBlocker(self._concurrency),
+            QSignalBlocker(self._retry),
+            QSignalBlocker(self._timeout),
+            QSignalBlocker(self._notify_new),
+            QSignalBlocker(self._notify_complete),
+            QSignalBlocker(self._notify_error),
+            QSignalBlocker(self._log_level),
+            QSignalBlocker(self._log_retention),
+            QSignalBlocker(self._enable_tray),
+            QSignalBlocker(self._minimize_tray),
+            QSignalBlocker(self._start_with_windows),
+            QSignalBlocker(self._github_enabled),
+            QSignalBlocker(self._github_repo),
+            QSignalBlocker(self._github_auto_commit),
+        ]
+        _ = blockers
         self._save_root.setText(str(root))
         self._theme.setCurrentText(cfg.ui.theme)
         self._region_selector.set_selected_codes(cfg.targets.selected_codes)
@@ -217,6 +280,7 @@ class SettingsTab(QWidget):
         self._github_enabled.setChecked(cfg.github.enabled)
         self._github_repo.setText(str(cfg.github.repo_path) if cfg.github.repo_path else "")
         self._github_auto_commit.setChecked(cfg.github.auto_commit)
+        self._set_dirty(False)
 
     def apply_to_config(self) -> AppConfig:
         """Copy widget state into ``self._config``."""
@@ -263,6 +327,7 @@ class SettingsTab(QWidget):
             QMessageBox.critical(self, "設定", f"保存に失敗しました:\n{exc}")
             return
         self._last_check_label.setText(self._config.schedule.last_check_at or "未実行")
+        self._set_dirty(False)
         self.config_saved.emit(self._config)
         QMessageBox.information(self, "設定", "設定を保存しました。")
 

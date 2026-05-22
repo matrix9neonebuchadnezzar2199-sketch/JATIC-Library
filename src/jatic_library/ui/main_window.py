@@ -92,6 +92,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("準備完了")
 
         self._settings_tab.config_saved.connect(self._on_config_saved)
+        self._settings_tab.dirty_changed.connect(self._on_settings_dirty_changed)
         self._settings_tab.check_requested.connect(self.run_update_check)
         self._settings_tab.scrape_requested.connect(self.run_scrape)
         self._library_tab.redownload_requested.connect(self._on_redownload_file)
@@ -200,6 +201,13 @@ class MainWindow(QMainWindow):
         with contextlib.suppress(OSError):
             self._store.save(self._config)
 
+    def _base_window_title(self) -> str:
+        return f"{__app_name__} v{__version__}"
+
+    def _on_settings_dirty_changed(self, dirty: bool) -> None:
+        base = self._base_window_title()
+        self.setWindowTitle(f"{base} *" if dirty else base)
+
     def _show_about(self) -> None:
         QMessageBox.about(
             self,
@@ -263,6 +271,14 @@ class MainWindow(QMainWindow):
     def run_update_check(self, *, force: bool) -> None:
         """Run scheduler check in a background thread."""
         if self._warn_playwright_chromium_missing():
+            return
+        if self._settings_tab.is_dirty:
+            QMessageBox.warning(
+                self,
+                "設定",
+                "設定が未保存です。変更を反映するには「設定を保存」を押してください。",
+            )
+            self._tabs.setCurrentWidget(self._settings_tab)
             return
 
         progress_dialog = DownloadProgressDialog(self)

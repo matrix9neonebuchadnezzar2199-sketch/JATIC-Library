@@ -76,7 +76,7 @@ class RegionSelector(QWidget):
             for target in region_targets:
                 box = QCheckBox(target.display_name)
                 box.setChecked(True)
-                box.stateChanged.connect(self.selection_changed.emit)
+                box.stateChanged.connect(lambda _state: self.selection_changed.emit())
                 self._boxes[target.code] = box
                 group_layout.addWidget(box)
             if region_targets:
