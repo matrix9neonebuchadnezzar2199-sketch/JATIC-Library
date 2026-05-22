@@ -43,7 +43,7 @@
 | 23 | 設定タブ未保存インジケータ | 未着手 | [INST_23](./instructions/INST_23_settings_dirty_indicator.md) |
 | 24 | 削除順序の見直し | 未着手 | [INST_24](./instructions/INST_24_delete_order_safety.md) |
 | 25 | Playwright ガード拡張 | 未着手 | [INST_25](./instructions/INST_25_playwright_guard_expand.md) |
-| 26 | SQLite WAL モード化 | 未着手 | [INST_26](./instructions/INST_26_sqlite_wal_mode.md) |
+| 26 | SQLite WAL モード化 | 完了 | [INST_26](./instructions/INST_26_sqlite_wal_mode.md)（timeout・checkpoint 補強） |
 | 19 | Git 自動 commit | 完了 | `git_sync`（push は手動） |
 | 20 | トレイ・スタートアップ | 完了 | Run キー登録 |
 | 21 | PyInstaller | 一部 | `build.bat` / `.spec` あり。ビルド検証・同梱方針は残 |
@@ -112,7 +112,7 @@
 | 23 | 設定タブ未保存状態の可視化 | UX |
 | 24 | 削除処理の不整合防止 | 堅牢性 |
 | 25 | Chromium 未導入時の事故防止 | 堅牢性 |
-| 26 | SQLite `database is locked` 予防 | 堅牢性 |
+| 26 | SQLite `database is locked` 予防 | 堅牢性（完了） |
 
 ### 5.1 必須（配布ブロッカー）
 

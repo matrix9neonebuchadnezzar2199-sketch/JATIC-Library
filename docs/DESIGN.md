@@ -83,6 +83,10 @@ F:\Cursor\JATIC-Library\
 
 ### 5.2 SQLite（`core/repository.py`）
 
+接続時: `PRAGMA journal_mode=WAL`, `synchronous=NORMAL`, `foreign_keys=ON`, `timeout=5.0`。
+終了時: `wal_checkpoint(TRUNCATE)` で WAL を本体へ統合。WAL 有効時は `history.db-wal` / `history.db-shm` が
+`APP_DATA_DIR` 直下に生成される（配布物に同梱しない）。
+
 ```sql
 CREATE TABLE publications (
   publish_ym TEXT PRIMARY KEY,

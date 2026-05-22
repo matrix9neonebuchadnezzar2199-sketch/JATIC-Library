@@ -1,6 +1,8 @@
 """Tests for SQLite repository."""
 
 import sqlite3
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import pytest
@@ -20,6 +22,47 @@ def repo(tmp_path: Path) -> Repository:
 def test_connect_and_foreign_keys(repo: Repository) -> None:
     row = repo._conn_required().execute("PRAGMA foreign_keys").fetchone()
     assert row is not None and int(row[0]) == 1
+
+
+def test_journal_mode_is_wal(repo: Repository) -> None:
+    row = repo._conn_required().execute("PRAGMA journal_mode").fetchone()
+    assert row is not None
+    assert str(row[0]).lower() == "wal"
+
+
+def test_checkpoint_truncates_wal(tmp_path: Path) -> None:
+    db_path = tmp_path / "chk.db"
+    with Repository(db_path) as repo:
+        repo.upsert_publication("2026_3", "2026-05-01", "pending")
+    wal_path = Path(str(db_path) + "-wal")
+    with Repository(db_path) as repo:
+        repo.checkpoint()
+    if wal_path.exists():
+        assert wal_path.stat().st_size == 0
+
+
+def test_concurrent_writers_do_not_deadlock(tmp_path: Path) -> None:
+    db_path = tmp_path / "wal_stress.db"
+    errors: list[BaseException] = []
+    lock = threading.Lock()
+
+    def writer(prefix: str) -> None:
+        try:
+            with Repository(db_path) as repo:
+                for index in range(15):
+                    repo.upsert_publication(f"2026_{prefix}_{index}", "2026-05-01", "pending")
+        except BaseException as exc:
+            with lock:
+                errors.append(exc)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(writer, tag) for tag in ("a", "b")]
+        for future in as_completed(futures, timeout=15.0):
+            future.result()
+
+    assert errors == []
+    with Repository(db_path) as repo:
+        assert len(repo.list_publications("ASC")) == 30
 
 
 def test_context_manager(tmp_path: Path) -> None:

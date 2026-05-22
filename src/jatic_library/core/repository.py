@@ -1,5 +1,6 @@
 """SQLite persistence for downloads and tags."""
 
+import contextlib
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -110,15 +111,30 @@ class Repository:
             str(self.db_path),
             isolation_level=None,
             check_same_thread=False,
+            timeout=5.0,
         )
         self._conn.row_factory = sqlite3.Row
-        self._conn.execute("PRAGMA foreign_keys = ON")
-        self._conn.execute("PRAGMA journal_mode = WAL")
+        self._init_pragmas()
         self._migrate()
+
+    def _init_pragmas(self) -> None:
+        """Apply SQLite pragmas for WAL concurrency and referential integrity."""
+        conn = self._conn_required()
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA synchronous = NORMAL")
+
+    def checkpoint(self) -> None:
+        """Merge WAL pages into the main database file."""
+        if self._conn is None:
+            return
+        self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
     def close(self) -> None:
         """Close the database connection."""
         if self._conn is not None:
+            with contextlib.suppress(sqlite3.Error):
+                self.checkpoint()
             self._conn.close()
             self._conn = None
 

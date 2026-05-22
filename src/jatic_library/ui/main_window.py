@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import sqlite3
 from collections.abc import Callable, Coroutine
 from pathlib import Path
 from typing import Any
@@ -147,6 +148,8 @@ class MainWindow(QMainWindow):
     def _quit_application(self) -> None:
         self._quitting = True
         self._tray.teardown()
+        with contextlib.suppress(sqlite3.Error):
+            self._repo.checkpoint()
         QApplication.quit()
 
     def closeEvent(self, event: QCloseEvent) -> None:
