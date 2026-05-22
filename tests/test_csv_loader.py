@@ -5,12 +5,14 @@ from __future__ import annotations
 import zipfile
 from pathlib import Path
 
+import polars as pl
 import pytest
 
 from jatic_library.core.csv_loader import (
     CsvLoadError,
     find_first_csv_name,
     merge_region_zip_csvs,
+    merge_region_zip_csvs_to_path,
     read_csv_frame_from_bytes,
 )
 
@@ -54,3 +56,28 @@ def test_memory_error_is_not_swallowed(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(pl, "read_csv", boom)
     with pytest.raises(MemoryError):
         read_csv_frame_from_bytes(b"a,b\n1\n")
+
+
+def test_merge_region_zip_csvs_to_path_matches_in_memory(tmp_path: Path) -> None:
+    first = tmp_path / "a.zip"
+    second = tmp_path / "b.zip"
+    third = tmp_path / "c.zip"
+    with zipfile.ZipFile(first, "w") as archive:
+        archive.writestr("x.csv", "col\n1\n2\n")
+    with zipfile.ZipFile(second, "w") as archive:
+        archive.writestr("x.csv", "col\n3\n")
+    with zipfile.ZipFile(third, "w") as archive:
+        archive.writestr("x.csv", "col\n4\n5\n")
+
+    in_memory = merge_region_zip_csvs([first, second, third])
+    dest = tmp_path / "merged.csv"
+    merge_region_zip_csvs_to_path([first, second, third], dest, temp_dir=tmp_path)
+    on_disk = pl.read_csv(dest, infer_schema_length=0)
+    assert on_disk.height == in_memory.height
+    assert on_disk.columns == in_memory.columns
+
+
+def test_merge_region_zip_csvs_to_path_empty_raises(tmp_path: Path) -> None:
+    dest = tmp_path / "out.csv"
+    with pytest.raises(CsvLoadError):
+        merge_region_zip_csvs_to_path([], dest)

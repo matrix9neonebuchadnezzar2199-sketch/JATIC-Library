@@ -389,6 +389,7 @@ body.diary > footer {
       <tr><td>15:05</td><td>INST_32 #1 計測未達マージ禁止ルール追記</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1505">#entry-1505</a></td></tr>
       <tr><td>15:29</td><td>INST_32 #1 キャッシュ掃除・専用 stats プール</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-1529">#entry-1529</a></td></tr>
       <tr><td>15:30</td><td>INST_32 #2 ROLE_MONTH_ITEM</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1530">#entry-1530</a></td></tr>
+      <tr><td>15:31</td><td>INST_32 #3 ストリーミング CSV 結合</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1531">#entry-1531</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -645,7 +646,16 @@ body.diary > footer {
   <h3>概要</h3>
   <p><code>_month_from_node</code> をラベル部分一致から <code>ROLE_MONTH_ITEM</code> の <code>setData</code> 参照に変更。</p>
   <h3>検証</h3>
-  <p><code>test_month_from_node_uses_role_data</code>。Commit: 本 push 参照。</p>
+  <p><code>test_month_from_node_uses_role_data</code>。Commit: <code>51284ea</code></p>
+</section>
+
+  <section class="entry" id="entry-1531">
+  <h2>INST_32 #3: ストリーミング統合 CSV</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p><code>merge_region_zip_csvs_to_path</code>（LazyFrame + <code>sink_csv</code>、<code>temp_dir=save_root</code>）。<code>write_merged_csv</code> / <code>export_merged_csv</code> を切替。</p>
+  <h3>検証</h3>
+  <p>pytest <strong>169 passed</strong>。RSS 手動: 未測定。Commit: 本 push 参照。</p>
 </section>
 </main>
 

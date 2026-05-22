@@ -6,7 +6,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
-from jatic_library.core.csv_loader import CsvLoadError, merge_region_zip_csvs
+from jatic_library.core.csv_loader import CsvLoadError, merge_region_zip_csvs_to_path
 
 
 class ExportError(Exception):
@@ -42,13 +42,11 @@ def export_merged_csv(
         raise ExportError(f"Publication folder not found: {folder}")
 
     zip_paths = sorted(folder.glob("*.zip"))[:max_files]
+    dest_csv.parent.mkdir(parents=True, exist_ok=True)
     try:
-        merged = merge_region_zip_csvs(zip_paths)
+        merge_region_zip_csvs_to_path(zip_paths, dest_csv, temp_dir=folder)
     except CsvLoadError as exc:
         raise ExportError(str(exc)) from exc
-
-    dest_csv.parent.mkdir(parents=True, exist_ok=True)
-    merged.write_csv(dest_csv)
     return dest_csv
 
 

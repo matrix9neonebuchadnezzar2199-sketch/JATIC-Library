@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import tempfile
 import zipfile
 from pathlib import Path
 from typing import IO
@@ -93,10 +94,60 @@ def read_csv_frame_from_zip(zip_path: Path) -> pl.DataFrame:
 
 def merge_region_zip_csvs(zip_paths: list[Path]) -> pl.DataFrame:
     """Concatenate the first CSV from each ZIP (one header row, all data)."""
-    frames = [read_csv_frame_from_zip(path) for path in zip_paths]
-    if not frames:
+    if not zip_paths:
         raise CsvLoadError("No CSV content to merge")
+    frames = [read_csv_frame_from_zip(path) for path in zip_paths]
     return pl.concat(frames, how="vertical_relaxed")
+
+
+def merge_region_zip_csvs_to_path(
+    zip_paths: list[Path],
+    dest_path: Path,
+    *,
+    temp_dir: Path | None = None,
+) -> None:
+    """Merge ZIP CSVs into *dest_path* with bounded peak memory.
+
+    Each ZIP is decoded to a utf-8 temp file (per-ZIP encoding detection), then
+    combined via LazyFrame ``sink_csv``. Temp files live under *temp_dir* when set
+    (use publication folder to avoid filling the system temp drive).
+    """
+    if not zip_paths:
+        raise CsvLoadError("No CSV content to merge")
+
+    parent = temp_dir if temp_dir is not None else dest_path.parent
+    parent.mkdir(parents=True, exist_ok=True)
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.TemporaryDirectory(dir=parent) as tmp_name:
+        tmp = Path(tmp_name)
+        lazy_frames: list[pl.LazyFrame] = []
+        column_names: list[str] | None = None
+        for index, zip_path in enumerate(zip_paths):
+            frame = read_csv_frame_from_zip(zip_path)
+            if frame.height == 0:
+                continue
+            if column_names is None:
+                column_names = list(frame.columns)
+            part_path = tmp / f"part_{index:04d}.csv"
+            if index == 0:
+                frame.write_csv(part_path)
+                lazy_frames.append(pl.scan_csv(part_path, infer_schema_length=0))
+            else:
+                frame.write_csv(part_path, include_header=False)
+                lazy_frames.append(
+                    pl.scan_csv(
+                        part_path,
+                        has_header=False,
+                        new_columns=column_names,
+                        infer_schema_length=0,
+                    )
+                )
+
+        if not lazy_frames:
+            raise CsvLoadError("No CSV content to merge")
+
+        pl.concat(lazy_frames, how="vertical_relaxed").sink_csv(dest_path)
 
 
 def find_first_csv_name(zip_path: Path) -> str:

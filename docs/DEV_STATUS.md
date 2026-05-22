@@ -17,6 +17,7 @@
 | **Hardening + 配布パイプライン** | 完了 | #22〜#29 |
 | **QA 回帰修正** | 完了 | 2026-05-22 — dirty/ソート/テーマ/エクスポート等（`QA_REVIEW_2026-05-22.md`） |
 | **INST_31 信頼性・性能** | 完了 | 2026-05-22 — 保管庫キャッシュ・404/HTTP ロック・統合 CSV タグ・CSV OOM |
+| **INST_32 保管庫・CSV** | 完了 | 2026-05-22 — キャッシュ掃除・ROLE_MONTH_ITEM・ストリーミング merge |
 
 ---
 
@@ -37,7 +38,7 @@
 | 29 | smoke test・Release | 完了 | 自動ゲート + 文書化（[BETA_TEST_LOG](BETA_TEST_LOG.md)） |
 | 30 | 公開後ドキュメント | 完了 | USER_MANUAL / README / DEV_SETUP |
 | 31 | 信頼性・性能パッチ | 完了 | `INST_31` #1〜#5（`ff7ef52`〜`8ad846e`） |
-| 32 | 保管庫応答性・ツリー／CSV | 未着手 | `INST_32` #1〜#3（キャッシュ掃除・`ROLE_MONTH_ITEM`・ストリーミング merge） |
+| 32 | 保管庫応答性・ツリー／CSV | 完了 | `INST_32` #1〜#3（`b3944a7`〜） |
 
 ---
 
@@ -105,7 +106,7 @@
 ## 6. 検証基準（開発時）
 
 ```text
-uv run pytest -q    # 165 passed（2026-05-22 INST_31 完了後）
+uv run pytest -q    # 169 passed（2026-05-22 INST_32 完了後）
 uv run ruff check src tests
 uv run mypy
 .\build.bat         # → dist\JATIC-Library-0.1.0-beta.1-win64.zip

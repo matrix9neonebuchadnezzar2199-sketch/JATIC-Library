@@ -10,7 +10,7 @@ from pathlib import Path
 from loguru import logger
 
 from jatic_library.constants import EXTRACTED_DIR_NAME, MERGED_CSV_FILENAME
-from jatic_library.core.csv_loader import CsvLoadError, merge_region_zip_csvs
+from jatic_library.core.csv_loader import CsvLoadError, merge_region_zip_csvs_to_path
 from jatic_library.core.targets import Target
 
 POSTPROCESS_EXTRACT_CODE = "__extract__"
@@ -59,12 +59,11 @@ def write_merged_csv(zip_paths: list[Path], dest_csv: Path) -> None:
     """Merge the first CSV in each ZIP (header once, all data rows)."""
     if not zip_paths:
         raise PostprocessError("No region ZIP files to merge")
+    dest_csv.parent.mkdir(parents=True, exist_ok=True)
     try:
-        merged = merge_region_zip_csvs(zip_paths)
+        merge_region_zip_csvs_to_path(zip_paths, dest_csv, temp_dir=dest_csv.parent)
     except CsvLoadError as exc:
         raise PostprocessError(str(exc)) from exc
-    dest_csv.parent.mkdir(parents=True, exist_ok=True)
-    merged.write_csv(dest_csv)
 
 
 def postprocess_publication_folder(
