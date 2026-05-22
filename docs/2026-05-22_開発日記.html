@@ -382,6 +382,7 @@ body.diary > footer {
       <tr><td>11:52</td><td>QA レビュー・バグ修正（dirty/ソート/エクスポート等）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1152">#entry-1152</a></td></tr>
       <tr><td>14:48</td><td>INST_31 #1 保管庫スキャンキャッシュ・非同期統計</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1448">#entry-1448</a></td></tr>
       <tr><td>14:52</td><td>INST_31 #2 404 再スクレイプ asyncio ロック</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1452">#entry-1452</a></td></tr>
+      <tr><td>14:54</td><td>INST_31 #3 HTTP/1.1 フォールバック競合防止</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1454">#entry-1454</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -565,6 +566,15 @@ body.diary > footer {
   <p><code>Downloader._rescrape_lock</code>（<code>asyncio.Lock</code>）で出版単位の 404 再スクレイプを直列化。非 404 はロック未取得のままスキップ。</p>
   <h3>検証</h3>
   <p>pytest 並行・非404 テスト追加。Commit: <code>ab2479e</code></p>
+</section>
+
+  <section class="entry" id="entry-1454">
+  <h2>INST_31 #3: HTTP/1.1 フォールバックの直列化</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p><code>JarticHttpClient._fallback_to_http1</code> を <code>asyncio.Lock</code> で保護。並行呼び出しでも <code>aclose</code> とクライアント再生成は 1 回のみ。</p>
+  <h3>検証</h3>
+  <p>pytest 同時 5 呼び出しテスト。Commit: <code>ba1f652</code></p>
 </section>
 </main>
 
