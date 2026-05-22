@@ -174,3 +174,37 @@ def test_delete_partial_failure_continues(main_window: MainWindow, tmp_path: Pat
 
     assert "manifest" in call_order
     assert "file" in call_order
+
+
+def test_delete_merged_csv_removes_tag_assignments(
+    main_window: MainWindow,
+    tmp_path: Path,
+) -> None:
+    folder = tmp_path / "2026_3"
+    folder.mkdir(parents=True, exist_ok=True)
+    merged_path = folder / "統合.csv"
+    merged_path.write_bytes(b"col\n1\n")
+    item = LibraryFileItem(
+        publish_ym="2026_3",
+        file_name=merged_path.name,
+        file_path=merged_path,
+        display_name="統合CSV",
+        target_code="merged",
+        file_size=8,
+        sha256=None,
+        source_url=None,
+        downloaded_at=None,
+    )
+    tag_id = main_window._repo.create_tag("merged-tag")
+    main_window._repo.assign_tag(tag_id, "file", "2026_3/merged")
+
+    with (
+        patch.object(main_window._repo, "get_file", return_value=None),
+        patch.object(main_window._repo, "delete_file") as mock_delete,
+        patch("jatic_library.ui.main_window.Manifest.load", return_value=None),
+        patch.object(Path, "unlink"),
+    ):
+        main_window._on_delete_file(item)
+
+    mock_delete.assert_not_called()
+    assert main_window._repo.list_tags_for("file", "2026_3/merged") == []

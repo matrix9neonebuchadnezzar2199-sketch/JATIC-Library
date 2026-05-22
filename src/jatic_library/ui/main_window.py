@@ -438,13 +438,11 @@ class MainWindow(QMainWindow):
                 row = self._repo.get_file(file_item.publish_ym, file_item.target_code)
                 if row is not None and row.id is not None:
                     self._repo.delete_file(row.id)
-                    code = file_item.target_code or file_item.file_name
-                    scope_key = f"{file_item.publish_ym}/{code}"
-                    self._repo.delete_tag_assignments("file", scope_key)
+                scope_key = f"{file_item.publish_ym}/{file_item.target_code}"
+                self._repo.delete_tag_assignments("file", scope_key)
             except sqlite3.Error as exc:
                 errors.append(f"DB: {exc}")
 
-        if file_item.target_code:
             try:
                 manifest = Manifest.load(folder)
                 if manifest is not None:
