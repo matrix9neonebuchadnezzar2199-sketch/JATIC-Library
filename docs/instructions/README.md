@@ -37,10 +37,12 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 29 | [INST_29_release_smoke_test.md](INST_29_release_smoke_test.md) | smoke test・Release | **完了** |
 | 30 | [INST_30_release_docs.md](INST_30_release_docs.md) | 公開後ドキュメント（R5〜R7） | **完了** |
 | 31 | [INST_31_reliability_perf_patch.md](INST_31_reliability_perf_patch.md) | 信頼性・性能パッチ（#1〜#5） | **完了** |
+| 32 | [INST_32_library_tab_responsiveness.md](INST_32_library_tab_responsiveness.md) | 保管庫応答性フォローアップ・ツリー／CSV 結合 | **未着手** |
 
-## Post-beta 改善（#31）
+## Post-beta 改善（#31〜#32）
 
-Cursor へ **#1 → #5 の順に 1 本ずつ** 投入。詳細・行番号・diff・テストは [INST_31_reliability_perf_patch.md](INST_31_reliability_perf_patch.md)。
+- **#31:** Cursor へ **#1 → #5 の順に 1 本ずつ** 投入。[INST_31_reliability_perf_patch.md](INST_31_reliability_perf_patch.md)（**完了**）。
+- **#32:** **#1 → #3** の順。保管庫キャッシュ仕上げ（INST_31 #1 の差分）、`ROLE_MONTH_ITEM`、ストリーミング統合 CSV。[INST_32_library_tab_responsiveness.md](INST_32_library_tab_responsiveness.md)。
 
 ## Pre-release Hardening（#22〜#26）
 

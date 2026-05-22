@@ -502,8 +502,9 @@ uv run pytest -q
 
 | 項目 | 箇所 | 理由 |
 |------|------|------|
-| 月ノード特定のラベル部分一致 | `library_tab.py:261-267` `_month_from_node` | ローカル影響・顕在化しにくい。`LibraryMonthItem` を `QTreeWidgetItem` の `setData` で保持する構造改修を別 issue 化 |
-| `merge_region_zip_csvs` の OOM | `csv_loader.py:95-100` | 現行データ規模では稀。LazyFrame + `sink_csv` は別 issue |
+| 月ノード特定のラベル部分一致 | `library_tab.py` `_month_from_node` | **INST_32 #2** へ移管 |
+| `merge_region_zip_csvs` の OOM | `csv_loader.py:94-99` | **INST_32 #3** へ移管 |
+| キャッシュ掃除・stats プール並列度 | `library_scan_cache.py` / `library_stats_worker.py` | **INST_32 #1** へ移管（コアキャッシュは INST_31 #1 済） |
 
 ---
 
