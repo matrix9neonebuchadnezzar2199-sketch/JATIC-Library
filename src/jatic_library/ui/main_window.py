@@ -31,7 +31,7 @@ from jatic_library.core.library_scanner import LibraryFileItem
 from jatic_library.core.manifest import Manifest
 from jatic_library.core.playwright_env import (
     INSTALL_HINT,
-    chromium_missing_message,
+    chromium_is_ready,
     failures_look_like_missing_browser,
 )
 from jatic_library.core.playwright_scraper import scrape_and_save_targets
@@ -47,6 +47,7 @@ from jatic_library.ui.tabs.library_tab import LibraryTab
 from jatic_library.ui.tabs.settings_tab import SettingsTab
 from jatic_library.ui.theme import apply_theme
 from jatic_library.ui.widgets.download_progress_dialog import DownloadProgressDialog
+from jatic_library.ui.widgets.playwright_setup_dialog import PlaywrightSetupDialog
 from jatic_library.ui.workers import AsyncTaskWorker
 
 
@@ -224,11 +225,12 @@ class MainWindow(QMainWindow):
 
     def _warn_playwright_chromium_missing(self) -> bool:
         """Show setup dialog when Chromium is missing. Returns True if blocked."""
-        hint = chromium_missing_message()
-        if hint is None:
+        if chromium_is_ready():
             return False
-        QMessageBox.warning(self, "Playwright のセットアップ", hint)
-        return True
+
+        dialog = PlaywrightSetupDialog(self)
+        dialog.exec()
+        return not (dialog.install_succeeded() and chromium_is_ready())
 
     def _start_worker(
         self,
