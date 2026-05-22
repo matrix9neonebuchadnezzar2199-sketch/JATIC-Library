@@ -6,6 +6,8 @@
 
 **作業順:** **#1 → #5**（#1 は他と疎結合で UX 影響最大）。各 PR で `uv run ruff check src tests` / `uv run mypy` / `uv run pytest -q` をすべて green にすること。
 
+**実装状態（2026-05-22）:** #1〜#5 すべて `master` に land 済（`ff7ef52` / `ab2479e` / `ba1f652` / `3b9b34a` / `8ad846e`）。
+
 **コミット規約:** Conventional Commits（`perf:` `fix:` `refactor:`）。既存テスト破壊時は PR 本文に理由を明記。
 
 **コード確認日:** 2026-05-22（`master` @ Chromium 同梱ビルド後）。行番号はこの時点の `src/` を基準とする。マージでずれた場合はシンボル名で再特定すること。

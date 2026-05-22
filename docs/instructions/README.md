@@ -36,7 +36,7 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 28 | [INST_28_pyinstaller_build_refine.md](INST_28_pyinstaller_build_refine.md) | PyInstaller ビルド・zip | **完了** |
 | 29 | [INST_29_release_smoke_test.md](INST_29_release_smoke_test.md) | smoke test・Release | **完了** |
 | 30 | [INST_30_release_docs.md](INST_30_release_docs.md) | 公開後ドキュメント（R5〜R7） | **完了** |
-| 31 | [INST_31_reliability_perf_patch.md](INST_31_reliability_perf_patch.md) | 信頼性・性能パッチ（#1〜#5） | **未着手** |
+| 31 | [INST_31_reliability_perf_patch.md](INST_31_reliability_perf_patch.md) | 信頼性・性能パッチ（#1〜#5） | **完了** |
 
 ## Post-beta 改善（#31）
 
