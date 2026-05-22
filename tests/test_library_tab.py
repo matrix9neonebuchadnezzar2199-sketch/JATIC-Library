@@ -4,12 +4,13 @@ import zipfile
 from pathlib import Path
 
 import pytest
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QTreeWidgetItem
 
+from jatic_library.core.library_scanner import LibraryMonthItem
 from jatic_library.core.manifest import Manifest, ManifestFileEntry
 from jatic_library.core.repository import Repository
 from jatic_library.settings.config import AppConfig
-from jatic_library.ui.tabs.library_tab import LibraryTab
+from jatic_library.ui.tabs.library_tab import ROLE_MONTH_ITEM, LibraryTab
 
 
 @pytest.fixture(scope="session")
@@ -78,3 +79,23 @@ def test_library_tab_builds_tree(qapp: QApplication, tmp_path: Path) -> None:
         month = year.child(0)
         assert month is not None
         assert month.childCount() == 1
+
+
+def test_month_from_node_uses_role_data(qapp: QApplication, tmp_path: Path) -> None:
+    save_root = tmp_path / "data"
+    _seed_library(save_root)
+    config = AppConfig.default()
+    config.download.save_root = save_root
+    db = tmp_path / "month_role.db"
+    month_item = LibraryMonthItem(
+        folder_name="2026_3",
+        year=2026,
+        month=3,
+        publication_status=None,
+        files=[],
+    )
+    with Repository(db) as repo:
+        tab = LibraryTab(config, repo)
+        node = QTreeWidgetItem(["dummy label"])
+        node.setData(0, ROLE_MONTH_ITEM, month_item)
+        assert tab._month_from_node(node) is month_item

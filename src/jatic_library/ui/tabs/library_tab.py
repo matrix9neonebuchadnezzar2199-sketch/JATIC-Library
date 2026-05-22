@@ -46,6 +46,7 @@ from jatic_library.ui.widgets.library_stats_worker import (
 
 ROLE_NODE_KIND = Qt.ItemDataRole.UserRole
 ROLE_FILE_ITEM = Qt.ItemDataRole.UserRole + 1
+ROLE_MONTH_ITEM = Qt.ItemDataRole.UserRole + 2
 
 KIND_YEAR = "year"
 KIND_MONTH = "month"
@@ -304,6 +305,7 @@ class LibraryTab(QWidget):
         label = f"{month.year}年{month.month}月分 ({month.folder_name}){status_suffix}"
         month_node = QTreeWidgetItem([label])
         month_node.setData(0, ROLE_NODE_KIND, KIND_MONTH)
+        month_node.setData(0, ROLE_MONTH_ITEM, month)
         month_node.setExpanded(True)
         for file_item in month.files:
             label = format_library_file_label(
@@ -350,12 +352,8 @@ class LibraryTab(QWidget):
             year_node.setHidden(not year_visible and bool(needle))
 
     def _month_from_node(self, month_node: QTreeWidgetItem) -> LibraryMonthItem | None:
-        label = month_node.text(0)
-        for year_item in self._tree_data:
-            for month_item in year_item.months:
-                if month_item.folder_name in label:
-                    return month_item
-        return None
+        data = month_node.data(0, ROLE_MONTH_ITEM)
+        return data if isinstance(data, LibraryMonthItem) else None
 
     def _on_selection_changed(
         self,
