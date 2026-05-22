@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.11.*"
 
 [[package]]
@@ -195,7 +195,7 @@ wheels = [
 
 [[package]]
 name = "jatic-library"
-version = "0.1.0b0"
+version = "0.1.0b1"
 source = { editable = "." }
 dependencies = [
     { name = "chardet" },

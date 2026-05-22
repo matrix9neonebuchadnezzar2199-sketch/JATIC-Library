@@ -48,7 +48,8 @@ class LibraryTab(QWidget):
 
     redownload_requested = Signal(object)
     delete_requested = Signal(object)
-    export_month_requested = Signal(str)
+    export_month_zip_requested = Signal(str)
+    export_month_csv_requested = Signal(str)
     sort_changed = Signal(str)
 
     def __init__(
@@ -344,11 +345,12 @@ class LibraryTab(QWidget):
         export_zip = QAction("月次 ZIP バンドルをエクスポート…", self)
         export_csv = QAction("統合 CSV をエクスポート…", self)
 
-        def export_bundle() -> None:
-            self.export_month_requested.emit(month_item.folder_name)
-
-        export_zip.triggered.connect(export_bundle)
-        export_csv.triggered.connect(export_bundle)
+        export_zip.triggered.connect(
+            lambda: self.export_month_zip_requested.emit(month_item.folder_name)
+        )
+        export_csv.triggered.connect(
+            lambda: self.export_month_csv_requested.emit(month_item.folder_name)
+        )
         menu.addAction(export_zip)
         menu.addAction(export_csv)
         menu.exec(self._tree.viewport().mapToGlobal(position))

@@ -17,7 +17,7 @@
 | UI 操作 | 概要 | 主なコード |
 |---|---|---|
 | 再読込 | `save_root` を走査し、年→月→地域ツリーを再構築。ヘッダに容量表示を更新 | `refresh()` → `scan_library()` |
-| ソート ComboBox | 並び順を `AppConfig.ui.library_default_sort` に反映し、ツリー再構築。設定を JSON 保存 | `_on_sort_changed()` → `sort_changed` → `MainWindow._on_library_sort_changed()` → `ConfigStore.save()` |
+| ソート ComboBox | 並び順を `AppConfig.ui.library_default_sort` に反映し、ツリー再構築。JSON はデバウンス保存（設定 dirty 時は部分パッチ） | `_on_sort_changed()` → `sort_changed` → `_on_library_sort_changed()` → `patch_library_sort` or `save` |
 | 検索欄 | 地域名でツリーノードの表示/非表示を切替（永続化なし） | `_apply_search_filter()` |
 | ツリー選択（ファイル行） | 右ペインにメタデータ・タグ一覧を表示 | `_on_selection_changed()` → `FileDetailPanel.show_file()` + `Repository.list_tags_for()` |
 | ツリー選択（年/月） | 詳細ペインをクリア | `_on_selection_changed()` → `FileDetailPanel.clear()` |
@@ -26,7 +26,7 @@
 | 右クリック → 再ダウンロード | 該当地域 ZIP を再取得（統合.csv は対象外） | `redownload_requested` → `MainWindow._on_redownload_file()` |
 | 右クリック → 削除 | 確認後、ファイル・manifest・DB 行を削除 | `_confirm_delete()` → `delete_requested` → `_on_delete_file()` |
 | 右クリック → タグを管理 | 既存タグ付与/解除または新規作成（DB のみ） | `_manage_tags()` → `Repository` |
-| 右クリック（月ノード）→ エクスポート | ZIP バンドル or 統合 CSV を保存ダイアログ経由で出力 | `export_month_requested` → `_on_export_month()` |
+| 右クリック（月ノード）→ ZIP / CSV エクスポート | 各メニューから直接保存ダイアログ | `export_month_zip_requested` / `export_month_csv_requested` → `_on_export_month_zip` / `_on_export_month_csv` |
 | タブ表示時 | ストレージ使用量ラベルを更新 | `showEvent()` → `_update_storage_header()` |
 
 右ペイン `FileDetailPanel` は **表示専用**（ボタンなし）です。
@@ -157,14 +157,14 @@ sequenceDiagram
     participant MW as MainWindow
     participant Exp as exporter
 
-    User->>LT: 月次 ZIP/CSV エクスポート
-    LT->>MW: export_month_requested(folder_name)
-    MW->>User: ZIPかCSVか確認
-    User->>MW: Yes/No
-    MW->>User: QFileDialog.getSaveFileName
+    User->>LT: 月次 ZIP または CSV エクスポート
     alt ZIP
+        LT->>MW: export_month_zip_requested(folder_name)
+        MW->>User: QFileDialog (zip)
         MW->>Exp: export_publication_zip_bundle()
     else CSV
+        LT->>MW: export_month_csv_requested(folder_name)
+        MW->>User: QFileDialog (csv)
         MW->>Exp: export_merged_csv()
     end
     MW->>User: 完了 QMessageBox
@@ -218,9 +218,10 @@ sequenceDiagram
     User->>ST: 今すぐ更新確認
     ST->>MW: check_requested(True) / run_update_check(force=True)
     MW->>Guard: check()（INST_25）
-    alt Chromium 未導入かつ再スクレイプ必要時
-        Guard->>User: 警告ダイアログ
+    alt Chromium 未導入
+        Guard->>User: PlaywrightSetupDialog（INST_27）
     end
+    MW->>MW: dirty / ワーカー二重 / save_root ガード
     MW->>Dlg: show()
     MW->>Worker: start(_task)
     Worker->>Repo: Repository(DB_PATH) 別接続（WAL）
@@ -284,7 +285,11 @@ sequenceDiagram
         LT->>Timer: start/restart (300ms)
         Timer-->>LT: timeout
         LT->>MW: sort_changed.emit(key)
-        MW->>Store: save(_config)
+        alt 設定タブ dirty
+            MW->>Store: patch_library_sort(key)
+        else
+            MW->>Store: save(_config)
+        end
     end
 ```
 
@@ -309,7 +314,8 @@ self._settings_tab.check_requested.connect(self.run_update_check)
 self._settings_tab.scrape_requested.connect(self.run_scrape)
 self._library_tab.redownload_requested.connect(self._on_redownload_file)
 self._library_tab.delete_requested.connect(self._on_delete_file)
-self._library_tab.export_month_requested.connect(self._on_export_month)
+self._library_tab.export_month_zip_requested.connect(self._on_export_month_zip)
+self._library_tab.export_month_csv_requested.connect(self._on_export_month_csv)
 self._library_tab.sort_changed.connect(self._on_library_sort_changed)
 ```
 

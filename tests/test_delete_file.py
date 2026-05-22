@@ -90,6 +90,7 @@ def test_delete_calls_db_before_manifest_before_file(
             "delete_file",
             side_effect=lambda _fid: call_order.append("db"),
         ) as mock_delete,
+        patch.object(main_window._repo, "delete_tag_assignments") as mock_tags,
         patch("jatic_library.ui.main_window.Manifest.load") as mock_load,
         patch.object(Path, "unlink", side_effect=lambda **_kw: call_order.append("file")),
     ):
@@ -102,6 +103,7 @@ def test_delete_calls_db_before_manifest_before_file(
 
     mock_get.assert_called_once()
     mock_delete.assert_called_once_with(1)
+    mock_tags.assert_called_once_with("file", "2026_3/tokyo")
     assert call_order.index("db") < call_order.index("manifest")
     assert call_order.index("manifest") < call_order.index("file")
 

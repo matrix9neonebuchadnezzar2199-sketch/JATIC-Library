@@ -299,6 +299,13 @@ class Repository:
         """Delete a file row by id."""
         self._conn_required().execute("DELETE FROM files WHERE id = ?", (file_id,))
 
+    def delete_tag_assignments(self, scope: str, scope_key: str) -> None:
+        """Remove tag assignments for a scope key (e.g. file delete)."""
+        self._conn_required().execute(
+            "DELETE FROM tag_assignments WHERE scope = ? AND scope_key = ?",
+            (scope, scope_key),
+        )
+
     def add_check_history(self, result: CheckResult, detail: str | None = None) -> int:
         """Append a check history row."""
         conn = self._conn_required()

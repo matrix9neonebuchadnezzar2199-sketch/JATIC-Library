@@ -91,7 +91,7 @@ class StartupScheduler:
 
         if not decision.should_run:
             self._repo.add_check_history("skipped", decision.reason)
-            self._touch_last_check()
+            self._touch_last_check(persist=True)
             return CheckOutcome(
                 publish_ym=info.folder_name,
                 new_downloads=0,
@@ -112,7 +112,7 @@ class StartupScheduler:
             logger.exception("Check run failed")
             self._repo.add_check_history("error", str(exc))
             notifier.notify_error(str(exc))
-            self._touch_last_check()
+            self._touch_last_check(persist=True)
             return CheckOutcome(
                 publish_ym=info.folder_name,
                 new_downloads=0,

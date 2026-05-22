@@ -15,6 +15,7 @@
 | **UX 拡張** | 完了 | 進捗ダイアログ、トレイ、エクスポート、タグ |
 | **配布** | 完了 | `build.bat` → zip。beta.1 リリースノート・マニュアル整備済 |
 | **Hardening + 配布パイプライン** | 完了 | #22〜#29 |
+| **QA 回帰修正** | 完了 | 2026-05-22 — dirty/ソート/テーマ/エクスポート等（`QA_REVIEW_2026-05-22.md`） |
 
 ---
 
@@ -101,7 +102,7 @@
 ## 6. 検証基準（開発時）
 
 ```text
-uv run pytest -q    # 147 passed（2026-05-22）
+uv run pytest -q    # 153 passed（2026-05-22 QA 修正後）
 uv run ruff check src tests
 uv run mypy
 .\build.bat         # → dist\JATIC-Library-0.1.0-beta.1-win64.zip

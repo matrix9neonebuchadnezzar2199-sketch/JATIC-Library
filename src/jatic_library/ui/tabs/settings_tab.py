@@ -230,6 +230,11 @@ class SettingsTab(QWidget):
         """Return True when widget edits have not been saved."""
         return self._dirty
 
+    def sync_theme_widget(self, theme: str) -> None:
+        """Update theme combo without marking dirty (menu-driven theme change)."""
+        with QSignalBlocker(self._theme):
+            self._theme.setCurrentText(theme)
+
     def _update_region_summary(self) -> None:
         self._region_summary.setText(self._region_selector.selection_summary())
 

@@ -32,6 +32,27 @@ async def test_run_check_skips_download_when_not_needed(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_run_check_skip_persists_last_check_at(tmp_path: Path) -> None:
+    config = AppConfig.default()
+    config.download.save_root = tmp_path / "data"
+    config.schedule.last_check_at = None
+    db = tmp_path / "skip_persist.db"
+    with Repository(db) as repo:
+        scheduler = StartupScheduler(config, repo)
+        with (
+            patch.object(
+                scheduler,
+                "should_check_now",
+                return_value=type("D", (), {"should_run": False, "reason": "disabled"})(),
+            ),
+            patch("jatic_library.core.scheduler.ConfigStore") as mock_store_cls,
+        ):
+            await scheduler.run_check(force=False)
+    assert config.schedule.last_check_at is not None
+    mock_store_cls.return_value.save.assert_called_once_with(config)
+
+
+@pytest.mark.asyncio
 async def test_run_check_downloads_and_syncs_git(tmp_path: Path) -> None:
     config = AppConfig.default()
     save_root = tmp_path / "data"

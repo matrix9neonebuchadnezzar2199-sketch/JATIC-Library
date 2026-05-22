@@ -44,9 +44,30 @@ class ConfigStore:
 
     def save(self, config: AppConfig) -> None:
         """Write config atomically via a temporary file."""
+        self._write_json(config.model_dump(mode="json"))
+
+    def patch_library_sort(self, sort_key: str) -> None:
+        """Update only ``ui.library_default_sort`` without overwriting other fields.
+
+        Used when the settings tab is dirty but the library sort preference changed.
+        """
+        if self.path.is_file():
+            try:
+                raw = json.loads(self.path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as exc:
+                logger.warning("patch_library_sort: cannot read {}: {}", self.path, exc)
+                raw = AppConfig.default().model_dump(mode="json")
+        else:
+            raw = AppConfig.default().model_dump(mode="json")
+        ui = raw.setdefault("ui", {})
+        if isinstance(ui, dict):
+            ui["library_default_sort"] = sort_key
+        self._write_json(raw)
+
+    def _write_json(self, data: object) -> None:
+        """Atomically write JSON data to the config path."""
         APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
         tmp = self.path.with_suffix(".json.tmp")
-        data = config.model_dump(mode="json")
         try:
             tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
             tmp.replace(self.path)

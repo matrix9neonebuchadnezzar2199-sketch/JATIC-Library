@@ -379,6 +379,7 @@ body.diary > footer {
       <tr><td>11:15</td><td>INST_29 smoke test チェックリスト・ログ雛形</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-1115">#entry-1115</a></td></tr>
       <tr><td>11:24</td><td>マイルストーン整合（DEV_STATUS / ROADMAP / DEV_SETUP）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1124">#entry-1124</a></td></tr>
       <tr><td>—</td><td>INST_29/30 完了・beta.1 リリース準備</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-beta1-done">#entry-beta1-done</a></td></tr>
+      <tr><td>11:52</td><td>QA レビュー・バグ修正（dirty/ソート/エクスポート等）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1152">#entry-1152</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -527,6 +528,23 @@ body.diary > footer {
   <p>Phase 3 クリーン環境は意思決定どおりスキップ（公開後 FB）。INST_29 は自動ゲート + 文書化で完了扱い。</p>
   <h3>検証</h3>
   <p>ruff / mypy / pytest 147。zip 136.1 MB。Commit: <code>7dfd35f</code>。タグ <code>v0.1.0-beta.1</code> push。GitHub Release 本体は <code>gh</code> 未導入のため Web UI で zip 添付要。</p>
+</section>
+
+  <section class="entry" id="entry-1152">
+  <h2>QA レビュー・回帰修正</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>ルール準拠の客観レビュー（<code>docs/QA_REVIEW_2026-05-22.md</code>）。設定 <strong>dirty</strong> とソート永続化の競合、テーマメニューによる設定上書き、スケジューラ <code>last_check_at</code>、更新確認のガード順序、エクスポートシグナル分離、削除時タグ残存を修正。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-mod">M</span> store.py — <code>patch_library_sort</code></li>
+    <li><span class="op op-mod">M</span> main_window.py, settings_tab.py, library_tab.py</li>
+    <li><span class="op op-mod">M</span> scheduler.py, repository.py</li>
+    <li><span class="op op-add">+</span> tests/test_qa_fixes.py</li>
+    <li><span class="op op-mod">M</span> UI_FLOW.md, QA_REVIEW_2026-05-22.md</li>
+  </ul>
+  <h3>検証</h3>
+  <p>ruff / mypy / pytest <strong>153 passed</strong>。Commit: <code>35ba76e</code></p>
 </section>
 </main>
 

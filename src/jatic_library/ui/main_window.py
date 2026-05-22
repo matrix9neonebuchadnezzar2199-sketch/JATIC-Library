@@ -98,7 +98,8 @@ class MainWindow(QMainWindow):
         self._settings_tab.scrape_requested.connect(self.run_scrape)
         self._library_tab.redownload_requested.connect(self._on_redownload_file)
         self._library_tab.delete_requested.connect(self._on_delete_file)
-        self._library_tab.export_month_requested.connect(self._on_export_month)
+        self._library_tab.export_month_zip_requested.connect(self._on_export_month_zip)
+        self._library_tab.export_month_csv_requested.connect(self._on_export_month_csv)
         self._library_tab.sort_changed.connect(self._on_library_sort_changed)
 
         self._center_on_screen()
@@ -169,9 +170,10 @@ class MainWindow(QMainWindow):
         app = QApplication.instance()
         if isinstance(app, QApplication):
             apply_theme(app, self._config.ui.theme)
-        with contextlib.suppress(OSError):
-            self._store.save(self._config)
-        self._settings_tab.load_from_config()
+        self._settings_tab.sync_theme_widget(theme)
+        if not self._settings_tab.is_dirty:
+            with contextlib.suppress(OSError):
+                self._store.save(self._config)
 
     def _on_config_saved(self, config: AppConfig) -> None:
         self._config = config
@@ -198,9 +200,12 @@ class MainWindow(QMainWindow):
             apply_theme(app, config.ui.theme)
         self.statusBar().showMessage("設定を反映しました", 5000)
 
-    def _on_library_sort_changed(self, _sort_key: str) -> None:
+    def _on_library_sort_changed(self, sort_key: str) -> None:
         with contextlib.suppress(OSError):
-            self._store.save(self._config)
+            if self._settings_tab.is_dirty:
+                self._store.patch_library_sort(sort_key)
+            else:
+                self._store.save(self._config)
 
     def _base_window_title(self) -> str:
         return f"{__app_name__} v{__version__}"
@@ -282,6 +287,15 @@ class MainWindow(QMainWindow):
             )
             self._tabs.setCurrentWidget(self._settings_tab)
             return
+        if self._active_worker is not None and self._active_worker.isRunning():
+            QMessageBox.information(self, "処理中", "別のバックグラウンド処理が実行中です。")
+            return
+        if self._config.download.save_root is None:
+            QMessageBox.warning(
+                self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。"
+            )
+            self._tabs.setCurrentWidget(self._settings_tab)
+            return
 
         progress_dialog = DownloadProgressDialog(self)
         progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
@@ -317,18 +331,6 @@ class MainWindow(QMainWindow):
                 and failures_look_like_missing_browser(download.failed)
             ):
                 QMessageBox.warning(self, "ダウンロード失敗", INSTALL_HINT)
-
-        if self._active_worker is not None and self._active_worker.isRunning():
-            QMessageBox.information(self, "処理中", "別のバックグラウンド処理が実行中です。")
-            progress_dialog.reject()
-            return
-        if self._config.download.save_root is None:
-            QMessageBox.warning(
-                self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。"
-            )
-            self._tabs.setCurrentWidget(self._settings_tab)
-            progress_dialog.reject()
-            return
 
         self._set_busy(True, "更新を確認しています…")
         worker = AsyncTaskWorker(_task, self)
@@ -380,7 +382,19 @@ class MainWindow(QMainWindow):
     def _on_redownload_file(self, file_item: object) -> None:
         if not isinstance(file_item, LibraryFileItem) or file_item.target_code is None:
             return
+        if self._settings_tab.is_dirty:
+            QMessageBox.warning(
+                self,
+                "設定",
+                "設定が未保存です。変更を反映するには「設定を保存」を押してください。",
+            )
+            self._tabs.setCurrentWidget(self._settings_tab)
+            return
         if self._config.download.save_root is None:
+            QMessageBox.warning(
+                self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。"
+            )
+            self._tabs.setCurrentWidget(self._settings_tab)
             return
         info = publish_info_from_folder(file_item.publish_ym)
         master = load_overrides(TARGETS_CACHE_PATH)
@@ -423,6 +437,9 @@ class MainWindow(QMainWindow):
                 row = self._repo.get_file(file_item.publish_ym, file_item.target_code)
                 if row is not None and row.id is not None:
                     self._repo.delete_file(row.id)
+                    code = file_item.target_code or file_item.file_name
+                    scope_key = f"{file_item.publish_ym}/{code}"
+                    self._repo.delete_tag_assignments("file", scope_key)
             except sqlite3.Error as exc:
                 errors.append(f"DB: {exc}")
 
@@ -456,54 +473,56 @@ class MainWindow(QMainWindow):
         else:
             self.statusBar().showMessage("ファイルを削除しました", 5000)
 
-    def _on_export_month(self, publish_ym: str) -> None:
+    def _on_export_month_zip(self, publish_ym: str) -> None:
         if self._config.download.save_root is None:
+            QMessageBox.warning(
+                self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。"
+            )
+            self._tabs.setCurrentWidget(self._settings_tab)
             return
-        choice = QMessageBox.question(
+        default_name = default_export_name(publish_ym, "zip")
+        dest, _ = QFileDialog.getSaveFileName(
             self,
-            "エクスポート",
-            f"{publish_ym} を ZIP バンドルとして出力しますか？\n"
-            "「いいえ」で統合 CSV を出力します。",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            "ZIP バンドルを保存",
+            default_name,
+            "ZIP (*.zip)",
         )
-        if choice == QMessageBox.StandardButton.Yes:
-            default_name = default_export_name(publish_ym, "zip")
-            dest, _ = QFileDialog.getSaveFileName(
-                self,
-                "ZIP バンドルを保存",
-                default_name,
-                "ZIP (*.zip)",
+        if not dest:
+            return
+        try:
+            export_publication_zip_bundle(
+                self._config.download.save_root,
+                publish_ym,
+                Path(dest),
             )
-            if not dest:
-                return
-            try:
-                export_publication_zip_bundle(
-                    self._config.download.save_root,
-                    publish_ym,
-                    Path(dest),
-                )
-            except ExportError as exc:
-                QMessageBox.warning(self, "エクスポート", str(exc))
-                return
-        elif choice == QMessageBox.StandardButton.No:
-            default_name = default_export_name(publish_ym, "csv")
-            dest, _ = QFileDialog.getSaveFileName(
-                self,
-                "統合 CSV を保存",
-                default_name,
-                "CSV (*.csv)",
+        except ExportError as exc:
+            QMessageBox.warning(self, "エクスポート", str(exc))
+            return
+        QMessageBox.information(self, "エクスポート", "エクスポートが完了しました。")
+
+    def _on_export_month_csv(self, publish_ym: str) -> None:
+        if self._config.download.save_root is None:
+            QMessageBox.warning(
+                self, "設定", "保存先フォルダが未設定です。設定タブで指定してください。"
             )
-            if not dest:
-                return
-            try:
-                export_merged_csv(
-                    self._config.download.save_root,
-                    publish_ym,
-                    Path(dest),
-                )
-            except ExportError as exc:
-                QMessageBox.warning(self, "エクスポート", str(exc))
-                return
-        else:
+            self._tabs.setCurrentWidget(self._settings_tab)
+            return
+        default_name = default_export_name(publish_ym, "csv")
+        dest, _ = QFileDialog.getSaveFileName(
+            self,
+            "統合 CSV を保存",
+            default_name,
+            "CSV (*.csv)",
+        )
+        if not dest:
+            return
+        try:
+            export_merged_csv(
+                self._config.download.save_root,
+                publish_ym,
+                Path(dest),
+            )
+        except ExportError as exc:
+            QMessageBox.warning(self, "エクスポート", str(exc))
             return
         QMessageBox.information(self, "エクスポート", "エクスポートが完了しました。")
