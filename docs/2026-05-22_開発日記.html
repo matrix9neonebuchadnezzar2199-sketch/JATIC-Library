@@ -386,6 +386,7 @@ body.diary > footer {
       <tr><td>14:56</td><td>INST_31 #4 統合 CSV 削除時タグ掃除</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1456">#entry-1456</a></td></tr>
       <tr><td>14:58</td><td>INST_31 #5 CSV ローダ例外・型精緻化</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1458">#entry-1458</a></td></tr>
       <tr><td>14:59</td><td>INST_32 指示書作成（保管庫・ツリー・CSV 結合）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1459">#entry-1459</a></td></tr>
+      <tr><td>15:05</td><td>INST_32 #1 計測未達マージ禁止ルール追記</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1505">#entry-1505</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -612,6 +613,19 @@ body.diary > footer {
   <p>ドラフトの保管庫 #1（SQLite 新規）は <code>ff7ef52</code> と重複するため、INST_32 #1 をフォローアップに再定義。</p>
   <h3>検証</h3>
   <p>ドキュメントのみ（実装未着手）。Commit: <code>5a673b2</code></p>
+</section>
+
+  <section class="entry" id="entry-1505">
+  <h2>INST_32: 計測未達時のマージ禁止ルール</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">docs</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>マスター確認に基づき INST_31 #1 は <code>ff7ef52</code> で land 済と整理。#1 受け入れに「500ms/200ms 未達はマージ禁止・チューニングは INST_33」を追記。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-mod">M</span> docs/instructions/INST_32_library_tab_responsiveness.md</li>
+  </ul>
+  <h3>検証</h3>
+  <p>ドキュメントのみ。Commit: 本エントリと同一 push。</p>
 </section>
 </main>
 
