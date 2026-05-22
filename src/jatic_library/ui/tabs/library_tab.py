@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 from PySide6.QtCore import QPoint, Qt, QTimer, Signal
 from PySide6.QtGui import QAction
@@ -28,12 +29,18 @@ from jatic_library.core.library_scanner import (
     LibraryMonthItem,
     LibraryYearItem,
     format_library_file_label,
+    iter_files_needing_stats,
     scan_library,
+    update_file_item_in_tree,
 )
 from jatic_library.core.library_storage import format_storage_usage_label
 from jatic_library.core.repository import Repository
 from jatic_library.settings.config import AppConfig
 from jatic_library.ui.widgets.file_detail_panel import FileDetailPanel
+from jatic_library.ui.widgets.library_stats_worker import (
+    LibraryStatsBridge,
+    enqueue_file_stats,
+)
 
 ROLE_NODE_KIND = Qt.ItemDataRole.UserRole
 ROLE_FILE_ITEM = Qt.ItemDataRole.UserRole + 1
@@ -67,6 +74,9 @@ class LibraryTab(QWidget):
         self._sort_persist_timer.setSingleShot(True)
         self._sort_persist_timer.setInterval(300)
         self._sort_persist_timer.timeout.connect(self._emit_sort_changed)
+        self._scan_generation = 0
+        self._stats_bridge = LibraryStatsBridge(self)
+        self._stats_bridge.stats_ready.connect(self._on_file_stats_ready)
         self._build_ui()
         self.refresh()
 
@@ -152,8 +162,78 @@ class LibraryTab(QWidget):
         self._tree_data = scan_library(save_root, self._repo, sort=sort_key)
         self._sync_sort_combo(sort_key)
         self._rebuild_tree()
+        self._schedule_stats_refresh()
         self._apply_search_filter(self._search.text())
         self._update_storage_header()
+
+    def _schedule_stats_refresh(self) -> None:
+        """Compute row counts in the background for cache misses."""
+        self._scan_generation += 1
+        generation = self._scan_generation
+        pending = iter_files_needing_stats(self._tree_data)
+        if not pending:
+            return
+        enqueue_file_stats(
+            self._stats_bridge,
+            generation,
+            [item.file_path for item in pending],
+        )
+
+    def _on_file_stats_ready(
+        self,
+        generation: int,
+        path_str: str,
+        row_count_signal: int,
+        display_size: int,
+    ) -> None:
+        if generation != self._scan_generation:
+            return
+        path = Path(path_str)
+        row_count = None if row_count_signal < 0 else row_count_signal
+        updated = update_file_item_in_tree(
+            self._tree_data,
+            path,
+            row_count=row_count,
+            file_size=display_size,
+        )
+        if updated is None:
+            return
+        self._update_tree_label_for_path(path, updated)
+
+    def _update_tree_label_for_path(
+        self,
+        path: Path,
+        file_item: LibraryFileItem,
+    ) -> None:
+        label = format_library_file_label(
+            file_item.display_name,
+            file_item.file_size,
+            file_item.row_count,
+        )
+        resolved = path.resolve()
+        for year_index in range(self._tree.topLevelItemCount()):
+            year_node = self._tree.topLevelItem(year_index)
+            if year_node is None:
+                continue
+            for month_index in range(year_node.childCount()):
+                month_node = year_node.child(month_index)
+                if month_node is None:
+                    continue
+                for file_index in range(month_node.childCount()):
+                    file_node = month_node.child(file_index)
+                    if file_node is None:
+                        continue
+                    item = file_node.data(0, ROLE_FILE_ITEM)
+                    if (
+                        isinstance(item, LibraryFileItem)
+                        and item.file_path.resolve() == resolved
+                    ):
+                        file_node.setText(0, label)
+                        file_node.setData(0, ROLE_FILE_ITEM, file_item)
+                        current = self._tree.currentItem()
+                        if current is file_node:
+                            self._on_selection_changed(current, None)
+                        return
 
     def _update_storage_header(self) -> None:
         """Show library size vs disk capacity in the tree header band."""

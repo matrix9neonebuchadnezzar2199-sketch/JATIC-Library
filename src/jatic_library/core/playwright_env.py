@@ -139,14 +139,14 @@ def _subprocess_env(base: dict[str, str] | None) -> dict[str, str]:
     return env
 
 
-def _popen_kwargs() -> dict[str, object]:
+def _popen_kwargs() -> dict[str, int]:
     """Hide console window on Windows when launching the Node installer."""
     if sys.platform != "win32":
         return {}
     flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     if not flags:
         return {}
-    return {"creationflags": flags}
+    return {"creationflags": int(flags)}
 
 
 def _resolve_install_command() -> tuple[list[str] | None, dict[str, str] | None]:
@@ -202,16 +202,28 @@ def install_chromium(on_line: ProgressLine | None = None) -> tuple[bool, str]:
     merged_env = _subprocess_env(env)
 
     try:
-        process = subprocess.Popen(  # noqa: S603 — cmd from _resolve_install_command only
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            env=merged_env,
-            **_popen_kwargs(),
-        )
+        win_kwargs = _popen_kwargs()
+        if win_kwargs:
+            process = subprocess.Popen(  # noqa: S603
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                env=merged_env,
+                creationflags=win_kwargs["creationflags"],
+            )
+        else:
+            process = subprocess.Popen(  # noqa: S603
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                env=merged_env,
+            )
     except OSError as exc:
         return False, f"インストーラ起動失敗: {exc}\n\n{PROXY_HINT}"
 

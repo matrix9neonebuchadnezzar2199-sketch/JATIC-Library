@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from jatic_library.constants import MERGED_CSV_DISPLAY_NAME, MERGED_CSV_FILENAME
 from jatic_library.core.csv_loader import count_data_rows_for_path, uncompressed_csv_size_in_zip
+from jatic_library.core.library_scan_cache import get_cached_stats
 from jatic_library.core.manifest import Manifest, ManifestFileEntry
 from jatic_library.core.models import FileRow
 from jatic_library.core.repository import Repository
@@ -25,6 +26,36 @@ def format_library_file_label(
     rows = f"{row_count:,}行" if row_count is not None else "—行"
     size_gb = file_size / (1024**3)
     return f"{display_name}  {rows}  {size_gb:.2f}GB"
+
+
+def compute_file_stats(path: Path) -> tuple[int | None, int]:
+    """Compute row count and display size (uncompressed CSV size when ZIP)."""
+    try:
+        zip_size = path.stat().st_size
+    except OSError:
+        zip_size = 0
+    row_count = count_data_rows_for_path(path)
+    if path.suffix.lower() == ".zip":
+        display_size = uncompressed_csv_size_in_zip(path) or zip_size
+    else:
+        display_size = zip_size
+    return row_count, display_size
+
+
+def _stats_for_path(path: Path) -> tuple[int, int | None]:
+    """Return (display_size, row_count) using cache when possible."""
+    try:
+        zip_size = path.stat().st_size
+    except OSError:
+        return 0, None
+
+    cached = get_cached_stats(path)
+    if cached is not None:
+        display_size = cached.uncompressed_csv_size if cached.uncompressed_csv_size else zip_size
+        return display_size, cached.row_count
+
+    # Cache miss: show placeholder size only; row count filled asynchronously in UI.
+    return zip_size, None
 
 
 @dataclass(frozen=True)
@@ -75,7 +106,6 @@ def _merge_file(
     elif db_row is not None:
         display = db_row.display_name
 
-    size = zip_path.stat().st_size
     target_code = None
     sha256 = None
     source_url = None
@@ -91,8 +121,7 @@ def _merge_file(
         source_url = db_row.source_url
         downloaded_at = db_row.downloaded_at
 
-    # Display uncompressed CSV size; *size* is the on-disk ZIP (compressed).
-    display_size = uncompressed_csv_size_in_zip(zip_path) or size
+    display_size, row_count = _stats_for_path(zip_path)
     return LibraryFileItem(
         publish_ym=publish_ym,
         file_name=zip_path.name,
@@ -104,7 +133,7 @@ def _merge_file(
         source_url=source_url,
         downloaded_at=downloaded_at,
         status=db_row.status if db_row is not None else None,
-        row_count=count_data_rows_for_path(zip_path),
+        row_count=row_count,
     )
 
 
@@ -129,7 +158,7 @@ def _scan_month_folder(
     files: list[LibraryFileItem] = []
     merged_csv = folder / MERGED_CSV_FILENAME
     if merged_csv.is_file():
-        size = merged_csv.stat().st_size
+        display_size, row_count = _stats_for_path(merged_csv)
         files.append(
             LibraryFileItem(
                 publish_ym=folder_name,
@@ -137,12 +166,12 @@ def _scan_month_folder(
                 file_path=merged_csv,
                 display_name=MERGED_CSV_DISPLAY_NAME,
                 target_code="merged",
-                file_size=size,
+                file_size=display_size,
                 sha256=None,
                 source_url=None,
                 downloaded_at=None,
                 status=None,
-                row_count=count_data_rows_for_path(merged_csv),
+                row_count=row_count,
             )
         )
 
@@ -193,3 +222,36 @@ def scan_library(
         years_map[month.year].months.append(month)
 
     return sorted(years_map.values(), key=lambda y: y.year, reverse=True)
+
+
+def iter_files_needing_stats(tree: list[LibraryYearItem]) -> list[LibraryFileItem]:
+    """Return file items whose row_count was not loaded from cache."""
+    pending: list[LibraryFileItem] = []
+    for year in tree:
+        for month in year.months:
+            for file_item in month.files:
+                if file_item.row_count is None:
+                    pending.append(file_item)
+    return pending
+
+
+def update_file_item_in_tree(
+    tree: list[LibraryYearItem],
+    path: Path,
+    *,
+    row_count: int | None,
+    file_size: int,
+) -> LibraryFileItem | None:
+    """Replace the matching ``LibraryFileItem`` in *tree* and return the new item."""
+    for year in tree:
+        for month in year.months:
+            for index, file_item in enumerate(month.files):
+                if file_item.file_path.resolve() == path.resolve():
+                    updated = replace(
+                        file_item,
+                        row_count=row_count,
+                        file_size=file_size,
+                    )
+                    month.files[index] = updated
+                    return updated
+    return None

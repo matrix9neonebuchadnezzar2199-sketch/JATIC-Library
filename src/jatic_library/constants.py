@@ -23,6 +23,7 @@ CONFIG_PATH = APP_DATA_DIR / "config.json"
 DB_PATH = APP_DATA_DIR / "history.db"
 LOG_DIR = APP_DATA_DIR / "logs"
 TARGETS_CACHE_PATH = APP_DATA_DIR / "targets.json"
+LIBRARY_SCAN_CACHE_PATH = APP_DATA_DIR / "library_scan_cache.json"
 
 MANIFEST_FILENAME = "_manifest.json"
 EXTRACTED_DIR_NAME = "extracted"

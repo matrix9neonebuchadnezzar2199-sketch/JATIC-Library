@@ -1,6 +1,12 @@
 """Tests for library folder scanner."""
 
+from __future__ import annotations
+
+import time
 from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 
 from jatic_library.core.library_scanner import scan_library
 from jatic_library.core.manifest import Manifest, ManifestFileEntry
@@ -56,3 +62,31 @@ def test_scan_ignores_invalid_folder(tmp_path: Path) -> None:
     save_root.mkdir()
     (save_root / "not_a_month").mkdir()
     assert scan_library(save_root) == []
+
+
+def test_scan_library_fast_when_row_count_mocked(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    save_root = tmp_path / "data"
+    folder = save_root / "2026_3"
+    folder.mkdir(parents=True)
+    for index in range(20):
+        (folder / f"region_{index}.zip").write_bytes(b"fake")
+
+    monkeypatch.setattr(
+        "jatic_library.core.library_scanner.get_cached_stats",
+        lambda _path: None,
+    )
+
+    start = time.perf_counter()
+    with patch(
+        "jatic_library.core.library_scanner.count_data_rows_for_path",
+        return_value=10,
+    ):
+        years = scan_library(save_root)
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < 0.1
+    assert len(years) == 1
+    assert all(item.row_count is None for item in years[0].months[0].files)

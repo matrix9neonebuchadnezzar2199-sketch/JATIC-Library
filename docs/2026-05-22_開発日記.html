@@ -380,6 +380,7 @@ body.diary > footer {
       <tr><td>11:24</td><td>マイルストーン整合（DEV_STATUS / ROADMAP / DEV_SETUP）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1124">#entry-1124</a></td></tr>
       <tr><td>—</td><td>INST_29/30 完了・beta.1 リリース準備</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-beta1-done">#entry-beta1-done</a></td></tr>
       <tr><td>11:52</td><td>QA レビュー・バグ修正（dirty/ソート/エクスポート等）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1152">#entry-1152</a></td></tr>
+      <tr><td>14:48</td><td>INST_31 #1 保管庫スキャンキャッシュ・非同期統計</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1448">#entry-1448</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -545,6 +546,15 @@ body.diary > footer {
   </ul>
   <h3>検証</h3>
   <p>ruff / mypy / pytest <strong>153 passed</strong>。Commit: <code>ab56917</code></p>
+</section>
+
+  <section class="entry" id="entry-1448">
+  <h2>INST_31 #1: 保管庫 UI フリーズ解消</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p><code>library_scan_cache.json</code> で行数・サイズをキャッシュ。スキャン時はキャッシュミスなら <code>—行</code> 表示のまま <code>QThreadPool</code> で後追い更新。</p>
+  <h3>検証</h3>
+  <p>pytest <strong>160 passed</strong>。Commit: <code>pending</code></p>
 </section>
 </main>
 
