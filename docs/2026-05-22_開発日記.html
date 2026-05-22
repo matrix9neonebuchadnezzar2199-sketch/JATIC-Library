@@ -391,6 +391,7 @@ body.diary > footer {
       <tr><td>15:30</td><td>INST_32 #2 ROLE_MONTH_ITEM</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1530">#entry-1530</a></td></tr>
       <tr><td>15:31</td><td>INST_32 #3 ストリーミング CSV 結合</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1531">#entry-1531</a></td></tr>
       <tr><td>15:53</td><td>性能計測ルール正式化（選択肢2）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1553">#entry-1553</a></td></tr>
+      <tr><td>16:59</td><td>CSV 文字化け切り分け・dist ビルド状況確認</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1659">#entry-1659</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -668,6 +669,21 @@ body.diary > footer {
   <p>守る本質は「未達のまま本番リリースしない」。トランク revert は不要。</p>
   <h3>検証</h3>
   <p>ドキュメントのみ。INST_33 草案は計測結果待ち。Commit: <code>9c1b86b</code></p>
+</section>
+
+  <section class="entry" id="entry-1659">
+  <h2>CSV 文字化けの切り分け・配布 exe の鮮度</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">analysis</span> <span class="tag tag-scope">docs</span> <span class="tag tag-ok">ok</span></p>
+  <h3>観察</h3>
+  <p>「ダウンロードファイルが文字化け」報告についてコード確認。地域 ZIP は <code>aiter_bytes</code> のバイナリ保存で改変なし。<code>統合.csv</code> / CSV エクスポートは polars が UTF-8 で再出力 → Excel ダブルクリックでは化けやすい（閲覧側＋出力形式の組み合わせ）。</p>
+  <h3>結論</h3>
+  <p>ZIP 単体はツール起因になりにくい。統合 CSV は UTF-8 出力をマニュアルに明記。<code>dist\JATIC-Library.exe</code> は 13:14 ビルドで INST_32 未反映 — ラボ計測・検証前に <code>build.bat</code> 要。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-mod">M</span> docs/USER_MANUAL.md（トラブルシューティング行）</li>
+  </ul>
+  <h3>検証</h3>
+  <p>コード変更なし。Commit: 本 push 参照。</p>
 </section>
 </main>
 
