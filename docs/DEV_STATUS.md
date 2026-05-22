@@ -2,8 +2,8 @@
 
 本ドキュメントが **実装進捗の正本** です。README の機能説明は製品ビジョン、本ファイルは事実ベースの状態を記録します。
 
-**最終更新:** 2026-05-20  
-**現在のマイルストーン:** Full Feature（#01〜#21 完了）— GUI 全タブ・エクスポート・トレイ・PyInstaller スクリプトまで利用可能
+**最終更新:** 2026-05-22  
+**現在のマイルストーン:** Full Feature（#01〜#21 完了）+ Pre-release Hardening（#22〜#26 未着手）
 
 ---
 
@@ -36,9 +36,14 @@
 | 13 | DL 404 自動再スクレイプ | 完了 | 出版単位で 1 回のみ |
 | 14 | 保管庫拡張 | 完了 | ソート・再 DL・削除 |
 | 15 | タグ UI | 完了 | ファイルスコープ |
-| 16 | カレンダー・欠損月 | 削除 | UI から除去（起動時チェックで十分） |
-| 17 | 比較タブ | 削除 | UI から除去 |
-| 18 | エクスポート・グラフ | 完了 | `exporter` / `TrafficChartWidget` |
+| 16 | カレンダー・欠損月 | 先送り | Phase P11（`MainWindow` 未配線） |
+| 17 | 比較タブ | 先送り | Phase P11（`MainWindow` 未配線） |
+| 18 | エクスポート・グラフ | 一部 | 月次 ZIP/CSV エクスポートは済。`TrafficChartWidget` は Phase P11 |
+| 22 | 保管庫ソート保存デバウンス | 未着手 | [INST_22](./instructions/INST_22_library_sort_debounce.md) |
+| 23 | 設定タブ未保存インジケータ | 未着手 | [INST_23](./instructions/INST_23_settings_dirty_indicator.md) |
+| 24 | 削除順序の見直し | 未着手 | [INST_24](./instructions/INST_24_delete_order_safety.md) |
+| 25 | Playwright ガード拡張 | 未着手 | [INST_25](./instructions/INST_25_playwright_guard_expand.md) |
+| 26 | SQLite WAL モード化 | 未着手 | [INST_26](./instructions/INST_26_sqlite_wal_mode.md) |
 | 19 | Git 自動 commit | 完了 | `git_sync`（push は手動） |
 | 20 | トレイ・スタートアップ | 完了 | Run キー登録 |
 | 21 | PyInstaller | 一部 | `build.bat` / `.spec` あり。ビルド検証・同梱方針は残 |
@@ -96,6 +101,19 @@
 
 機能実装（指示書 #01〜#21）は完了。**以降は「実行形式として配れる品」に仕上げる作業**が中心です。
 
+### 5.0 Pre-release Hardening（#22〜#26）
+
+リリースビルド前に以下の堅牢化を完了させます。PyInstaller ビルド（#21）と並行可。
+詳細は各指示書を参照。
+
+| # | 目的 | 区分 |
+|---|------|------|
+| 22 | ソート保存の I/O 削減 | UX |
+| 23 | 設定タブ未保存状態の可視化 | UX |
+| 24 | 削除処理の不整合防止 | 堅牢性 |
+| 25 | Chromium 未導入時の事故防止 | 堅牢性 |
+| 26 | SQLite `database is locked` 予防 | 堅牢性 |
+
 ### 5.1 必須（配布ブロッカー）
 
 | 優先 | 項目 | 内容 | 状態 |
@@ -114,7 +132,15 @@
 | R7 | **DEV_SETUP** | PyInstaller ビルド手順・既知の制限（Playwright 等） | 要追記 |
 | R8 | **実サイト回帰** | 当月 typeB の HEAD/DL・404→再スクレイプの手動確認 | 随時 |
 
-### 5.3 任意（設計・将来）
+### 5.3 先送り（Phase P11 以降）
+
+- カレンダーによる欠損可視化（#16）→ Phase P11
+- 比較タブ（#17）→ Phase P11
+- ZIP/CSV エクスポート向けチャート（#18, `exporter` / `TrafficChartWidget`）→ Phase P11
+
+これらは `MainWindow` に未配線です。指示書ファイルは将来実装のため `docs/instructions/` に保持します。
+
+### 5.4 任意（設計・将来）
 
 | 項目 | 備考 |
 |------|------|
@@ -124,7 +150,7 @@
 | `targets.json` 更新後の地域一覧即時反映 | 現状は再スキャン後に再起動案内 |
 | コード署名・MSI インストーラ | スコープ外（必要なら別フェーズ） |
 
-### 5.4 スコープ外（今回やらない）
+### 5.5 スコープ外（今回やらない）
 
 - 過去月の遡及 DL（JARTIC 非公開のため不可）
 - macOS / Linux 対応
@@ -134,7 +160,7 @@
 ## 6. 検証基準（開発時）
 
 ```text
-uv run pytest -q    # 98 passed（2026-05-20 時点）
+uv run pytest -q    # 118 passed（2026-05-22 時点）
 uv run ruff check src tests
 uv run mypy
 ```
@@ -146,5 +172,6 @@ uv run mypy
 | ドキュメント | 用途 |
 |--------------|------|
 | [DESIGN.md](DESIGN.md) | 全体設計・要件 |
+| [UI_FLOW.md](UI_FLOW.md) | タブ構成・シーケンス図 |
 | [instructions/README.md](instructions/README.md) | 実装指示書一覧 |
 | [DEV_SETUP.md](DEV_SETUP.md) | 開発環境構築 |

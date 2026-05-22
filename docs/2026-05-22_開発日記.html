@@ -370,6 +370,7 @@ body.diary > footer {
     </thead>
     <tbody>
       <tr><td>08:38</td><td>品質チェック失敗の修正（ruff / mypy / pytest）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-0838">#entry-0838</a></td></tr>
+      <tr><td>09:15</td><td>UI_FLOW・INST_22〜26・DEV_STATUS ドキュメント整備</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-0915">#entry-0915</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -396,7 +397,23 @@ body.diary > footer {
     <li><span class="op op-mod">M</span> ruff format 対象 7 ファイル（scheduler, repository 等）</li>
   </ul>
   <h3>検証</h3>
-  <p><code>uv run ruff check src tests</code> / <code>ruff format --check</code> / <code>mypy</code> / <code>pytest</code> すべて成功。作業時 HEAD: <code>e0e5230</code>（未コミット）</p>
+  <p><code>uv run ruff check src tests</code> / <code>ruff format --check</code> / <code>mypy</code> / <code>pytest</code> すべて成功。Commit: <code>03b2d5b</code></p>
+</section>
+
+  <section class="entry" id="entry-0915">
+  <h2>UI フロー・Pre-release Hardening 指示書（A 段階）</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">docs</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>タブ解析結果を <code>docs/UI_FLOW.md</code> に体系化。#16〜#18 を Phase P11 先送りに整理し、
+  Pre-release Hardening として <code>INST_22</code>〜<code>INST_26</code> を追加。</p>
+  <h3>変更ファイル</h3>
+  <ul class="changes">
+    <li><span class="op op-add">+</span> docs/UI_FLOW.md</li>
+    <li><span class="op op-add">+</span> docs/instructions/INST_22〜26（5 本）</li>
+    <li><span class="op op-mod">M</span> docs/DESIGN.md, DEV_STATUS.md, instructions/README.md</li>
+  </ul>
+  <h3>設計判断</h3>
+  <p>削除シーケンス図は <code>INST_24</code> 適用後の目標順（DB→manifest→file）を記載。現行コードは未変更（B 段階で実装）。</p>
 </section>
 </main>
 

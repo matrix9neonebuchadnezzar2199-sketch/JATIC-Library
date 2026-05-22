@@ -155,6 +155,11 @@ CREATE TABLE event_logs (...);
 
 画面ワイヤ・メニュー構成はマスター指示書 §7。
 
+## UI フロー詳細
+
+タブ構成・シグナル配線・主要操作のシーケンス図は [UI_FLOW.md](./UI_FLOW.md) を参照してください。
+本ファイルは構造設計（モジュール分割・データフロー）に専念します。
+
 ## 8. 処理フロー
 
 1. 起動 → 設定ロード → DB init → テーマ → MainWindow
@@ -179,7 +184,8 @@ CREATE TABLE event_logs (...);
 ## 12. ロードマップ
 
 - **進捗正本:** [DEV_STATUS.md](DEV_STATUS.md)（指示書トラッカー・機能マトリクス・残作業）
-- 実装指示書: [instructions/README.md](instructions/README.md)（#01〜#21 完了）
+- 実装指示書: [instructions/README.md](instructions/README.md)（#01〜#21 完了、#22〜#26 Pre-release Hardening）
+- UI フロー: [UI_FLOW.md](UI_FLOW.md)
 - Phase 表: [ROADMAP.md](ROADMAP.md)
 
 ## 実装進捗

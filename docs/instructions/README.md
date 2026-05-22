@@ -21,12 +21,31 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 13 | [INST_13_dl_404_rescrape.md](INST_13_dl_404_rescrape.md) | 404 自動再スクレイプ | **完了** |
 | 14 | [INST_14_library_actions.md](INST_14_library_actions.md) | 保管庫拡張 | **完了** |
 | 15 | [INST_15_tags.md](INST_15_tags.md) | タグ UI | **完了** |
-| 16 | [INST_16_calendar_missing.md](INST_16_calendar_missing.md) | カレンダー・欠損月 | **完了** |
-| 17 | [INST_17_compare_tab.md](INST_17_compare_tab.md) | 比較タブ | **完了** |
-| 18 | [INST_18_export_chart.md](INST_18_export_chart.md) | エクスポート・グラフ | **完了** |
+| 16 | [INST_16_calendar_missing.md](INST_16_calendar_missing.md) | カレンダー・欠損月 | **先送り**（P11） |
+| 17 | [INST_17_compare_tab.md](INST_17_compare_tab.md) | 比較タブ | **先送り**（P11） |
+| 18 | [INST_18_export_chart.md](INST_18_export_chart.md) | エクスポート・グラフ | **一部**（エクスポート済・チャート P11） |
 | 19 | [INST_19_git_sync.md](INST_19_git_sync.md) | Git 連携 | **完了** |
 | 20 | [INST_20_system_tray.md](INST_20_system_tray.md) | トレイ・スタートアップ | **完了** |
 | 21 | [INST_21_pyinstaller.md](INST_21_pyinstaller.md) | PyInstaller | **完了** |
+| 22 | [INST_22_library_sort_debounce.md](INST_22_library_sort_debounce.md) | 保管庫ソート保存デバウンス | **未着手** |
+| 23 | [INST_23_settings_dirty_indicator.md](INST_23_settings_dirty_indicator.md) | 設定タブ未保存インジケータ | **未着手** |
+| 24 | [INST_24_delete_order_safety.md](INST_24_delete_order_safety.md) | 削除順序の見直し | **未着手** |
+| 25 | [INST_25_playwright_guard_expand.md](INST_25_playwright_guard_expand.md) | Playwright ガード拡張 | **未着手** |
+| 26 | [INST_26_sqlite_wal_mode.md](INST_26_sqlite_wal_mode.md) | SQLite WAL モード化 | **未着手** |
+
+## Pre-release Hardening（#22〜#26）
+
+リリース前に適用する保守・堅牢化タスク群。`MainWindow` 解析（[UI_FLOW.md](../UI_FLOW.md)）に基づく
+リスク抽出から生まれた小さなパッチの集まりです。各指示書は **1 つの目的に絞った独立タスク** として
+着手できます。
+
+| # | リンク | 概要 |
+|---|---|---|
+| 22 | [INST_22_library_sort_debounce.md](./INST_22_library_sort_debounce.md) | 保管庫ソート保存のデバウンス・同値ガード |
+| 23 | [INST_23_settings_dirty_indicator.md](./INST_23_settings_dirty_indicator.md) | 設定タブの未保存インジケータ |
+| 24 | [INST_24_delete_order_safety.md](./INST_24_delete_order_safety.md) | ファイル削除の順序見直し |
+| 25 | [INST_25_playwright_guard_expand.md](./INST_25_playwright_guard_expand.md) | Chromium ガードを更新確認にも展開 |
+| 26 | [INST_26_sqlite_wal_mode.md](./INST_26_sqlite_wal_mode.md) | SQLite WAL モード化 |
 
 - 差分メモ: [ALIGNMENT.md](ALIGNMENT.md)
 - 正本設計: [../DESIGN.md](../DESIGN.md)
