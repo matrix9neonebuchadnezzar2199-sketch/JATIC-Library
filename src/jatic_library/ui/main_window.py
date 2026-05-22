@@ -385,27 +385,48 @@ class MainWindow(QMainWindow):
     def _on_delete_file(self, file_item: object) -> None:
         if not isinstance(file_item, LibraryFileItem):
             return
-        path = file_item.file_path
-        try:
-            if path.is_file():
-                path.unlink()
-        except OSError as exc:
-            QMessageBox.critical(self, "削除", f"ファイル削除に失敗しました:\n{exc}")
-            return
 
+        path = file_item.file_path
         folder = path.parent
-        manifest = Manifest.load(folder)
-        if manifest is not None and file_item.target_code:
-            manifest.remove_file(file_item.target_code)
-            manifest.save(folder)
+        errors: list[str] = []
 
         if file_item.target_code:
-            row = self._repo.get_file(file_item.publish_ym, file_item.target_code)
-            if row is not None and row.id is not None:
-                self._repo.delete_file(row.id)
+            try:
+                row = self._repo.get_file(file_item.publish_ym, file_item.target_code)
+                if row is not None and row.id is not None:
+                    self._repo.delete_file(row.id)
+            except sqlite3.Error as exc:
+                errors.append(f"DB: {exc}")
+
+        if file_item.target_code:
+            try:
+                manifest = Manifest.load(folder)
+                if manifest is not None:
+                    manifest.remove_file(file_item.target_code)
+                    manifest.save(folder)
+            except OSError as exc:
+                errors.append(f"manifest: {exc}")
+
+        try:
+            path.unlink(missing_ok=True)
+        except OSError as exc:
+            errors.append(f"file: {exc}")
 
         self._refresh_data_tabs()
-        self.statusBar().showMessage("ファイルを削除しました", 5000)
+
+        if any(err.startswith("file:") for err in errors):
+            QMessageBox.warning(
+                self,
+                "削除",
+                "ファイル削除に失敗しました:\n" + "\n".join(errors),
+            )
+        elif errors:
+            self.statusBar().showMessage(
+                f"削除は完了しましたが警告があります（{len(errors)}件）",
+                7000,
+            )
+        else:
+            self.statusBar().showMessage("ファイルを削除しました", 5000)
 
     def _on_export_month(self, publish_ym: str) -> None:
         if self._config.download.save_root is None:

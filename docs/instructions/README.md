@@ -29,7 +29,7 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 | 21 | [INST_21_pyinstaller.md](INST_21_pyinstaller.md) | PyInstaller | **完了** |
 | 22 | [INST_22_library_sort_debounce.md](INST_22_library_sort_debounce.md) | 保管庫ソート保存デバウンス | **未着手** |
 | 23 | [INST_23_settings_dirty_indicator.md](INST_23_settings_dirty_indicator.md) | 設定タブ未保存インジケータ | **未着手** |
-| 24 | [INST_24_delete_order_safety.md](INST_24_delete_order_safety.md) | 削除順序の見直し | **未着手** |
+| 24 | [INST_24_delete_order_safety.md](INST_24_delete_order_safety.md) | 削除順序の見直し | **完了** |
 | 25 | [INST_25_playwright_guard_expand.md](INST_25_playwright_guard_expand.md) | Playwright ガード拡張 | **未着手** |
 | 26 | [INST_26_sqlite_wal_mode.md](INST_26_sqlite_wal_mode.md) | SQLite WAL モード化 | **完了** |
 
@@ -43,7 +43,7 @@ Cursor へ **1 本ずつ** 投入し、完了ごとに `pytest` → `ruff` → `
 |---|---|---|
 | 22 | [INST_22_library_sort_debounce.md](./INST_22_library_sort_debounce.md) | 保管庫ソート保存のデバウンス・同値ガード |
 | 23 | [INST_23_settings_dirty_indicator.md](./INST_23_settings_dirty_indicator.md) | 設定タブの未保存インジケータ |
-| 24 | [INST_24_delete_order_safety.md](./INST_24_delete_order_safety.md) | ファイル削除の順序見直し |
+| 24 | [INST_24_delete_order_safety.md](./INST_24_delete_order_safety.md) | ファイル削除の順序見直し（完了） |
 | 25 | [INST_25_playwright_guard_expand.md](./INST_25_playwright_guard_expand.md) | Chromium ガードを更新確認にも展開 |
 | 26 | [INST_26_sqlite_wal_mode.md](./INST_26_sqlite_wal_mode.md) | SQLite WAL モード化（完了） |
 
