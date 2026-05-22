@@ -3,7 +3,7 @@
 本ドキュメントが **実装進捗の正本** です。README の機能説明は製品ビジョン、本ファイルは事実ベースの状態を記録します。
 
 **最終更新:** 2026-05-22  
-**現在のマイルストーン:** Beta 配布検証（INST_29）— 機能 #01〜#28 完了、pre-release 公開待ち
+**現在のマイルストーン:** **v0.1.0-beta.1** 公開済（pre-release）。残りは P11 機能・R4 事後検証・任意改善
 
 ---
 
@@ -12,44 +12,28 @@
 | 区分 | 状態 | 説明 |
 |------|------|------|
 | **MVP Core** | 完了 | 設定・DL・CLI・保管庫ツリー・CSV プレビュー |
-| **UX 拡張** | 完了 | 進捗ダイアログ、トレイ、エクスポート、タグ（カレンダー・比較タブは削除） |
-| **配布** | 一部 | `build.bat` → zip 生成済（`0.1.0-beta.1`）。GUI smoke・Release は INST_29 |
+| **UX 拡張** | 完了 | 進捗ダイアログ、トレイ、エクスポート、タグ |
+| **配布** | 完了 | `build.bat` → zip。beta.1 リリースノート・マニュアル整備済 |
+| **Hardening + 配布パイプライン** | 完了 | #22〜#29 |
 
 ---
 
-## 2. 実装指示書トラッカー（#01〜#21）
+## 2. 実装指示書トラッカー（#01〜#29）
 
 | # | タイトル | 状態 | 備考 |
 |---|----------|------|------|
-| 01 | プロジェクト初期化 | 完了 | setuptools / エントリポイント |
-| 02 | 定数・51地域・URL 生成 | 完了 | `targets.json` 同梱 |
-| 03 | Pydantic 設定・JSON 永続化 | 完了 | `ConfigStore` |
-| 04 | SQLite リポジトリ | 完了 | 全 CRUD |
-| 05 | ロガー・トースト | 完了 | loguru / win11toast |
-| 06 | ダウンローダ・マニフェスト・HTTP | 完了 | HTTP/2→1.1 フォールバック |
-| 07 | Playwright スクレイパ | 完了 | `targets.json` 学習 |
-| 08 | スケジューラ・CLI | 完了 | `check` / `download` / `scrape` |
-| 09 | メインウィンドウ | 完了 | 4 タブ骨格 |
-| 10 | 設定タブ | 完了 | 地域選択・保存・アクション |
-| 11 | 保管庫タブ | 完了 | ツリー・詳細・CSV プレビュー |
-| 12 | DL 進捗ダイアログ | 完了 | `DownloadProgressDialog` |
-| 13 | DL 404 自動再スクレイプ | 完了 | 出版単位で 1 回のみ |
-| 14 | 保管庫拡張 | 完了 | ソート・再 DL・削除 |
-| 15 | タグ UI | 完了 | ファイルスコープ |
-| 16 | カレンダー・欠損月 | 先送り | Phase P11（`MainWindow` 未配線） |
-| 17 | 比較タブ | 先送り | Phase P11（`MainWindow` 未配線） |
-| 18 | エクスポート・グラフ | 一部 | 月次 ZIP/CSV エクスポートは済。`TrafficChartWidget` は Phase P11 |
-| 19 | Git 自動 commit | 完了 | `git_sync`（push は手動） |
-| 20 | トレイ・スタートアップ | 完了 | Run キー登録 |
-| 21 | PyInstaller 初期 | 完了 | INST_28 で上書き・拡張 |
-| 22 | 保管庫ソート保存デバウンス | 完了 | [INST_22](./instructions/INST_22_library_sort_debounce.md) |
-| 23 | 設定タブ未保存インジケータ | 完了 | [INST_23](./instructions/INST_23_settings_dirty_indicator.md) |
-| 24 | 削除順序の見直し | 完了 | [INST_24](./instructions/INST_24_delete_order_safety.md) |
-| 25 | Playwright ガード拡張 | 完了 | [INST_25](./instructions/INST_25_playwright_guard_expand.md) |
-| 26 | SQLite WAL モード化 | 完了 | [INST_26](./instructions/INST_26_sqlite_wal_mode.md) |
-| 27 | Chromium セットアップ UI | 完了 | [INST_27](./instructions/INST_27_playwright_first_run_setup.md) |
-| 28 | PyInstaller ビルド・zip | 完了 | [INST_28](./instructions/INST_28_pyinstaller_build_refine.md) |
-| 29 | smoke test・Release | 進行中 | [INST_29](./instructions/INST_29_release_smoke_test.md) |
+| 01〜15 | （コア・UX） | 完了 | 指示書参照 |
+| 16 | カレンダー・欠損月 | 先送り | Phase P11 |
+| 17 | 比較タブ | 先送り | Phase P11 |
+| 18 | エクスポート・グラフ | 一部 | エクスポート済・チャート P11 |
+| 19 | Git 自動 commit | 完了 | push は手動 |
+| 20 | トレイ・スタートアップ | 完了 | |
+| 21 | PyInstaller 初期 | 完了 | INST_28 で拡張 |
+| 22〜26 | Pre-release Hardening | 完了 | |
+| 27 | Chromium セットアップ UI | 完了 | |
+| 28 | PyInstaller ビルド・zip | 完了 | |
+| 29 | smoke test・Release | 完了 | 自動ゲート + 文書化（[BETA_TEST_LOG](BETA_TEST_LOG.md)） |
+| 30 | 公開後ドキュメント | 完了 | USER_MANUAL / README / DEV_SETUP |
 
 ---
 
@@ -57,127 +41,70 @@
 
 | Phase | 成果物 | 状態 |
 |-------|--------|------|
-| P0 | プロジェクト雛形 | 完了 |
-| P1 | コアデータ層 | 完了 |
-| P2 | ダウンロード・スケジューラ・CLI | 完了 |
-| P3 | MainWindow + SettingsTab | 完了 |
-| P4 | LibraryTab | 完了 |
-| P5 | DL 404 自動再スクレイプ | 完了 |
-| P6 | 通知 UX・トレイ・進捗ダイアログ | 完了 |
-| P7 | カレンダー・欠損検出・タグ | 完了 |
-| P8 | 比較・可視化・エクスポート | 完了 |
-| P9 | GitHub 連携・テーマ | 完了（commit のみ自動） |
-| P10 | PyInstaller 配布 | 一部 | zip 生成済（INST_28）。smoke・Release・マニュアル（INST_29/30） |
+| P0〜P9 | （各層） | 完了 |
+| P10 | PyInstaller・配布・Release | **完了**（beta.1） |
+| P11 | カレンダー・比較・チャート | 先送り |
 
-詳細 Phase 表: [ROADMAP.md](ROADMAP.md)
+詳細: [ROADMAP.md](ROADMAP.md)
 
 ---
 
 ## 4. 機能マトリクス（製品機能 × 実装）
 
-凡例: **済** = 利用可 / **一部** = 限定実装 / **予定** = 未実装
-
 | 機能 | GUI | CLI | 状態 |
 |------|-----|-----|------|
-| 保存先・DL 設定 | 済 | — | 設定タブ |
-| 51 地域選択 | 済 | — | 空集合＝全地域 |
-| 起動時自動チェック（24h） | 済 | 済 | `check` |
-| 並列 DL・リトライ・SHA256 | 済 | 済 | manifest + SQLite |
-| サイト再スキャン | 済 | 済 | Playwright |
-| DL 404 時自動再スクレイプ | 済 | 済 | #13 |
-| 保管庫ツリー（年→月→ZIP） | 済 | — | #11 |
-| ZIP 内 CSV プレビュー | 済 | — | polars |
-| ソート・再 DL・削除 | 済 | — | #14 |
-| タグ付け | 済 | — | #15 |
-| カレンダー・欠損月 | — | — | 削除（#16） |
-| 比較ビュー・簡易グラフ | — | — | 削除（#17） |
-| 月次 ZIP / 統合 CSV エクスポート | 済 | — | #18 |
-| Git 自動 commit | 済 | — | push は手動 #19 |
-| DL 進捗ダイアログ | 済 | — | #12 |
-| トレイ・スタートアップ | 済 | — | #20 |
-| PyInstaller 配布（exe） | 済 | — | ビルド済・smoke は INST_29（§5.1 R1） |
-| exe 初回 Chromium セットアップ | 済 | — | INST_27 ダイアログ |
-| Git 自動 push | — | — | 未（commit のみ #19） |
+| 保存先・DL 設定 | 済 | — | |
+| 51 地域選択 | 済 | — | |
+| 起動時自動チェック | 済 | 済 | |
+| 並列 DL・リトライ・SHA256 | 済 | 済 | |
+| サイト再スキャン | 済 | 済 | |
+| DL 404 時自動再スクレイプ | 済 | 済 | |
+| 保管庫ツリー | 済 | — | |
+| ZIP 内 CSV プレビュー | 済 | — | |
+| ソート・再 DL・削除 | 済 | — | |
+| タグ付け | 済 | — | |
+| 月次 ZIP / CSV エクスポート | 済 | — | |
+| Git 自動 commit | 済 | — | |
+| DL 進捗ダイアログ | 済 | — | |
+| トレイ・スタートアップ | 済 | — | |
+| PyInstaller 配布（exe） | 済 | — | |
+| exe 初回 Chromium セットアップ | 済 | — | |
+| カレンダー・比較 | — | — | P11 |
+| Git 自動 push | — | — | 未 |
 
 ---
 
-## 5. 残作業（リリース・配布まで）
+## 5. 残作業
 
-機能実装（指示書 #01〜#21）は完了。**以降は「実行形式として配れる品」に仕上げる作業**が中心です。
+### 5.1 配布・検証（事後）
 
-### 5.0 Pre-release Hardening（#22〜#26）— 完了
+| 優先 | 項目 | 状態 |
+|------|------|------|
+| R4 | クリーン環境確認 | 公開後 FB / 別 PC（意思決定） |
+| R8 | 実サイト回帰 | 随時 |
 
-| # | 目的 | 区分 | 状態 |
-|---|------|------|------|
-| 22 | ソート保存の I/O 削減 | UX | 完了 |
-| 23 | 設定タブ未保存状態の可視化 | UX | 完了 |
-| 24 | 削除処理の不整合防止 | 堅牢性 | 完了 |
-| 25 | Chromium 未導入時の事故防止 | 堅牢性 | 完了 |
-| 26 | SQLite `database is locked` 予防 | 堅牢性 | 完了 |
-
-### 5.0b 配布パイプライン（#27〜#29）
-
-| # | 目的 | 状態 |
-|---|------|------|
-| 27 | アプリ内 Chromium インストール（方式 B） | 完了 |
-| 28 | `build.bat` / `.spec` / zip `0.1.0-beta.1` | 完了 |
-| 29 | smoke test・GitHub pre-release | **進行中**（[BETA_TEST_LOG.md](BETA_TEST_LOG.md)） |
-
-### 5.1 必須（配布ブロッカー）
-
-| 優先 | 項目 | 内容 | 状態 |
-|------|------|------|------|
-| R1 | **PyInstaller ビルド検証** | `build.bat` 完走・exe/zip 生成済（2026-05-22）。GUI/DL smoke は INST_29 | 一部 |
-| R2 | **Playwright 同梱方針** | 方式 B: アプリ内インストール UI（INST_27 完了）。ビルド同梱・初回 DL 検証は R1/R4 残 | 一部 |
-| R3 | **配布物の形** | `JATIC-Library-0.1.0-beta.1-win64.zip` + BETA_TEST 同梱（INST_28） | 完了 |
-| R4 | **クリーン環境確認** | Python / uv 未インストールの Windows 10/11 で R1 成果物のみ動作確認 | 未 |
-
-### 5.2 推奨（品質・運用）
-
-| 優先 | 項目 | 内容 | 状態 |
-|------|------|------|------|
-| R5 | **USER_MANUAL.md** | 全タブ・トレイ・エクスポート・Git 連携の操作手順 | ドラフトのみ |
-| R6 | **README 仕上げ** | スクリーンショット、ステータスバッジ、exe 利用者向け導線 | 一部 |
-| R7 | **DEV_SETUP** | PyInstaller ビルド手順・既知の制限（Playwright 等） | 一部（INST_30 で仕上げ） |
-| R8 | **実サイト回帰** | 当月 typeB の HEAD/DL・404→再スクレイプの手動確認 | 随時 |
-
-### 5.2b 公開後ドキュメント（INST_30 想定）
-
-| 優先 | 項目 | 内容 | 状態 |
-|------|------|------|------|
-| — | **INST_30** | R5 USER_MANUAL / R6 README / R7 DEV_SETUP 仕上げ | 未着手 |
-
-### 5.3 先送り（Phase P11 以降）
-
-- カレンダーによる欠損可視化（#16）→ Phase P11
-- 比較タブ（#17）→ Phase P11
-- ZIP/CSV エクスポート向けチャート（#18, `exporter` / `TrafficChartWidget`）→ Phase P11
-
-これらは `MainWindow` に未配線です。指示書ファイルは将来実装のため `docs/instructions/` に保持します。
-
-### 5.4 任意（設計・将来）
+### 5.2 任意
 
 | 項目 | 備考 |
 |------|------|
-| Git 自動 `push`（PAT） | #19 は commit のみ |
-| タスクスケジューラ連携 | 仕様書案: 公開日朝の自動起動（現状は Run キー + 起動時チェック） |
-| サーバー側更新の差分 DL | ハッシュ不一致時の再取得ログ強化 |
-| `targets.json` 更新後の地域一覧即時反映 | 現状は再スキャン後に再起動案内 |
-| コード署名・MSI インストーラ | スコープ外（必要なら別フェーズ） |
+| README スクリーンショット | ベータ受入後 |
+| Git 自動 push | PAT 要 |
+| コード署名 | 別フェーズ |
+| P11 | #16/#17/#18 チャート |
 
-### 5.5 スコープ外（今回やらない）
+### 5.3 スコープ外
 
-- 過去月の遡及 DL（JARTIC 非公開のため不可）
-- macOS / Linux 対応
+- 過去月遡及 DL、macOS/Linux
 
 ---
 
 ## 6. 検証基準（開発時）
 
 ```text
-uv run pytest -q    # 147 passed（2026-05-22 時点・INST_27 以降）
+uv run pytest -q    # 147 passed（2026-05-22）
 uv run ruff check src tests
 uv run mypy
+.\build.bat         # → dist\JATIC-Library-0.1.0-beta.1-win64.zip
 ```
 
 ---
@@ -186,7 +113,8 @@ uv run mypy
 
 | ドキュメント | 用途 |
 |--------------|------|
-| [DESIGN.md](DESIGN.md) | 全体設計・要件 |
-| [UI_FLOW.md](UI_FLOW.md) | タブ構成・シーケンス図 |
-| [instructions/README.md](instructions/README.md) | 実装指示書一覧 |
-| [DEV_SETUP.md](DEV_SETUP.md) | 開発環境構築 |
+| [DESIGN.md](DESIGN.md) | 全体設計 |
+| [UI_FLOW.md](UI_FLOW.md) | タブ・シーケンス |
+| [BETA_TEST_LOG.md](BETA_TEST_LOG.md) | リリース検証ログ |
+| [RELEASE_v0.1.0-beta.1.md](RELEASE_v0.1.0-beta.1.md) | リリースノート |
+| [instructions/README.md](instructions/README.md) | 指示書一覧 |

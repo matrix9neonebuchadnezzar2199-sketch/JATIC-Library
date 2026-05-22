@@ -29,4 +29,4 @@ INST_29 のスコープ外（R5〜R7）を担当する。
 
 ## 状態
 
-**未着手**（pre-release 公開後でも可）
+**完了**（2026-05-22）— USER_MANUAL / README / DEV_SETUP / RELEASE ノート

@@ -378,6 +378,7 @@ body.diary > footer {
       <tr><td>11:08</td><td>INST_28 PyInstaller ビルド・配布 zip</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1108">#entry-1108</a></td></tr>
       <tr><td>11:15</td><td>INST_29 smoke test チェックリスト・ログ雛形</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-1115">#entry-1115</a></td></tr>
       <tr><td>11:24</td><td>マイルストーン整合（DEV_STATUS / ROADMAP / DEV_SETUP）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1124">#entry-1124</a></td></tr>
+      <tr><td>—</td><td>INST_29/30 完了・beta.1 リリース準備</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-beta1-done">#entry-beta1-done</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -515,6 +516,17 @@ body.diary > footer {
   <p>整合レビューに基づき <code>DEV_STATUS</code>（マイルストーン・#27〜29 トラッカー・R/P10）、<code>ROADMAP</code>、<code>DEV_SETUP</code>（<code>build.bat</code> 一本化）、<code>DESIGN</code> サマリを更新。<code>INST_30_release_docs.md</code> を R5〜R7 用に追加。</p>
   <h3>検証</h3>
   <p>コード変更なし。Commit: <code>a71eeb7</code></p>
+</section>
+
+  <section class="entry" id="entry-beta1-done">
+  <h2>v0.1.0-beta.1 リリース完了（INST_29/30）</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">release</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>残作業を一括完了: <code>USER_MANUAL</code> 本番化、README/RELEASE ノート、<code>BETA_TEST_LOG</code> 記録、<code>DEV_STATUS</code>/ROADMAP を beta.1 公開状態に更新。pytest 147。</p>
+  <h3>設計判断</h3>
+  <p>Phase 3 クリーン環境は意思決定どおりスキップ（公開後 FB）。INST_29 は自動ゲート + 文書化で完了扱い。</p>
+  <h3>検証</h3>
+  <p>ruff / mypy / pytest 147。zip 136.1 MB。タグ <code>v0.1.0-beta.1</code> push。</p>
 </section>
 </main>
 

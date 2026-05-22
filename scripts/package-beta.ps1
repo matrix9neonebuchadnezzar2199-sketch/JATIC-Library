@@ -1,6 +1,6 @@
 # Package dist\JATIC-Library as a beta zip for testing.
 param(
-    [string]$Version = "0.1.0-beta"
+    [string]$Version = "0.1.0-beta.1"
 )
 
 $ErrorActionPreference = "Stop"
