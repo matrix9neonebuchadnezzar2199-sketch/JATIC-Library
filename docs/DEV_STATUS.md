@@ -160,7 +160,7 @@
 ## 6. 検証基準（開発時）
 
 ```text
-uv run pytest -q    # 118 passed（2026-05-22 時点）
+uv run pytest -q    # 139 passed（2026-05-22 時点・INST_23 以降）
 uv run ruff check src tests
 uv run mypy
 ```

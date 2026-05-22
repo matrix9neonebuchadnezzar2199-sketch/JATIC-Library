@@ -372,6 +372,7 @@ body.diary > footer {
       <tr><td>08:38</td><td>品質チェック失敗の修正（ruff / mypy / pytest）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-0838">#entry-0838</a></td></tr>
       <tr><td>09:15</td><td>UI_FLOW・INST_22〜26・DEV_STATUS ドキュメント整備</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-0915">#entry-0915</a></td></tr>
       <tr><td>10:42</td><td>Pre-release Hardening #22〜#26 実装完了</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1042">#entry-1042</a></td></tr>
+      <tr><td>10:48</td><td>配布 R1〜R4 方針整理・PyInstaller 同梱パス確認</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-1048">#entry-1048</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -434,7 +435,24 @@ body.diary > footer {
     <li><span class="op op-mod">M</span> docs/DEV_STATUS.md, instructions/README.md</li>
   </ul>
   <h3>検証</h3>
-  <p><code>uv run ruff check</code> / <code>mypy</code> / <code>pytest</code> すべて成功。最終 HEAD: <code>3e5da3a</code>（#23）。コミット列: <code>77aacf6</code>（#22）→ <code>3e5da3a</code>（#23）。#24〜#26 は先行 push 済み。</p>
+  <p><code>uv run ruff check</code> / <code>mypy</code> / <code>pytest</code> すべて成功（当時 118 passed、現行 139 passed）。最終 HEAD: <code>3e5da3a</code>（#23）。コミット列: <code>77aacf6</code>（#22）→ <code>3e5da3a</code>（#23）。#24〜#26 は先行 push 済み。docs: <code>76bc334</code></p>
+</section>
+
+  <section class="entry" id="entry-1048">
+  <h2>配布作業（R1〜R4）— 方針整理・待機</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">docs</span> <span class="tag tag-warn">warn</span></p>
+  <h3>概要</h3>
+  <p>Pre-release Hardening 完了後、配布ブロッカー R1〜R4 の設計を整理。<code>build.bat</code> / <code>jatic-library.spec</code> は雛形のみで<strong>実ビルド検証は未</strong>（DEV_STATUS R1〜R4 はすべて「未」）。</p>
+  <h3>設計判断（マスター意思決定待ち）</h3>
+  <ul>
+    <li><strong>(1) Playwright Chromium</strong>: A 同梱 / B 初回インストール UI / C 手動 — 推奨案は B、初回リリースは C も可。</li>
+    <li><strong>(2) バージョン</strong>: 初回 exe は <code>v0.1.0-beta.1</code> 案。</li>
+    <li><strong>(3) Cursor の役割</strong>: <code>.spec</code> / <code>build.bat</code> / INST_21 / smoke checklist / README 加筆。実機 <code>build.bat</code> と smoke はマスター側。</li>
+  </ul>
+  <h3>検証（同梱パス）</h3>
+  <p><code>src/jatic_library/resources</code> — <strong>あり</strong>（<code>targets.json</code>, <code>version.txt</code>）。<code>src/jatic_library/ui/themes</code> — <strong>あり</strong>（<code>dark.qss</code>, <code>light.qss</code>）。現行 <code>.spec</code> の <code>datas</code> 2 行は実在パスと一致。</p>
+  <h3>残課題</h3>
+  <p>pytest 表記を DEV_STATUS §6 で <strong>139 passed</strong> に更新（08:38 エントリの 118 は当時正）。INST_21 指示書・<code>.spec</code> 改善は (1) 決定後に着手。HEAD: <code>76bc334</code></p>
 </section>
 </main>
 
