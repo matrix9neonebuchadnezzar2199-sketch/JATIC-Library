@@ -8,6 +8,7 @@ from pathlib import Path
 import polars as pl
 import pytest
 
+from jatic_library.constants import MERGED_CSV_ENCODING
 from jatic_library.core.csv_loader import (
     CsvLoadError,
     find_first_csv_name,
@@ -72,9 +73,30 @@ def test_merge_region_zip_csvs_to_path_matches_in_memory(tmp_path: Path) -> None
     in_memory = merge_region_zip_csvs([first, second, third])
     dest = tmp_path / "merged.csv"
     merge_region_zip_csvs_to_path([first, second, third], dest, temp_dir=tmp_path)
-    on_disk = pl.read_csv(dest, infer_schema_length=0)
+    on_disk = pl.read_csv(dest, encoding=MERGED_CSV_ENCODING, infer_schema_length=0)
     assert on_disk.height == in_memory.height
     assert on_disk.columns == in_memory.columns
+
+
+def test_read_csv_frame_from_bytes_prefers_cp932_for_japanese_header() -> None:
+    """cp932 source must not be mis-read as UTF-8 (garbles header column names)."""
+    raw = "都道府県,件数\n13,100\n".encode("cp932")
+    frame = read_csv_frame_from_bytes(raw)
+    assert frame.columns == ["都道府県", "件数"]
+    assert frame.row(0) == ("13", "100")
+
+
+def test_merge_region_zip_csvs_to_path_writes_shift_jis(tmp_path: Path) -> None:
+    first = tmp_path / "a.zip"
+    with zipfile.ZipFile(first, "w") as archive:
+        archive.writestr("x.csv", "都道府県,件数\n13,100\n".encode("cp932"))
+
+    dest = tmp_path / "merged.csv"
+    merge_region_zip_csvs_to_path([first], dest, temp_dir=tmp_path)
+
+    text = dest.read_text(encoding=MERGED_CSV_ENCODING)
+    assert text.startswith("都道府県,件数")
+    assert "13,100" in text
 
 
 def test_merge_region_zip_csvs_to_path_empty_raises(tmp_path: Path) -> None:

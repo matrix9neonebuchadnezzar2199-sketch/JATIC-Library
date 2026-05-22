@@ -10,6 +10,11 @@ from typing import IO
 
 import polars as pl
 
+from jatic_library.constants import MERGED_CSV_ENCODING
+
+# JARTIC region ZIP CSVs are typically cp932; try these before UTF-8.
+_SOURCE_CSV_ENCODINGS = ("cp932", "shift_jis", "utf-8")
+
 
 class CsvLoadError(Exception):
     """Raised when CSV data cannot be read from an archive."""
@@ -71,17 +76,21 @@ def count_data_rows_for_path(path: Path) -> int | None:
 def read_csv_frame_from_bytes(raw: bytes) -> pl.DataFrame:
     """Decode *raw* CSV bytes into a DataFrame."""
     last_error: Exception | None = None
-    for encoding in ("utf-8", "cp932", "shift_jis"):
+    for encoding in _SOURCE_CSV_ENCODINGS:
         try:
             return pl.read_csv(
                 io.BytesIO(raw),
                 encoding=encoding,
                 infer_schema_length=0,
-                ignore_errors=True,
             )
         except (UnicodeDecodeError, pl.exceptions.ComputeError) as exc:
             last_error = exc
     raise CsvLoadError(str(last_error or "Could not decode CSV"))
+
+
+def _transcode_utf8_csv_file(src: Path, dest: Path, encoding: str) -> None:
+    """Rewrite a UTF-8 CSV file produced by Polars as *encoding*."""
+    dest.write_bytes(src.read_text(encoding="utf-8").encode(encoding))
 
 
 def read_csv_frame_from_zip(zip_path: Path) -> pl.DataFrame:
@@ -108,8 +117,9 @@ def merge_region_zip_csvs_to_path(
 ) -> None:
     """Merge ZIP CSVs into *dest_path* with bounded peak memory.
 
-    Each ZIP is decoded to a utf-8 temp file (per-ZIP encoding detection), then
-    combined via LazyFrame ``sink_csv``. Temp files live under *temp_dir* when set
+    Each ZIP is decoded with cp932-first detection, combined via LazyFrame
+    ``sink_csv`` (UTF-8 intermediate), then written to *dest_path* as Shift_JIS
+    (``MERGED_CSV_ENCODING``). Temp files live under *temp_dir* when set
     (use publication folder to avoid filling the system temp drive).
     """
     if not zip_paths:
@@ -147,7 +157,9 @@ def merge_region_zip_csvs_to_path(
         if not lazy_frames:
             raise CsvLoadError("No CSV content to merge")
 
-        pl.concat(lazy_frames, how="vertical_relaxed").sink_csv(dest_path)
+        utf8_dest = tmp / "merged_utf8.csv"
+        pl.concat(lazy_frames, how="vertical_relaxed").sink_csv(utf8_dest)
+        _transcode_utf8_csv_file(utf8_dest, dest_path, MERGED_CSV_ENCODING)
 
 
 def find_first_csv_name(zip_path: Path) -> str:

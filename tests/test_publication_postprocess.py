@@ -7,7 +7,7 @@ from pathlib import Path
 
 import polars as pl
 
-from jatic_library.constants import EXTRACTED_DIR_NAME, MERGED_CSV_FILENAME
+from jatic_library.constants import EXTRACTED_DIR_NAME, MERGED_CSV_ENCODING, MERGED_CSV_FILENAME
 from jatic_library.core.publication_postprocess import postprocess_publication_folder
 from jatic_library.core.targets import TARGETS
 
@@ -31,6 +31,6 @@ def test_postprocess_extracts_and_merges(tmp_path: Path) -> None:
     assert (folder / EXTRACTED_DIR_NAME / "東京都").is_dir()
     assert (folder / EXTRACTED_DIR_NAME / "神奈川県").is_dir()
 
-    frame = pl.read_csv(merged_path)
+    frame = pl.read_csv(merged_path, encoding=MERGED_CSV_ENCODING)
     assert frame.height == 2
     assert set(frame["region"].to_list()) == {"tokyo", "kanagawa"}

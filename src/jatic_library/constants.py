@@ -29,5 +29,7 @@ MANIFEST_FILENAME = "_manifest.json"
 EXTRACTED_DIR_NAME = "extracted"
 MERGED_CSV_FILENAME = "統合.csv"
 MERGED_CSV_DISPLAY_NAME = "統合CSV"
+# Shift_JIS (Windows cp932) for Excel double-click on Japanese Windows.
+MERGED_CSV_ENCODING = "cp932"
 
 TZ_JST = "Asia/Tokyo"
