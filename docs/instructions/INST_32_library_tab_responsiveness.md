@@ -62,7 +62,7 @@
 
 **B. バックグラウンド並列度**
 
-- `enqueue_file_stats()` 内で、ジョブ投入前に `pool.setMaxThreadCount(min(2, pool.maxThreadCount()))` を設定（グローバルプールを他用途と共有するため、**2 未満には下げない**）。INST_31 ドラフトの「最大 2」意図を満たす。
+- `LibraryTab` 専用の `QThreadPool`（`self._stats_pool`）を `__init__` で生成し `setMaxThreadCount(2)`。`enqueue_file_stats(..., pool)` に渡す（`globalInstance` は使わない）。
 
 **C. 受け入れ検証（手動・PR 必須）**
 
@@ -78,6 +78,8 @@
 - **未達**（初回骨格 >500ms、または再起動 >200ms、または UI ブロックあり）の場合、**INST_32 #1 の PR は `master` にマージしない**（Draft のまま、または revert）。「後で直す」前提のマージは禁止。
 - 未達のチューニングは **INST_33**（別指示書）で実施する。候補例: stats プール並列度 2→4、`uncompressed_csv_size_in_zip` 結果の短期メモリキャッシュ、スキャン世代ごとの投入バッチ化。
 - **未測定** もマージ不可（計測環境・手順を PR に追記して再計測）。
+
+**PR 本文に併記する測定環境（必須）:** OS バージョン、ストレージ種別（SSD / HDD）、論理 CPU コア数、保管庫 ZIP 件数と合計サイズ（概算可）。
 
 大規模 fixture が無い CI では閾値の **自動アサートは任意**。代わりに `test_scan_library_completes_under_100ms_with_cache_hits`（INST_31 既存）の維持を確認すること。
 

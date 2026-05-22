@@ -60,8 +60,8 @@ def enqueue_file_stats(
     bridge: LibraryStatsBridge,
     generation: int,
     paths: list[Path],
+    pool: QThreadPool,
 ) -> None:
-    """Schedule background stats jobs on the global thread pool."""
-    pool = QThreadPool.globalInstance()
+    """Schedule background stats jobs on *pool* (caller-owned, max threads capped)."""
     for path in paths:
         pool.start(FileStatsRunnable(bridge, generation, path))

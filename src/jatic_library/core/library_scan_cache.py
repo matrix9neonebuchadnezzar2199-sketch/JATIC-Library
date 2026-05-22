@@ -92,3 +92,33 @@ def set_cached_stats(
     }
     _save_entries(entries)
 
+
+def evict_stale_entries(valid_paths: set[Path]) -> int:
+    """Remove cache entries for files not in *valid_paths* or missing on disk.
+
+    Returns:
+        Number of entries removed. Does not write the cache file when zero.
+    """
+    valid_resolved = {str(path.resolve()) for path in valid_paths}
+    entries = _load_entries()
+    stale_keys: list[str] = []
+    for key in entries:
+        try:
+            payload = json.loads(key)
+        except json.JSONDecodeError:
+            stale_keys.append(key)
+            continue
+        if not isinstance(payload, list) or not payload:
+            stale_keys.append(key)
+            continue
+        path_str = str(payload[0])
+        path = Path(path_str)
+        if path_str not in valid_resolved or not path.is_file():
+            stale_keys.append(key)
+    if not stale_keys:
+        return 0
+    for key in stale_keys:
+        del entries[key]
+    _save_entries(entries)
+    return len(stale_keys)
+

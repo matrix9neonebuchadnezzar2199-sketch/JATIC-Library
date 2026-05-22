@@ -387,6 +387,7 @@ body.diary > footer {
       <tr><td>14:58</td><td>INST_31 #5 CSV ローダ例外・型精緻化</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1458">#entry-1458</a></td></tr>
       <tr><td>14:59</td><td>INST_32 指示書作成（保管庫・ツリー・CSV 結合）</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1459">#entry-1459</a></td></tr>
       <tr><td>15:05</td><td>INST_32 #1 計測未達マージ禁止ルール追記</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1505">#entry-1505</a></td></tr>
+      <tr><td>15:29</td><td>INST_32 #1 キャッシュ掃除・専用 stats プール</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-1529">#entry-1529</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -626,6 +627,15 @@ body.diary > footer {
   </ul>
   <h3>検証</h3>
   <p>ドキュメントのみ。Commit: <code>7337ce9</code></p>
+</section>
+
+  <section class="entry" id="entry-1529">
+  <h2>INST_32 #1: キャッシュ掃除・専用 stats プール</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-warn">warn</span></p>
+  <h3>概要</h3>
+  <p><code>evict_stale_entries</code> を <code>refresh()</code> 末尾で実行。統計計算は <code>LibraryTab</code> 専用 <code>QThreadPool(max=2)</code> に変更。</p>
+  <h3>検証</h3>
+  <p>pytest <strong>166 passed</strong>。手動計測（500ms/200ms）: <strong>未測定</strong>（lab 実機でマスター計測要）。Commit: 本 push の #1 コミット参照。</p>
 </section>
 </main>
 

@@ -224,6 +224,16 @@ def scan_library(
     return sorted(years_map.values(), key=lambda y: y.year, reverse=True)
 
 
+def iter_all_file_paths(tree: list[LibraryYearItem]) -> list[Path]:
+    """Return every on-disk file path referenced in the library tree."""
+    paths: list[Path] = []
+    for year in tree:
+        for month in year.months:
+            for file_item in month.files:
+                paths.append(file_item.file_path)
+    return paths
+
+
 def iter_files_needing_stats(tree: list[LibraryYearItem]) -> list[LibraryFileItem]:
     """Return file items whose row_count was not loaded from cache."""
     pending: list[LibraryFileItem] = []

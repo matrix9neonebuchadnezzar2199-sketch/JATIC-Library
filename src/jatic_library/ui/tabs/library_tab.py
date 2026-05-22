@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from PySide6.QtCore import QPoint, Qt, QTimer, Signal
+from PySide6.QtCore import QPoint, Qt, QThreadPool, QTimer, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
@@ -24,11 +24,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from jatic_library.core.library_scan_cache import evict_stale_entries
 from jatic_library.core.library_scanner import (
     LibraryFileItem,
     LibraryMonthItem,
     LibraryYearItem,
     format_library_file_label,
+    iter_all_file_paths,
     iter_files_needing_stats,
     scan_library,
     update_file_item_in_tree,
@@ -75,6 +77,8 @@ class LibraryTab(QWidget):
         self._sort_persist_timer.setInterval(300)
         self._sort_persist_timer.timeout.connect(self._emit_sort_changed)
         self._scan_generation = 0
+        self._stats_pool = QThreadPool(self)
+        self._stats_pool.setMaxThreadCount(2)
         self._stats_bridge = LibraryStatsBridge(self)
         self._stats_bridge.stats_ready.connect(self._on_file_stats_ready)
         self._build_ui()
@@ -164,6 +168,7 @@ class LibraryTab(QWidget):
         self._rebuild_tree()
         self._schedule_stats_refresh()
         self._apply_search_filter(self._search.text())
+        self._evict_stale_scan_cache()
         self._update_storage_header()
 
     def _schedule_stats_refresh(self) -> None:
@@ -177,7 +182,13 @@ class LibraryTab(QWidget):
             self._stats_bridge,
             generation,
             [item.file_path for item in pending],
+            self._stats_pool,
         )
+
+    def _evict_stale_scan_cache(self) -> None:
+        """Drop cache entries for files no longer present in the library tree."""
+        valid_paths = set(iter_all_file_paths(self._tree_data))
+        evict_stale_entries(valid_paths)
 
     def _on_file_stats_ready(
         self,

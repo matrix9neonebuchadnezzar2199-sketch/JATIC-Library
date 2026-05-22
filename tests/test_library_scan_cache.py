@@ -8,6 +8,7 @@ from pathlib import Path
 
 from jatic_library.core.library_scan_cache import (
     cache_key_for,
+    evict_stale_entries,
     get_cached_stats,
     set_cached_stats,
 )
@@ -57,3 +58,21 @@ def test_cache_miss_when_file_size_changes(tmp_path: Path, monkeypatch) -> None:
     cache_file.write_text(json.dumps({"entries": entries}), encoding="utf-8")
     target.write_bytes(b"much-longer-content")
     assert get_cached_stats(target) is None
+
+
+def test_evict_stale_entries_removes_missing_files(tmp_path: Path, monkeypatch) -> None:
+    cache_file = tmp_path / "library_scan_cache.json"
+    monkeypatch.setattr(
+        "jatic_library.core.library_scan_cache.LIBRARY_SCAN_CACHE_PATH",
+        cache_file,
+    )
+    kept = tmp_path / "kept.zip"
+    removed = tmp_path / "gone.zip"
+    kept.write_bytes(b"keep")
+    removed.write_bytes(b"gone")
+    set_cached_stats(kept, row_count=1, uncompressed_csv_size=10)
+    set_cached_stats(removed, row_count=2, uncompressed_csv_size=20)
+    removed.unlink()
+    assert evict_stale_entries({kept}) == 1
+    assert get_cached_stats(kept) is not None
+    assert get_cached_stats(removed) is None
