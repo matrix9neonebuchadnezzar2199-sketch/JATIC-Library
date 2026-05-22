@@ -375,6 +375,7 @@ body.diary > footer {
       <tr><td>10:48</td><td>配布 R1〜R4 方針整理・PyInstaller 同梱パス確認</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-1048">#entry-1048</a></td></tr>
       <tr><td>—</td><td>INST_27〜29 草案レビュー（方式 B・意思決定待ち）</td><td><span class="tag tag-warn">warn</span></td><td><a href="#entry-inst27-draft">#entry-inst27-draft</a></td></tr>
       <tr><td>10:53</td><td>INST_27 Chromium セットアップ UI 実装</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1053">#entry-1053</a></td></tr>
+      <tr><td>11:08</td><td>INST_28 PyInstaller ビルド・配布 zip</td><td><span class="tag tag-ok">ok</span></td><td><a href="#entry-1108">#entry-1108</a></td></tr>
     </tbody>
   </table>
 </section>
@@ -487,6 +488,15 @@ body.diary > footer {
   </ul>
   <h3>検証</h3>
   <p>ruff / mypy / pytest <strong>147 passed</strong>。Commit: <code>75d791d</code>。INST_28/29 は未着手。</p>
+</section>
+
+  <section class="entry" id="entry-1108">
+  <h2>INST_28: PyInstaller ビルド・配布 zip</h2>
+  <p class="meta"><span class="date">2026-05-22</span> <span class="tag tag-type">dev</span> <span class="tag tag-scope">tool</span> <span class="tag tag-ok">ok</span></p>
+  <h3>概要</h3>
+  <p>バージョン <code>0.1.0-beta.1</code>。<code>jatic-library.spec</code> に Playwright driver <code>datas</code>・<code>hiddenimports</code>、<code>upx=False</code>。<code>build.bat</code> で dist クリーン・zip 化。</p>
+  <h3>検証</h3>
+  <p><code>build.bat</code> 完走（約 3 分）。<code>dist\JATIC-Library\JATIC-Library.exe</code>、<code>JATIC-Library-0.1.0-beta.1-win64.zip</code>（約 136 MB）。<code>playwright/driver</code> は <code>_internal\playwright\driver\node.exe</code> に配置。pytest 147 passed。Commit: <code>bebe52f</code>。GUI smoke は INST_29。</p>
 </section>
 </main>
 
