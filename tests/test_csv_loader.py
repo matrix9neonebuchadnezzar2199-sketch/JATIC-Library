@@ -94,7 +94,11 @@ def test_merge_region_zip_csvs_to_path_writes_shift_jis(tmp_path: Path) -> None:
     dest = tmp_path / "merged.csv"
     merge_region_zip_csvs_to_path([first], dest, temp_dir=tmp_path)
 
-    text = dest.read_text(encoding=MERGED_CSV_ENCODING)
+    raw = dest.read_bytes()
+    assert not raw.startswith(b"\xef\xbb\xbf")
+    with pytest.raises(UnicodeDecodeError):
+        raw.decode("utf-8")
+    text = raw.decode(MERGED_CSV_ENCODING)
     assert text.startswith("都道府県,件数")
     assert "13,100" in text
 

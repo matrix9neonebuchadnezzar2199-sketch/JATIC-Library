@@ -89,8 +89,18 @@ def read_csv_frame_from_bytes(raw: bytes) -> pl.DataFrame:
 
 
 def _transcode_utf8_csv_file(src: Path, dest: Path, encoding: str) -> None:
-    """Rewrite a UTF-8 CSV file produced by Polars as *encoding*."""
-    dest.write_bytes(src.read_text(encoding="utf-8").encode(encoding))
+    """Rewrite a UTF-8 CSV file produced by Polars as Shift_JIS (cp932).
+
+    Uses a temp file so a failed encode does not leave a half-written *dest*.
+    """
+    data = src.read_bytes()
+    if data.startswith(b"\xef\xbb\xbf"):
+        data = data[3:]
+    text = data.decode("utf-8")
+    encoded = text.encode(encoding, errors="strict")
+    tmp = dest.with_suffix(dest.suffix + ".part")
+    tmp.write_bytes(encoded)
+    tmp.replace(dest)
 
 
 def read_csv_frame_from_zip(zip_path: Path) -> pl.DataFrame:
@@ -142,12 +152,15 @@ def merge_region_zip_csvs_to_path(
             part_path = tmp / f"part_{index:04d}.csv"
             if index == 0:
                 frame.write_csv(part_path)
-                lazy_frames.append(pl.scan_csv(part_path, infer_schema_length=0))
+                lazy_frames.append(
+                    pl.scan_csv(part_path, encoding="utf8", infer_schema_length=0)
+                )
             else:
                 frame.write_csv(part_path, include_header=False)
                 lazy_frames.append(
                     pl.scan_csv(
                         part_path,
+                        encoding="utf8",
                         has_header=False,
                         new_columns=column_names,
                         infer_schema_length=0,
