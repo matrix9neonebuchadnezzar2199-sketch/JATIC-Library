@@ -25,7 +25,7 @@ async def test_maybe_rescrape_runs_once(tmp_path: Path, monkeypatch: pytest.Monk
         )
     calls: list[int] = []
 
-    async def fake_scrape() -> int:
+    async def fake_scrape(**_kwargs: object) -> int:
         calls.append(1)
         return 51
 
@@ -39,8 +39,8 @@ async def test_maybe_rescrape_runs_once(tmp_path: Path, monkeypatch: pytest.Monk
     exc = httpx.HTTPStatusError("404", request=request, response=response)
     state: dict[str, bool] = {"done": False}
 
-    assert await downloader._maybe_rescrape_on_404(exc, state) is True
-    assert await downloader._maybe_rescrape_on_404(exc, state) is False
+    assert await downloader._maybe_rescrape_on_404(exc, state, "2026_4") is True
+    assert await downloader._maybe_rescrape_on_404(exc, state, "2026_4") is False
     assert len(calls) == 1
 
 
@@ -56,7 +56,7 @@ async def test_maybe_rescrape_ignores_non_404(tmp_path: Path) -> None:
     response = httpx.Response(500, request=request)
     exc = httpx.HTTPStatusError("500", request=request, response=response)
     state: dict[str, bool] = {"done": False}
-    assert await downloader._maybe_rescrape_on_404(exc, state) is False
+    assert await downloader._maybe_rescrape_on_404(exc, state, "2026_4") is False
 
 
 @pytest.mark.asyncio
@@ -81,7 +81,7 @@ async def test_rescrape_on_404_concurrency_protection(
     state: dict[str, bool] = {"done": False}
 
     results = await asyncio.gather(
-        *[downloader._maybe_rescrape_on_404(exc, state) for _ in range(5)]
+        *[downloader._maybe_rescrape_on_404(exc, state, "2026_4") for _ in range(5)]
     )
 
     assert sum(1 for value in results if value) == 1
@@ -105,5 +105,5 @@ async def test_rescrape_skipped_for_non_404_without_lock(tmp_path: Path) -> None
         response = httpx.Response(500, request=request)
         exc = httpx.HTTPStatusError("500", request=request, response=response)
         state: dict[str, bool] = {"done": False}
-        assert await downloader._maybe_rescrape_on_404(exc, state) is False
+        assert await downloader._maybe_rescrape_on_404(exc, state, "2026_4") is False
         mock_enter.assert_not_called()

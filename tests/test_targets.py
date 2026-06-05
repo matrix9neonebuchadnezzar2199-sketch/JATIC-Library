@@ -11,8 +11,11 @@ from jatic_library.core.targets import (
     all_targets,
     by_code,
     by_region,
+    cache_is_fresh_for_folder,
+    load_cache_meta,
     load_overrides,
     save_overrides,
+    write_cache_meta,
 )
 
 
@@ -60,3 +63,33 @@ def test_overrides_roundtrip(tmp_path: Path) -> None:
     loaded = load_overrides(cache)
     tokyo = next(t for t in loaded if t.code == "tokyo")
     assert tokyo.filename_key == "tokyo_custom"
+
+
+def test_cache_meta_roundtrip(tmp_path: Path) -> None:
+    cache = tmp_path / "targets.json"
+    write_cache_meta(
+        cache,
+        publish_ym_compact="202606010928",
+        scraped_for_folder="2026_4",
+        scraped_at="2026-06-01T10:00:00+09:00",
+    )
+    meta = load_cache_meta(cache)
+    assert meta.publish_ym_compact == "202606010928"
+    assert meta.scraped_for_folder == "2026_4"
+    assert cache_is_fresh_for_folder(meta, "2026_4")
+    assert not cache_is_fresh_for_folder(meta, "2026_3")
+
+
+def test_save_overrides_preserves_cache_meta(tmp_path: Path) -> None:
+    cache = tmp_path / "targets.json"
+    write_cache_meta(
+        cache,
+        publish_ym_compact="202606010928",
+        scraped_for_folder="2026_4",
+    )
+    save_overrides(list(TARGETS), cache)
+    meta = load_cache_meta(cache)
+    assert meta.publish_ym_compact == "202606010928"
+    assert meta.scraped_for_folder == "2026_4"
+    tokyo = next(t for t in load_overrides(cache) if t.code == "tokyo")
+    assert tokyo.filename_key == "tokyo"

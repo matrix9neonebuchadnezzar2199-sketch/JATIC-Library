@@ -1,14 +1,18 @@
 """Tests for publish URL logic."""
 
 from datetime import date
+from pathlib import Path
 
 import pytest
 
+from jatic_library.core.targets import write_cache_meta
 from jatic_library.core.url_builder import (
     build_zip_url,
     compute_publish_info,
     parse_folder_name,
     publish_info_from_folder,
+    resolve_publish_info,
+    with_publish_ym_compact,
 )
 
 _PUBLISH_CASES = [
@@ -70,3 +74,38 @@ def test_publish_info_from_folder() -> None:
     assert info.data_month == 3
     assert info.publish_year == 2026
     assert info.publish_month == 5
+
+
+def test_with_publish_ym_compact_updates_dir_url() -> None:
+    info = compute_publish_info(date(2026, 6, 5))
+    resolved = with_publish_ym_compact(info, "202606010928")
+    assert resolved.publish_ym_compact == "202606010928"
+    assert "202606010928" in resolved.dir_url
+    url = build_zip_url(resolved, "tokyo_2026_04")
+    assert url.endswith("/typeB_tokyo_2026_04.zip")
+
+
+def test_resolve_publish_info_uses_cache_when_folder_matches(tmp_path: Path) -> None:
+    cache = tmp_path / "targets.json"
+    write_cache_meta(
+        cache,
+        publish_ym_compact="202606010928",
+        scraped_for_folder="2026_4",
+        scraped_at="2026-06-01T10:00:00+09:00",
+    )
+    info = compute_publish_info(date(2026, 6, 5))
+    assert info.folder_name == "2026_4"
+    resolved = resolve_publish_info(info, cache)
+    assert resolved.publish_ym_compact == "202606010928"
+
+
+def test_resolve_publish_info_ignores_stale_folder(tmp_path: Path) -> None:
+    cache = tmp_path / "targets.json"
+    write_cache_meta(
+        cache,
+        publish_ym_compact="202605010000",
+        scraped_for_folder="2026_3",
+    )
+    info = compute_publish_info(date(2026, 6, 5))
+    resolved = resolve_publish_info(info, cache)
+    assert resolved.publish_ym_compact == info.publish_ym_compact

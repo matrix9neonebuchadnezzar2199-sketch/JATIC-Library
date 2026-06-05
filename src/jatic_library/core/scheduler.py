@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 from loguru import logger
 
-from jatic_library.constants import DB_PATH, LOG_DIR, TZ_JST
+from jatic_library.constants import DB_PATH, LOG_DIR, TARGETS_CACHE_PATH, TZ_JST
 from jatic_library.core.downloader import (
     Downloader,
     DownloadResult,
@@ -20,7 +20,8 @@ from jatic_library.core.logger import setup_logging
 from jatic_library.core.models import CheckResult
 from jatic_library.core.notifier import DownloadSummary, Notifier
 from jatic_library.core.repository import Repository
-from jatic_library.core.url_builder import compute_publish_info
+from jatic_library.core.playwright_scraper import ensure_targets_cache_fresh
+from jatic_library.core.url_builder import compute_publish_info, resolve_publish_info
 from jatic_library.settings.config import AppConfig
 from jatic_library.settings.store import ConfigStore
 
@@ -100,6 +101,20 @@ class StartupScheduler:
             )
 
         notifier.notify_new_publish(info.folder_name)
+        try:
+            await ensure_targets_cache_fresh(info.folder_name)
+        except Exception as exc:
+            logger.exception("Pre-download scrape failed")
+            self._repo.add_check_history("error", str(exc))
+            notifier.notify_error(str(exc))
+            self._touch_last_check(persist=True)
+            return CheckOutcome(
+                publish_ym=info.folder_name,
+                new_downloads=0,
+                skipped=0,
+                errors=1,
+            )
+        info = resolve_publish_info(info, TARGETS_CACHE_PATH)
         targets = resolve_targets(self._config.targets.selected_codes)
         downloader = Downloader(self._config.download, self._repo)
         try:

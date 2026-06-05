@@ -7,6 +7,15 @@ from pathlib import Path
 from typing import Any
 
 
+@dataclass(frozen=True)
+class TargetsCacheMeta:
+    """Metadata stored alongside filename_key overrides."""
+
+    publish_ym_compact: str | None = None
+    scraped_for_folder: str | None = None
+    scraped_at: str | None = None
+
+
 class Region(StrEnum):
     """Geographic grouping for UI bulk selection."""
 
@@ -168,13 +177,61 @@ def _apply_overrides(base: tuple[Target, ...], overrides: dict[str, str]) -> tup
     return tuple(updated)
 
 
+def _read_cache_payload(cache_path: Path) -> dict[str, Any] | None:
+    if not cache_path.is_file():
+        return None
+    try:
+        raw = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return raw if isinstance(raw, dict) else None
+
+
+def load_cache_meta(cache_path: Path) -> TargetsCacheMeta:
+    """Load scrape metadata from *cache_path*."""
+    raw = _read_cache_payload(cache_path)
+    if raw is None:
+        return TargetsCacheMeta()
+    publish_ym_compact = raw.get("publish_ym_compact")
+    scraped_for_folder = raw.get("scraped_for_folder")
+    scraped_at = raw.get("scraped_at")
+    return TargetsCacheMeta(
+        publish_ym_compact=str(publish_ym_compact) if publish_ym_compact else None,
+        scraped_for_folder=str(scraped_for_folder) if scraped_for_folder else None,
+        scraped_at=str(scraped_at) if scraped_at else None,
+    )
+
+
+def cache_is_fresh_for_folder(meta: TargetsCacheMeta, folder_name: str) -> bool:
+    """Return whether *meta* matches the requested publication folder."""
+    return meta.scraped_for_folder == folder_name and bool(meta.publish_ym_compact)
+
+
+def write_cache_meta(
+    cache_path: Path,
+    *,
+    publish_ym_compact: str,
+    scraped_for_folder: str | None,
+    scraped_at: str | None = None,
+) -> None:
+    """Merge scrape metadata into *cache_path* without dropping target overrides."""
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = _read_cache_payload(cache_path) or {
+        "version": 1,
+        "scraped_at": None,
+        "targets": [],
+    }
+    payload["publish_ym_compact"] = publish_ym_compact
+    payload["scraped_for_folder"] = scraped_for_folder
+    if scraped_at is not None:
+        payload["scraped_at"] = scraped_at
+    cache_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
 def load_overrides(cache_path: Path) -> tuple[Target, ...]:
     """Load targets with optional filename_key overrides from JSON cache."""
-    if not cache_path.is_file():
-        return TARGETS
-    try:
-        raw: dict[str, Any] = json.loads(cache_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    raw = _read_cache_payload(cache_path)
+    if raw is None:
         return TARGETS
     entries = raw.get("targets", [])
     if not isinstance(entries, list):
@@ -186,12 +243,22 @@ def load_overrides(cache_path: Path) -> tuple[Target, ...]:
     return _apply_overrides(TARGETS, overrides)
 
 
-def save_overrides(targets: list[Target], cache_path: Path) -> None:
+def save_overrides(
+    targets: list[Target],
+    cache_path: Path,
+    *,
+    preserve_meta: bool = True,
+) -> None:
     """Persist filename_key overrides for later loads."""
     cache_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
+    existing = _read_cache_payload(cache_path) if preserve_meta else None
+    payload: dict[str, Any] = {
         "version": 1,
         "scraped_at": None,
         "targets": [{"code": t.code, "filename_key": t.filename_key} for t in targets],
     }
+    if existing is not None:
+        for key in ("publish_ym_compact", "scraped_for_folder", "scraped_at"):
+            if key in existing:
+                payload[key] = existing[key]
     cache_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")

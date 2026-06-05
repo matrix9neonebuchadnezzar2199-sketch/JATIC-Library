@@ -22,7 +22,7 @@ from jatic_library.core.publication_postprocess import (
 )
 from jatic_library.core.repository import Repository, now_jst_iso
 from jatic_library.core.targets import Target, load_overrides
-from jatic_library.core.url_builder import PublishInfo, build_zip_url
+from jatic_library.core.url_builder import PublishInfo, build_zip_url, resolve_publish_info
 from jatic_library.settings.config import DownloadSettings
 
 
@@ -98,6 +98,8 @@ class Downloader:
         if not targets:
             raise ValueError("targets list is empty")
 
+        info = resolve_publish_info(info, TARGETS_CACHE_PATH)
+
         save_root = Path(self._settings.save_root)
         folder = save_root / info.folder_name
         folder.mkdir(parents=True, exist_ok=True)
@@ -130,6 +132,7 @@ class Downloader:
                             manifest,
                             progress_cb,
                             rescrape_state,
+                            info.folder_name,
                         )
                         if status == "skipped":
                             result.skipped.append(target.code)
@@ -179,6 +182,7 @@ class Downloader:
         manifest: Manifest,
         progress_cb: ProgressCallback | None,
         rescrape_state: dict[str, bool],
+        folder_name: str,
     ) -> str:
         """Download a single target. Returns 'skipped' or 'done'."""
         url = build_zip_url(info, target.filename_key)
@@ -234,8 +238,9 @@ class Downloader:
                 last_error = exc
                 if dest.exists():
                     dest.unlink(missing_ok=True)
-                if await self._maybe_rescrape_on_404(exc, rescrape_state):
+                if await self._maybe_rescrape_on_404(exc, rescrape_state, folder_name):
                     target = self._refresh_target(target)
+                    info = self._refresh_publish_info(info)
                     url = build_zip_url(info, target.filename_key)
                     continue
                 if attempt < self._settings.retry:
@@ -243,7 +248,12 @@ class Downloader:
         assert last_error is not None
         raise last_error
 
-    async def _maybe_rescrape_on_404(self, exc: Exception, rescrape_state: dict[str, bool]) -> bool:
+    async def _maybe_rescrape_on_404(
+        self,
+        exc: Exception,
+        rescrape_state: dict[str, bool],
+        folder_name: str,
+    ) -> bool:
         status_code = None
         if isinstance(exc, httpx.HTTPStatusError):
             status_code = exc.response.status_code
@@ -255,9 +265,12 @@ class Downloader:
             logger.warning("404 for ZIP URL, running one-time Playwright rescrape")
             from jatic_library.core.playwright_scraper import scrape_and_save_targets
 
-            await scrape_and_save_targets()
+            await scrape_and_save_targets(scraped_for_folder=folder_name)
             rescrape_state["done"] = True
             return True
+
+    def _refresh_publish_info(self, info: PublishInfo) -> PublishInfo:
+        return resolve_publish_info(info, TARGETS_CACHE_PATH)
 
     def _refresh_target(self, target: Target) -> Target:
         master = load_overrides(TARGETS_CACHE_PATH)

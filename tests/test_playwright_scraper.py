@@ -4,7 +4,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from jatic_library.core.playwright_scraper import JarticScraper, merge_scraped_keys
+from jatic_library.core.playwright_scraper import (
+    JarticScraper,
+    extract_publish_ym_compact,
+    merge_scraped_keys,
+)
 
 
 @pytest.mark.asyncio
@@ -28,6 +32,19 @@ async def test_fetch_typeb_links_mocked() -> None:
 
     assert len(links) == 1
     assert links[0].filename_key == "tokyo"
+
+
+def test_extract_publish_ym_compact() -> None:
+    from jatic_library.core.playwright_scraper import ScrapedLink
+
+    links = [
+        ScrapedLink(
+            "東京都",
+            "https://www.jartic.or.jp/d/opendata/202606010928/typeB_tokyo_2026_04.zip",
+            "tokyo_2026_04",
+        )
+    ]
+    assert extract_publish_ym_compact(links) == "202606010928"
 
 
 def test_merge_scraped_keys() -> None:

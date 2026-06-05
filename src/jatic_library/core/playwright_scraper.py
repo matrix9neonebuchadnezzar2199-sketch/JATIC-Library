@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,9 +11,17 @@ from zoneinfo import ZoneInfo
 from loguru import logger
 
 from jatic_library.constants import JARTIC_OPENDATA_PAGE, TARGETS_CACHE_PATH, TZ_JST
-from jatic_library.core.targets import TARGETS, Target, save_overrides
+from jatic_library.core.targets import (
+    TARGETS,
+    Target,
+    cache_is_fresh_for_folder,
+    load_cache_meta,
+    save_overrides,
+    write_cache_meta,
+)
 
 _TYPEB_RE = re.compile(r"typeB_([A-Za-z0-9_]+)\.zip", re.IGNORECASE)
+_OPENDATA_DIR_RE = re.compile(r"/d/opendata/(\d+)/", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -86,6 +93,15 @@ class JarticScraper:
                 await browser.close()
 
 
+def extract_publish_ym_compact(links: list[ScrapedLink]) -> str:
+    """Return the JARTIC open-data directory timestamp from scraped URLs."""
+    for link in links:
+        match = _OPENDATA_DIR_RE.search(link.url)
+        if match:
+            return match.group(1)
+    raise RuntimeError("Could not determine publish_ym_compact from scraped links")
+
+
 def merge_scraped_keys(links: list[ScrapedLink]) -> list[Target]:
     """Apply scraped filename_key values onto the built-in master."""
     key_map = {link.filename_key: link for link in links}
@@ -116,15 +132,36 @@ def merge_scraped_keys(links: list[ScrapedLink]) -> list[Target]:
     return merged
 
 
-async def scrape_and_save_targets(cache_path: Path = TARGETS_CACHE_PATH) -> int:
+async def scrape_and_save_targets(
+    cache_path: Path = TARGETS_CACHE_PATH,
+    *,
+    scraped_for_folder: str | None = None,
+) -> int:
     """Scrape site and persist filename_key overrides. Returns link count."""
     scraper = JarticScraper()
     links = await scraper.fetch_typeb_links()
     if not links:
         raise RuntimeError("No typeB links found on JARTIC open-data page")
+    publish_ym_compact = extract_publish_ym_compact(links)
     merged = merge_scraped_keys(links)
     save_overrides(merged, cache_path)
-    data = json.loads(cache_path.read_text(encoding="utf-8"))
-    data["scraped_at"] = datetime.now(ZoneInfo(TZ_JST)).isoformat(timespec="seconds")
-    cache_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    scraped_at = datetime.now(ZoneInfo(TZ_JST)).isoformat(timespec="seconds")
+    write_cache_meta(
+        cache_path,
+        publish_ym_compact=publish_ym_compact,
+        scraped_for_folder=scraped_for_folder,
+        scraped_at=scraped_at,
+    )
     return len(links)
+
+
+async def ensure_targets_cache_fresh(
+    folder_name: str,
+    cache_path: Path = TARGETS_CACHE_PATH,
+) -> bool:
+    """Scrape when *cache_path* lacks metadata for *folder_name*. Returns True if scraped."""
+    meta = load_cache_meta(cache_path)
+    if cache_is_fresh_for_folder(meta, folder_name):
+        return False
+    await scrape_and_save_targets(cache_path, scraped_for_folder=folder_name)
+    return True

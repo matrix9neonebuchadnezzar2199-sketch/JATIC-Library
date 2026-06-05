@@ -3,12 +3,14 @@
 import re
 from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 
 from jatic_library.constants import (
     JARTIC_DATA_DIR_TPL,
     JARTIC_ZIP_TPL,
     PUBLISH_LAG_MONTHS,
 )
+from jatic_library.core.targets import TargetsCacheMeta, load_cache_meta
 
 _FOLDER_RE = re.compile(r"^(\d{4})_(\d{1,2})$")
 
@@ -47,6 +49,28 @@ def compute_publish_info(today: date) -> PublishInfo:
         publish_ym_compact=publish_ym_compact,
         dir_url=dir_url,
     )
+
+
+def with_publish_ym_compact(info: PublishInfo, publish_ym_compact: str) -> PublishInfo:
+    """Return *info* with an observed JARTIC directory timestamp."""
+    dir_url = JARTIC_DATA_DIR_TPL.format(publish_ym_compact=publish_ym_compact)
+    return PublishInfo(
+        publish_year=info.publish_year,
+        publish_month=info.publish_month,
+        data_year=info.data_year,
+        data_month=info.data_month,
+        folder_name=info.folder_name,
+        publish_ym_compact=publish_ym_compact,
+        dir_url=dir_url,
+    )
+
+
+def resolve_publish_info(info: PublishInfo, cache_path: Path) -> PublishInfo:
+    """Apply cached ``publish_ym_compact`` when it matches *info.folder_name*."""
+    meta = load_cache_meta(cache_path)
+    if meta.publish_ym_compact and meta.scraped_for_folder == info.folder_name:
+        return with_publish_ym_compact(info, meta.publish_ym_compact)
+    return info
 
 
 def build_zip_url(info: PublishInfo, filename_key: str) -> str:

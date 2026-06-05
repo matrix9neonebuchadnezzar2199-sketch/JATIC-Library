@@ -35,13 +35,13 @@ from jatic_library.core.playwright_env import (
     chromium_is_ready,
     failures_look_like_missing_browser,
 )
-from jatic_library.core.playwright_scraper import scrape_and_save_targets
+from jatic_library.core.playwright_scraper import ensure_targets_cache_fresh, scrape_and_save_targets
 from jatic_library.core.repository import Repository
 from jatic_library.core.scheduler import CheckOutcome, StartupScheduler
 from jatic_library.core.startup import set_startup_enabled
 from jatic_library.core.targets import load_overrides
 from jatic_library.core.tray import TrayController
-from jatic_library.core.url_builder import publish_info_from_folder
+from jatic_library.core.url_builder import publish_info_from_folder, resolve_publish_info
 from jatic_library.settings.config import AppConfig
 from jatic_library.settings.store import ConfigStore
 from jatic_library.ui.tabs.library_tab import LibraryTab
@@ -356,7 +356,12 @@ class MainWindow(QMainWindow):
         """Rescan JARTIC site for typeB links."""
 
         async def _task() -> int:
-            return await scrape_and_save_targets()
+            from datetime import date
+
+            from jatic_library.core.url_builder import compute_publish_info
+
+            folder = compute_publish_info(date.today()).folder_name
+            return await scrape_and_save_targets(scraped_for_folder=folder)
 
         def _on_success(result: object) -> None:
             if not isinstance(result, int):
@@ -405,11 +410,13 @@ class MainWindow(QMainWindow):
             return
 
         async def _task() -> object:
+            await ensure_targets_cache_fresh(info.folder_name)
+            resolved = resolve_publish_info(info, TARGETS_CACHE_PATH)
             with Repository(DB_PATH) as worker_repo:
                 downloader = Downloader(self._config.download, worker_repo)
                 merge_targets = resolve_targets(self._config.targets.selected_codes)
                 return await downloader.download_publication(
-                    info,
+                    resolved,
                     [target],
                     merge_targets=merge_targets,
                 )

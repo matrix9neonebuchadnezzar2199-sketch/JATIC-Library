@@ -14,10 +14,11 @@ from jatic_library.core.downloader import Downloader, resolve_targets
 from jatic_library.core.logger import setup_logging
 from jatic_library.core.notifier import DownloadSummary, Notifier
 from jatic_library.core.playwright_env import configure_playwright_runtime
-from jatic_library.core.playwright_scraper import scrape_and_save_targets
+from jatic_library.constants import TARGETS_CACHE_PATH
+from jatic_library.core.playwright_scraper import ensure_targets_cache_fresh, scrape_and_save_targets
 from jatic_library.core.repository import Repository
 from jatic_library.core.scheduler import run_cli_check
-from jatic_library.core.url_builder import compute_publish_info
+from jatic_library.core.url_builder import compute_publish_info, resolve_publish_info
 from jatic_library.settings.store import ConfigStore
 
 
@@ -57,8 +58,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1 if outcome.errors else 0
 
     if args.command == "scrape":
-        count = asyncio.run(scrape_and_save_targets())
-        print(f"scrape: saved {count} typeB links to targets cache")
+        folder = compute_publish_info(date.today()).folder_name
+        count = asyncio.run(scrape_and_save_targets(scraped_for_folder=folder))
+        print(f"scrape: saved {count} typeB links to targets cache ({folder})")
         return 0
 
     if args.command == "download":
@@ -85,6 +87,8 @@ async def _run_download(args: argparse.Namespace) -> int:
     config.targets.selected_codes = codes
     targets = resolve_targets(codes)
     info = compute_publish_info(date.today())
+    await ensure_targets_cache_fresh(info.folder_name)
+    info = resolve_publish_info(info, TARGETS_CACHE_PATH)
 
     with Repository(DB_PATH) as repo:
         if not args.force and repo.is_publication_complete(info.folder_name):
